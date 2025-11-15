@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dr. [Adınız Soyadınız] - Kişisel Akademik Web Sayfası</title>
+    <style>
+        /* Sayfanın Genel Stil Ayarları */
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+            color: #333;
+        }
+        .container {
+            width: 80%;
+            margin: auto;
+            overflow: hidden;
+            padding: 0 20px;
+        }
+        /* Üst Başlık Alanı */
+        header {
+            background: #333;
+            color: #fff;
+            padding: 1rem 0;
+            text-align: center;
+            border-bottom: #0779e4 3px solid;
+        }
+        header h1 {
+            margin: 0;
+            font-size: 2.5rem;
+        }
+        header p {
+            margin: 0;
+            font-size: 1.2rem;
+        }
+        /* Navigasyon Menüsü */
+        nav {
+            background: #444;
+            color: #fff;
+            padding: 0.5rem 0;
+            text-align: center;
+        }
+        nav a {
+            color: #fff;
+            text-decoration: none;
+            padding: 0.5rem 1.5rem;
+            font-size: 1.1rem;
+        }
+        nav a:hover {
+            background: #0779e4;
+            border-radius: 5px;
+        }
+        /* Ana İçerik Bölümleri */
+        section {
+            padding: 20px;
+            margin: 20px 0;
+            background: #fff;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        section h2 {
+            color: #0779e4;
+            border-bottom: 2px solid #f4f4f4;
+            padding-bottom: 10px;
+        }
+        /* Yayınlar Listesi Stili */
+        .publication-item {
+            margin-bottom: 15px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #eee;
+        }
+        .publication-item:last-child {
+            border-bottom: none;
+        }
+        .publication-item a {
+            color: #0779e4;
+            text-decoration: none;
+            font-weight: bold;
+        }
+        .publication-item a:hover {
+            text-decoration: underline;
+        }
+        /* Alt Bilgi (Footer) */
+        footer {
+            text-align: center;
+            padding: 20px;
+            background: #333;
+            color: #fff;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ÜST BAŞLIK -->
+    <header>
+        <div class="container">
+            <h1>Dr. [Adınız Soyadınız]</h1>
+            <p>[Ünvanınız] | [Bölümünüz], [Üniversiteniz]</p>
+        </div>
+    </header>
+
+    <!-- NAVİGASYON MENÜSÜ -->
+    <nav>
+        <div class="container">
+            <a href="#hakkimda">Hakkımda</a>
+            <a href="#yayinlar">Yayınlar</a>
+            <a href="#arastirma">Araştırma</a>
+            <a href="#iletisim">İletişim</a>
+        </div>
+    </nav>
+
+    <div class="container">
+        <!-- HAKKIMDA BÖLÜMÜ -->
+        <section id="hakkimda">
+            <h2>Hakkımda</h2>
+            <p>
+                Buraya kendinizle ilgili kısa bir biyografi yazabilirsiniz. Akademik geçmişiniz, araştırma ilgi alanlarınız ve kariyer hedefleriniz hakkında bilgi verebilirsiniz. 
+                Örneğin: "Lisans derecemi [Üniversite Adı] bölümünden aldım. Yüksek lisans ve doktora çalışmalarımı [Alan] üzerine [Diğer Üniversite] bünyesinde tamamladım. 
+                Şu anda [Üniversiteniz]'de [Bölümünüz]'de görev yapmaktayım."
+            </p>
+        </section>
+
+        <!-- YAYINLAR BÖLÜMÜ -->
+        <section id="yayinlar">
+            <h2>Seçilmiş Yayınlar</h2>
+            
+            <!-- Örnek Makale 1 -->
+            <div class="publication-item">
+                <p>
+                    <strong>Yazar(lar). (Yıl). "Makale Başlığı". <em>Dergi Adı</em>, Cilt(Sayı), Sayfa aralığı.</strong>  
+
+                    <a href="[MAKALENİN PDF VEYA DOI LİNKİ]" target="_blank">[PDF]</a> | 
+                    <a href="[PROJE SAYFASI LİNKİ]" target="_blank">[Proje Sayfası]</a>
+                </p>
+            </div>
+
+            <!-- Örnek Makale 2 -->
+            <div class="publication-item">
+                <p>
+                    <strong>Soyad, A., & Soyad, B. (2024). "Örnek Bir Makale Başlığı". <em>Uluslararası Akademik Araştırmalar Dergisi</em>, 12(2), 112-128.</strong>  
+
+                    <a href="#" target="_blank">[PDF]</a> | 
+                    <a href="#" target="_blank">[DOI]</a>
+                </p>
+            </div>
+
+            <!-- Buraya daha fazla makale ekleyebilirsiniz -->
+
+        </section>
+
+        <!-- ARAŞTIRMA BÖLÜMÜ -->
+        <section id="arastirma">
+            <h2>Araştırma Alanları</h2>
+            <ul>
+                <li>Araştırma Alanı 1 (Örn: Yapay Zeka ve Makine Öğrenmesi)</li>
+                <li>Araştırma Alanı 2 (Örn: Veri Bilimi Uygulamaları)</li>
+                <li>Araştırma Alanı 3 (Örn: Doğal Dil İşleme)</li>
+            </ul>
+            <p>
+                Burada devam eden veya tamamlanmış projeleriniz hakkında daha detaylı bilgi verebilirsiniz.
+            </p>
+        </section>
+
+        <!-- İLETİŞİM BÖLÜMÜ -->
+        <section id="iletisim">
+            <h2>İletişim</h2>
+            <p><strong>E-posta:</strong> [e-posta adresiniz]</p>
+            <p><strong>Ofis:</strong> [Ofis Numaranız], [Bina Adı], [Üniversite Kampüsü]</p>
+            <p>
+                <strong>Akademik Profiller:</strong>  
+
+                <a href="[GOOGLE SCHOLAR LİNKİNİZ]" target="_blank">Google Scholar</a> | 
+                <a href="[RESEARCHGATE LİNKİNİZ]" target="_blank">ResearchGate</a> | 
+                <a href="[LINKEDIN LİNKİNİZ]" target="_blank">LinkedIn</a>
+            </p>
+        </section>
+    </div>
+
+    <!-- ALT BİLGİ -->
+    <footer>
+        <p>&copy; 2025 [Adınız Soyadınız]. Tüm hakları saklıdır.</p>
+    </footer>
+
+</body>
+</html>
