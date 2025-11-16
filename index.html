@@ -93,6 +93,56 @@
             color: #fff;
             margin-top: 20px;
         }
+        /* <style> etiketlerinizin içine, en sona ekleyin */
+
+/* Datasets Bölümü Stilleri */
+.dataset-item {
+    background-color: #f9f9f9;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    padding: 20px;
+    margin-bottom: 20px;
+}
+
+.dataset-item h3 {
+    margin-top: 0;
+    color: #333;
+}
+
+/* İndirme Butonları için Stiller */
+.btn, .btn-secondary {
+    display: inline-block;
+    padding: 10px 20px;
+    margin-top: 10px;
+    margin-right: 10px;
+    text-decoration: none;
+    border-radius: 5px;
+    font-weight: bold;
+    transition: background-color 0.3s ease;
+}
+
+/* Ana Buton (İndir) */
+.btn {
+    background-color: #0779e4;
+    color: #fff;
+    border: 1px solid #0779e4;
+}
+
+.btn:hover {
+    background-color: #056ab1;
+}
+
+/* İkincil Buton (Dokümantasyon vb.) */
+.btn-secondary {
+    background-color: #6c757d;
+    color: #fff;
+    border: 1px solid #6c757d;
+}
+
+.btn-secondary:hover {
+    background-color: #5a6268;
+}
+
     </style>
 </head>
 <body>
@@ -111,6 +161,7 @@
             <a href="#hakkimda">Hakkımda</a>
             <a href="#yayinlar">Yayınlar</a>
             <a href="#arastirma">Araştırma</a>
+            <a href="#datasets">Datasets</a> 
             <a href="#iletisim">İletişim</a>
         </div>
     </nav>
@@ -184,6 +235,49 @@
                 <a href="https://www.linkedin.com/in/yavuzunalcan/" target="_blank">LinkedIn</a>
             </p>
         </section>
+        <!-- ... (Araştırma bölümünün bittiği yer) ... -->
+</section>
+
+<!-- YENİ DATASETS BÖLÜMÜ (BURAYA EKLEYİN) -->
+<section id="datasets">
+    <h2>Datasets</h2>
+    <p>
+        Araştırmalarım sırasında ürettiğim veya derlediğim kamuya açık veri setlerini aşağıda bulabilirsiniz. Bu veri setlerini atıf yaparak çalışmalarınızda kullanabilirsiniz.
+    </p>
+    
+    <!-- Örnek Veri Seti 1 -->
+    <div class="dataset-item">
+        <h3>Veri Seti Başlığı 1</h3>
+        <p>
+            Bu veri seti, [kısa açıklama, örneğin: Türkiye'deki şehirlerin 2020-2024 yılları arasındaki hava kirliliği ölçümlerini] içermektedir. Veri seti, [ilgili makaleniz veya projeniz] kapsamında toplanmıştır.
+        </p>
+        <p>
+            <strong>Format:</strong> CSV, JSON  
+
+            <strong>Boyut:</strong> 25 MB
+        </p>
+        <a href="[VERI_SETI_INDIRME_LINKI]" class="btn" target="_blank">İndir</a>
+        <a href="[VERI_SETI_DOKUMANTASYON_LINKI]" class="btn-secondary" target="_blank">Dokümantasyon</a>
+    </div>
+
+    <!-- Örnek Veri Seti 2 -->
+    <div class="dataset-item">
+        <h3>Görüntü Sınıflandırma için Tıbbi Görüntüler</h3>
+        <p>
+            Bu koleksiyon, [hastalık adı] teşhisi için kullanılan 5.000 adet anonimleştirilmiş röntgen görüntüsü içerir.
+        </p>
+        <p>
+            <strong>Format:</strong> PNG  
+
+            <strong>Boyut:</strong> 500 MB
+        </p>
+        <a href="#" class="btn" target="_blank">İndir (Zenodo)</a>
+        <a href="#" class="btn-secondary" target="_blank">GitHub Sayfası</a>
+    </div>
+
+</section>
+<!-- ... (İletişim bölümü buradan sonra devam ediyor) ... -->
+
     </div>
 
     <!-- ALT BİLGİ -->
@@ -193,6 +287,7 @@
 
 </body>
 </html>
+
 
 
 
