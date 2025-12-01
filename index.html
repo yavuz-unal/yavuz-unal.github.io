@@ -93,56 +93,210 @@
             color: #fff;
             margin-top: 20px;
         }
-        /* <style> etiketlerinizin içine, en sona ekleyin */
 
-/* Datasets Bölümü Stilleri */
-.dataset-item {
-    background-color: #f9f9f9;
-    border: 1px solid #e0e0e0;
-    border-radius: 8px;
-    padding: 20px;
-    margin-bottom: 20px;
-}
+        /* Datasets Bölümü Stilleri */
+        .dataset-item {
+            background-color: #f9f9f9;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
 
-.dataset-item h3 {
-    margin-top: 0;
-    color: #333;
-}
+        .dataset-item h3 {
+            margin-top: 0;
+            color: #333;
+        }
 
-/* İndirme Butonları için Stiller */
-.btn, .btn-secondary {
-    display: inline-block;
-    padding: 10px 20px;
-    margin-top: 10px;
-    margin-right: 10px;
-    text-decoration: none;
-    border-radius: 5px;
-    font-weight: bold;
-    transition: background-color 0.3s ease;
-}
+        /* İndirme Butonları için Stiller */
+        .btn, .btn-secondary {
+            display: inline-block;
+            padding: 10px 20px;
+            margin-top: 10px;
+            margin-right: 10px;
+            text-decoration: none;
+            border-radius: 5px;
+            font-weight: bold;
+            transition: background-color 0.3s ease;
+        }
 
-/* Ana Buton (İndir) */
-.btn {
-    background-color: #0779e4;
-    color: #fff;
-    border: 1px solid #0779e4;
-}
+        /* Ana Buton (İndir) */
+        .btn {
+            background-color: #0779e4;
+            color: #fff;
+            border: 1px solid #0779e4;
+        }
 
-.btn:hover {
-    background-color: #056ab1;
-}
+        .btn:hover {
+            background-color: #056ab1;
+        }
 
-/* İkincil Buton (Dokümantasyon vb.) */
-.btn-secondary {
-    background-color: #6c757d;
-    color: #fff;
-    border: 1px solid #6c757d;
-}
+        /* İkincil Buton (Dokümantasyon vb.) */
+        .btn-secondary {
+            background-color: #6c757d;
+            color: #fff;
+            border: 1px solid #6c757d;
+        }
 
-.btn-secondary:hover {
-    background-color: #5a6268;
-}
+        .btn-secondary:hover {
+            background-color: #5a6268;
+        }
 
+        /* TODO + POMODORO BÖLÜMÜ */
+        #productivity {
+            margin: 20px 0;
+            background: #fff;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            padding: 20px;
+        }
+
+        .productivity-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        .todo-section, .pomodoro-section {
+            flex: 1 1 280px;
+            border: 1px solid #eee;
+            border-radius: 8px;
+            padding: 16px;
+            background-color: #fafafa;
+        }
+
+        .todo-section h3,
+        .pomodoro-section h3 {
+            margin-top: 0;
+            color: #0779e4;
+        }
+
+        #todo-form {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 12px;
+        }
+
+        #todo-input {
+            flex: 1;
+            padding: 8px 10px;
+            border-radius: 6px;
+            border: 1px solid #ccc;
+        }
+
+        #todo-form button {
+            padding: 8px 12px;
+            border: none;
+            border-radius: 6px;
+            background-color: #0779e4;
+            color: #fff;
+            cursor: pointer;
+        }
+
+        #todo-form button:hover {
+            background-color: #056ab1;
+        }
+
+        #todo-list {
+            list-style: none;
+            padding-left: 0;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .todo-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 6px 8px;
+            border-radius: 6px;
+            background-color: #fff;
+            border: 1px solid #e0e0e0;
+        }
+
+        .todo-left {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .todo-text.completed {
+            text-decoration: line-through;
+            color: #999;
+        }
+
+        .todo-delete {
+            background: transparent;
+            border-radius: 999px;
+            border: 1px solid #e57373;
+            color: #c62828;
+            padding: 4px 10px;
+            font-size: 0.8rem;
+            cursor: pointer;
+        }
+
+        .todo-delete:hover {
+            background-color: #ffebee;
+        }
+
+        .pomodoro-section {
+            text-align: center;
+        }
+
+        .timer-display {
+            font-size: 2rem;
+            font-weight: bold;
+            margin: 10px 0 14px;
+        }
+
+        .timer-controls {
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            margin-bottom: 10px;
+        }
+
+        .timer-controls button,
+        .timer-settings button {
+            padding: 6px 10px;
+            border-radius: 6px;
+            border: none;
+            background-color: #0779e4;
+            color: #fff;
+            cursor: pointer;
+            font-size: 0.85rem;
+        }
+
+        .timer-controls button:hover,
+        .timer-settings button:hover {
+            background-color: #056ab1;
+        }
+
+        .timer-settings {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            align-items: center;
+            font-size: 0.85rem;
+        }
+
+        .timer-settings input {
+            width: 60px;
+            padding: 4px;
+            border-radius: 4px;
+            border: 1px solid #ccc;
+            text-align: center;
+        }
+
+        #mode-toggle {
+            background-color: #6c757d;
+        }
+
+        #mode-toggle:hover {
+            background-color: #5a6268;
+        }
     </style>
 </head>
 <body>
@@ -151,7 +305,7 @@
     <header>
         <div class="container">
             <h1>Dr. Yavuz ÜNAL</h1>
-            <p>Dr. Öğr. Üyesi| Bilgisayar Mühendisliği| Sinop Üniversitesi</p>
+            <p>Dr. Öğr. Üyesi | Bilgisayar Mühendisliği | Sinop Üniversitesi</p>
         </div>
     </header>
 
@@ -161,7 +315,8 @@
             <a href="#hakkimda">Hakkımda</a>
             <a href="#yayinlar">Yayınlar</a>
             <a href="#arastirma">Araştırma</a>
-            <a href="#datasets">Datasets</a> 
+            <a href="#datasets">Datasets</a>
+            <a href="#productivity">Üretkenlik</a>
             <a href="#iletisim">İletişim</a>
         </div>
     </nav>
@@ -171,14 +326,14 @@
         <section id="hakkimda">
             <h2>Hakkımda</h2>
             <div class="profile-container">
-                     <p>
-                Buraya kendinizle ilgili kısa bir biyografi yazabilirsiniz. Akademik geçmişiniz, araştırma ilgi alanlarınız ve kariyer hedefleriniz hakkında bilgi verebilirsiniz. 
-                Örneğin: "Lisans derecemi [Üniversite Adı] bölümünden aldım. Yüksek lisans ve doktora çalışmalarımı [Alan] üzerine [Diğer Üniversite] bünyesinde tamamladım. 
-                Şu anda Sinop Üniversitesi Mühendislik ve Mimarlık Fakültesin'de görev yapmaktayım.
-            </p>
+                <p>
+                    Buraya kendinizle ilgili kısa bir biyografi yazabilirsiniz. Akademik geçmişiniz, araştırma ilgi alanlarınız ve kariyer hedefleriniz hakkında bilgi verebilirsiniz. 
+                    Örneğin: "Lisans derecemi [Üniversite Adı] bölümünden aldım. Yüksek lisans ve doktora çalışmalarımı [Alan] üzerine [Diğer Üniversite] bünyesinde tamamladım. 
+                    Şu anda Sinop Üniversitesi Mühendislik ve Mimarlık Fakültesi'nde görev yapmaktayım.
+                </p>
                 <!-- Fotoğrafınızın dosya adını buraya yazın -->
-                <img src="profil.jpg" alt="Profil Fotoğrafı" class="profile-pic" style="width: 120px; height: 120px;>
-       
+                <img src="profil.jpg" alt="Profil Fotoğrafı" class="profile-pic" style="width: 120px; height: 120px;">
+            </div>
         </section>
 
         <!-- YAYINLAR BÖLÜMÜ -->
@@ -188,9 +343,7 @@
             <!-- Örnek Makale 1 -->
             <div class="publication-item">
                 <p>
-                    <strong>Yavuz Ünal  , Muzaffer Bolat , Muhammet Nuri Dudak. (2024). "Examining the Performance of a Deep Learning Model Utilizing Yolov8 for Vehicle Make and Model Classification". <em>Journal of Engineering Technology and Applied Sciences, </em>, 9
-(2) 2017 : 131-143.</strong>  
-
+                    <strong>Yavuz Ünal, Muzaffer Bolat, Muhammet Nuri Dudak. (2024). "Examining the Performance of a Deep Learning Model Utilizing Yolov8 for Vehicle Make and Model Classification". <em>Journal of Engineering Technology and Applied Sciences,</em> 9(2) 2017 : 131-143.</strong>  
                     <a href="https://dergipark.org.tr/en/download/article-file/3709145" target="_blank">[PDF]</a> | 
                     <a href="https://dergipark.org.tr/tr/download/article-file/3606293" target="_blank">[Proje Sayfası]</a>
                 </p>
@@ -199,15 +352,11 @@
             <!-- Örnek Makale 2 -->
             <div class="publication-item">
                 <p>
-                    <strong>Yavuz Ünal  , Muzaffer Bolat. "Detecting Wheat Leaf Diseases: A Deep Feature-Based Approach with Machine Learning Classification". <em>Uluslararası Akademik Araştırmalar Dergisi</em>, Cilt: 38 Sayı: 3, 463 - 474,</strong>  
-
+                    <strong>Yavuz Ünal, Muzaffer Bolat. "Detecting Wheat Leaf Diseases: A Deep Feature-Based Approach with Machine Learning Classification". <em>Uluslararası Akademik Araştırmalar Dergisi</em>, Cilt: 38 Sayı: 3, 463 - 474.</strong>  
                     <a href="https://dergipark.org.tr/tr/download/article-file/3606293" target="_blank">[PDF]</a> | 
                     <a href="#" target="_blank">[DOI]</a>
                 </p>
             </div>
-
-            <!-- Buraya daha fazla makale ekleyebilirsiniz -->
-
         </section>
 
         <!-- ARAŞTIRMA BÖLÜMÜ -->
@@ -223,63 +372,98 @@
             </p>
         </section>
 
+        <!-- DATASETS BÖLÜMÜ -->
+        <section id="datasets">
+            <h2>Datasets</h2>
+            <p>
+                Araştırmalarım sırasında ürettiğim veya derlediğim kamuya açık veri setlerini aşağıda bulabilirsiniz. Bu veri setlerini atıf yaparak çalışmalarınızda kullanabilirsiniz.
+            </p>
+            
+            <!-- Örnek Veri Seti 1 -->
+            <div class="dataset-item">
+                <h3>Veri Seti Başlığı 1</h3>
+                <p>
+                    Örnek dataset, Örnek dataset, Örnek dataset, Örnek dataset, Örnek dataset, Örnek dataset, Örnek dataset. Veri seti, [ilgili makaleniz veya projeniz] kapsamında toplanmıştır.
+                </p>
+                <p>
+                    <strong>Format:</strong> CSV, JSON  
+                    <strong>Boyut:</strong> 25 MB
+                </p>
+                <a href="[VERI_SETI_INDIRME_LINKI]" class="btn" target="_blank">İndir</a>
+                <a href="[VERI_SETI_DOKUMANTASYON_LINKI]" class="btn-secondary" target="_blank">Dokümantasyon</a>
+            </div>
+
+            <!-- Örnek Veri Seti 2 -->
+            <div class="dataset-item">
+                <h3>Görüntü Sınıflandırma için Tıbbi Görüntüler</h3>
+                <p>
+                    Örnek dataset, Örnek dataset, Örnek dataset, Örnek dataset, Örnek dataset, Örnek dataset, Örnek dataset.
+                </p>
+                <p>
+                    <strong>Format:</strong> PNG  
+                    <strong>Boyut:</strong> 500 MB
+                </p>
+                <a href="#" class="btn" target="_blank">İndir (Zenodo)</a>
+                <a href="#" class="btn-secondary" target="_blank">GitHub Sayfası</a>
+            </div>
+        </section>
+
+        <!-- TODO + POMODORO BÖLÜMÜ -->
+        <section id="productivity">
+            <h2>Üretkenlik Aracı: Todo + Pomodoro</h2>
+            <p>
+                Günlük görevlerinizi takip etmek ve odak sürenizi yönetmek için bu küçük aracı kullanabilirsiniz.
+                Görevler tarayıcınızda saklandığı için sayfayı kapatsanız bile kaybolmaz.
+            </p>
+
+            <div class="productivity-container">
+                <!-- TODO LİSTESİ -->
+                <div class="todo-section">
+                    <h3>Yapılacaklar</h3>
+                    <form id="todo-form">
+                        <input id="todo-input" type="text" placeholder="Bir görev yazın..." required>
+                        <button type="submit">Ekle</button>
+                    </form>
+                    <ul id="todo-list"></ul>
+                </div>
+
+                <!-- POMODORO -->
+                <div class="pomodoro-section">
+                    <h3>Pomodoro Zamanlayıcı</h3>
+                    <div class="timer-display" id="timer-display">25:00</div>
+                    <div class="timer-controls">
+                        <button id="start-btn" type="button">Başlat</button>
+                        <button id="pause-btn" type="button">Duraklat</button>
+                        <button id="reset-btn" type="button">Sıfırla</button>
+                    </div>
+                    <div class="timer-settings">
+                        <label>
+                            Odak (dk):
+                            <input type="number" id="focus-minutes" value="25" min="1" max="60">
+                        </label>
+                        <label>
+                            Mola (dk):
+                            <input type="number" id="break-minutes" value="5" min="1" max="30">
+                        </label>
+                        <button id="mode-toggle" type="button">Mod: Odak</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
         <!-- İLETİŞİM BÖLÜMÜ -->
         <section id="iletisim">
             <h2>İletişim</h2>
             <p><strong>E-posta:</strong> yunal@sinop.edu.tr</p>
-            <p><strong>Ofis:</strong> dahili 4359, Sinop Üniversitesi Mühendislik ve Mimarlık Fakültesi Binası Kat2: , Sinop Üniversitesi Kuzey Kampüsü</p>
+            <p><strong>Ofis:</strong> dahili 4359, Sinop Üniversitesi Mühendislik ve Mimarlık Fakültesi Binası Kat2, Sinop Üniversitesi Kuzey Kampüsü</p>
             <p>
                 <strong>Akademik Profiller:</strong>  
-
                 <a href="https://scholar.google.com/citations?user=7BWcGiYAAAAJ&hl" target="_blank">Google Scholar</a> | 
                 <a href="https://orcid.org/0000-0002-3007-679X" target="_blank">Orcid</a> | 
-                <a href="https://www.linkedin.com/in/yavuzunalcan/" target="_blank">LinkedIn</a>
+                <a href="https://www.linkedin.com/in/yavuzunalcan/" target="_blank">LinkedIn</a> |
                 <a href="https://www.researchgate.net/profile/Yavuz-Unal" target="_blank">ResearchGate</a>
             </p>
         </section>
-        <!-- ... (Araştırma bölümünün bittiği yer) ... -->
-</section>
-
-<!-- YENİ DATASETS BÖLÜMÜ (BURAYA EKLEYİN) -->
-<section id="datasets">
-    <h2>Datasets</h2>
-    <p>
-        Araştırmalarım sırasında ürettiğim veya derlediğim kamuya açık veri setlerini aşağıda bulabilirsiniz. Bu veri setlerini atıf yaparak çalışmalarınızda kullanabilirsiniz.
-    </p>
-    
-    <!-- Örnek Veri Seti 1 -->
-    <div class="dataset-item">
-        <h3>Veri Seti Başlığı 1</h3>
-        <p>
-            Örnek dataset, Örnek dataset, Örnek dataset, Örnek dataset, Örnek dataset, Örnek dataset, Örnek dataset Veri seti, [ilgili makaleniz veya projeniz] kapsamında toplanmıştır.
-        </p>
-        <p>
-            <strong>Format:</strong> CSV, JSON  
-
-            <strong>Boyut:</strong> 25 MB
-        </p>
-        <a href="[VERI_SETI_INDIRME_LINKI]" class="btn" target="_blank">İndir</a>
-        <a href="[VERI_SETI_DOKUMANTASYON_LINKI]" class="btn-secondary" target="_blank">Dokümantasyon</a>
-    </div>
-
-    <!-- Örnek Veri Seti 2 -->
-    <div class="dataset-item">
-        <h3>Görüntü Sınıflandırma için Tıbbi Görüntüler</h3>
-        <p>
-            Örnek dataset, Örnek dataset, Örnek dataset, Örnek dataset, Örnek dataset, Örnek dataset, Örnek dataset.
-        </p>
-        <p>
-            <strong>Format:</strong> PNG  
-
-            <strong>Boyut:</strong> 500 MB
-        </p>
-        <a href="#" class="btn" target="_blank">İndir (Zenodo)</a>
-        <a href="#" class="btn-secondary" target="_blank">GitHub Sayfası</a>
-    </div>
-
-</section>
-<!-- ... (İletişim bölümü buradan sonra devam ediyor) ... -->
-
     </div>
 
     <!-- ALT BİLGİ -->
@@ -287,27 +471,181 @@
         <p>&copy; 2025 Yavuz ÜNAL. Tüm hakları saklıdır.</p>
     </footer>
 
+    <script>
+    // ---------- TODO LİSTESİ ----------
+    const todoForm = document.getElementById("todo-form");
+    const todoInput = document.getElementById("todo-input");
+    const todoListEl = document.getElementById("todo-list");
+
+    let todos = [];
+
+    function loadTodos() {
+      const saved = localStorage.getItem("todos");
+      if (saved) {
+        try {
+          todos = JSON.parse(saved);
+        } catch {
+          todos = [];
+        }
+      } else {
+        todos = [];
+      }
+    }
+
+    function saveTodos() {
+      localStorage.setItem("todos", JSON.stringify(todos));
+    }
+
+    function renderTodos() {
+      if (!todoListEl) return;
+      todoListEl.innerHTML = "";
+      todos.forEach((todo) => {
+        const li = document.createElement("li");
+        li.className = "todo-item";
+
+        const left = document.createElement("div");
+        left.className = "todo-left";
+
+        const checkbox = document.createElement("input");
+        checkbox.type = "checkbox";
+        checkbox.checked = todo.completed;
+        checkbox.addEventListener("change", () => toggleTodo(todo.id));
+
+        const span = document.createElement("span");
+        span.textContent = todo.text;
+        span.className = "todo-text";
+        if (todo.completed) span.classList.add("completed");
+
+        left.appendChild(checkbox);
+        left.appendChild(span);
+
+        const delBtn = document.createElement("button");
+        delBtn.textContent = "Sil";
+        delBtn.className = "todo-delete";
+        delBtn.addEventListener("click", () => deleteTodo(todo.id));
+
+        li.appendChild(left);
+        li.appendChild(delBtn);
+
+        todoListEl.appendChild(li);
+      });
+    }
+
+    function addTodo(text) {
+      const newTodo = {
+        id: Date.now(),
+        text,
+        completed: false,
+      };
+      todos.push(newTodo);
+      saveTodos();
+      renderTodos();
+    }
+
+    function toggleTodo(id) {
+      todos = todos.map((t) =>
+        t.id === id ? { ...t, completed: !t.completed } : t
+      );
+      saveTodos();
+      renderTodos();
+    }
+
+    function deleteTodo(id) {
+      todos = todos.filter((t) => t.id !== id);
+      saveTodos();
+      renderTodos();
+    }
+
+    if (todoForm) {
+      todoForm.addEventListener("submit", (e) => {
+        e.preventDefault();
+        const value = todoInput.value.trim();
+        if (!value) return;
+        addTodo(value);
+        todoInput.value = "";
+      });
+    }
+
+    // ---------- POMODORO ----------
+    const timerDisplay = document.getElementById("timer-display");
+    const startBtn = document.getElementById("start-btn");
+    const pauseBtn = document.getElementById("pause-btn");
+    const resetBtn = document.getElementById("reset-btn");
+    const focusInput = document.getElementById("focus-minutes");
+    const breakInput = document.getElementById("break-minutes");
+    const modeToggleBtn = document.getElementById("mode-toggle");
+
+    let isFocusMode = true;
+    let remainingSeconds = 25 * 60;
+    let timerId = null;
+
+    function updateTimerDisplay() {
+      if (!timerDisplay) return;
+      const m = Math.floor(remainingSeconds / 60)
+        .toString()
+        .padStart(2, "0");
+      const s = (remainingSeconds % 60).toString().padStart(2, "0");
+      timerDisplay.textContent = `${m}:${s}`;
+    }
+
+    function startTimer() {
+      if (timerId || !timerDisplay) return;
+      timerId = setInterval(() => {
+        remainingSeconds--;
+        if (remainingSeconds <= 0) {
+          clearInterval(timerId);
+          timerId = null;
+          alert(isFocusMode ? "Odak süresi bitti! Mola zamanı." : "Mola bitti! Tekrar odaklan.");
+          toggleMode(true);
+        }
+        updateTimerDisplay();
+      }, 1000);
+    }
+
+    function pauseTimer() {
+      if (timerId) {
+        clearInterval(timerId);
+        timerId = null;
+      }
+    }
+
+    function resetTimer() {
+      pauseTimer();
+      const mins = isFocusMode
+        ? parseInt(focusInput?.value || "25", 10)
+        : parseInt(breakInput?.value || "5", 10);
+      remainingSeconds = mins * 60;
+      updateTimerDisplay();
+    }
+
+    function toggleMode(autoFromFinish = false) {
+      isFocusMode = autoFromFinish ? !isFocusMode : !isFocusMode;
+      if (modeToggleBtn) {
+        modeToggleBtn.textContent = isFocusMode ? "Mod: Odak" : "Mod: Mola";
+      }
+      resetTimer();
+    }
+
+    if (startBtn) startBtn.addEventListener("click", startTimer);
+    if (pauseBtn) pauseBtn.addEventListener("click", pauseTimer);
+    if (resetBtn) resetBtn.addEventListener("click", resetTimer);
+    if (modeToggleBtn) modeToggleBtn.addEventListener("click", () => toggleMode(false));
+
+    if (focusInput) {
+      focusInput.addEventListener("change", () => {
+        if (isFocusMode) resetTimer();
+      });
+    }
+    if (breakInput) {
+      breakInput.addEventListener("change", () => {
+        if (!isFocusMode) resetTimer();
+      });
+    }
+
+    // ---------- BAŞLANGIÇ ----------
+    loadTodos();
+    renderTodos();
+    updateTimerDisplay();
+    </script>
 </body>
 </html>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
