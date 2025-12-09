@@ -408,69 +408,56 @@
             </div>
         </section>
 <section id="yemek-listesi">
-   <script>
-(function() {
-    const container = document.getElementById('yemek-container');
+   <?php
+header('Content-Type: application/json; charset=utf-8');
+header('Access-Control-Allow-Origin: *');
+
+$url = 'https://sksdb.sinop.edu.tr/yemek-listesi/';
+
+$ch = curl_init();
+curl_setopt($ch, CURLOPT_URL, $url);
+curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
+curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+$html = curl_exec($ch);
+curl_close($ch);
+
+// Bugünün menüsünü bul
+preg_match('/Bugünün Menüsü:\s*(.*?)\s*-\s*Kalori:\s*(\d+)\s*kcal/', $html, $matches);
+
+if ($matches) {
+    $menuItems = array_map('trim', explode(',', $matches[1]));
+    $kalori = $matches[2];
     
-    const gunler = ['Pazar', 'Pazartesi', 'Salı', 'Çarşamba', 'Perşembe', 'Cuma', 'Cumartesi'];
-    const aylar = ['Ocak', 'Şubat', 'Mart', 'Nisan', 'Mayıs', 'Haziran', 
-                   'Temmuz', 'Ağustos', 'Eylül', 'Ekim', 'Kasım', 'Aralık'];
+    $gun_isimleri = ['Pazar', 'Pazartesi', 'Salı', 'Çarşamba', 'Perşembe', 'Cuma', 'Cumartesi'];
+    $ay_isimleri = ['Ocak', 'Şubat', 'Mart', 'Nisan', 'Mayıs', 'Haziran', 'Temmuz', 'Ağustos', 'Eylül', 'Ekim', 'Kasım', 'Aralık'];
     
-    async function loadYemekListesi() {
-        try {
-            // AllOrigins ücretsiz CORS proxy servisi
-            const targetUrl = 'https://sksdb.sinop.edu.tr/yemek-listesi/';
-            const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(targetUrl)}`;
-            
-            const response = await fetch(proxyUrl);
-            const data = await response.json();
-            const html = data.contents;
-            
-            const menuMatch = html.match(/Bugünün Menüsü:\s*(.*?)\s*-\s*Kalori:\s*(\d+)\s*kcal/);
-            
-            if (menuMatch) {
-                const menuItems = menuMatch[1].split(',').map(item => item.trim());
-                const kalori = menuMatch[2];
-                
-                const bugun = new Date();
-                const gun = gunler[bugun.getDay()];
-                const tarih = `${bugun.getDate()} ${aylar[bugun.getMonth()]} ${bugun.getFullYear()}`;
-                
-                let htmlOutput = `
-                    <div class="yemek-tarih">${gun}, ${tarih}</div>
-                    <div class="yemek-icerik">`;
-                
-                const labels = ['Çorba', 'Ana Yemek', 'Yan Yemek', 'Diğer'];
-                menuItems.forEach((item, index) => {
-                    htmlOutput += `
-                        <div class="yemek-item">
-                            <strong>${labels[index] || 'Yemek'}</strong>
-                            ${item}
-                        </div>`;
-                });
-                
-                htmlOutput += `
-                        <div class="yemek-kalori">
-                            🔥 Toplam: ${kalori} kcal
-                        </div>
-                    </div>`;
-                
-                container.innerHTML = htmlOutput;
-            }
-        } catch (error) {
-            console.error('Hata:', error);
-            container.innerHTML = `
-                <div class="yemek-error">
-                    ⚠️ Yemek listesi yüklenemiyor.<br>
-                    <small><a href="https://sksdb.sinop.edu.tr/yemek-listesi/" target="_blank" style="color: #0779e4;">Buradan</a> kontrol edin.</small>
-                </div>`;
-        }
-    }
+    $gun_index = date('w');
+    $ay_index = date('n') - 1;
     
-    if (container) loadYemekListesi();
-})();
-</script>
-</script>
+    $result = [
+        'success' => true,
+        'tarih' => date('d') . ' ' . $ay_isimleri[$ay_index] . ' ' . date('Y'),
+        'gun' => $gun_isimleri[$gun_index],
+        'menu' => [
+            'corba' => isset($menuItems[0]) ? $menuItems[0] : '',
+            'ana_yemek' => isset($menuItems[1]) ? $menuItems[1] : '',
+            'yan_yemek' => isset($menuItems[2]) ? $menuItems[2] : '',
+            'diger' => isset($menuItems[3]) ? implode(', ', array_slice($menuItems, 3)) : ''
+        ],
+        'menuItems' => $menuItems,
+        'kalori' => intval($kalori)
+    ];
+    
+    echo json_encode($result, JSON_UNESCAPED_UNICODE);
+} else {
+    echo json_encode([
+        'success' => false,
+        'error' => 'Menü bulunamadı'
+    ], JSON_UNESCAPED_UNICODE);
+}
+?>
+
 </section>
         <!-- TODO + POMODORO BÖLÜMÜ -->
         <section id="productivity">
@@ -713,5 +700,6 @@
     </script>
 </body>
 </html>
+
 
 
