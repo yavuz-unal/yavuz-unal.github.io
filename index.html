@@ -407,7 +407,201 @@
                 <a href="#" class="btn-secondary" target="_blank">GitHub Sayfası</a>
             </div>
         </section>
+<section id="yemek-listesi">
+    <!-- ==============================================
+     GÜNLÜK YEMEK LİSTESİ WİDGET
+     Sayfanızda istediğiniz yere ekleyebilirsiniz
+     ============================================== -->
 
+<!-- ADIM 1: CSS Stillerini <style> tagının içine ekleyin -->
+<style>
+/* Yemek Listesi Widget Stilleri */
+.yemek-widget {
+    background: linear-gradient(135deg, #0779e4 0%, #056ab1 100%);
+    border-radius: 12px;
+    padding: 20px;
+    color: white;
+    box-shadow: 0 4px 15px rgba(7, 121, 228, 0.3);
+}
+
+.yemek-widget h3 {
+    margin-top: 0;
+    margin-bottom: 15px;
+    font-size: 1.5rem;
+    text-align: center;
+    border-bottom: 2px solid rgba(255, 255, 255, 0.3);
+    padding-bottom: 10px;
+}
+
+.yemek-tarih {
+    text-align: center;
+    margin-bottom: 15px;
+    font-size: 1.1rem;
+    font-weight: 500;
+}
+
+.yemek-icerik {
+    background: rgba(255, 255, 255, 0.95);
+    border-radius: 8px;
+    padding: 20px;
+    color: #333;
+}
+
+.yemek-item {
+    margin-bottom: 12px;
+    padding: 10px;
+    background: #f8f9fa;
+    border-left: 4px solid #0779e4;
+    border-radius: 4px;
+}
+
+.yemek-item:last-child {
+    margin-bottom: 0;
+}
+
+.yemek-item strong {
+    color: #0779e4;
+    display: block;
+    margin-bottom: 4px;
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.yemek-kalori {
+    text-align: center;
+    margin-top: 15px;
+    padding: 12px;
+    background: linear-gradient(135deg, #0779e4 0%, #056ab1 100%);
+    color: white;
+    border-radius: 8px;
+    font-size: 1.2rem;
+    font-weight: bold;
+}
+
+.yemek-loading,
+.yemek-error {
+    text-align: center;
+    padding: 30px;
+    font-size: 1rem;
+}
+
+.yemek-error {
+    color: #dc3545;
+    background: rgba(220, 53, 69, 0.1);
+    border-radius: 8px;
+}
+
+.yemek-kaynak {
+    text-align: center;
+    margin-top: 10px;
+    font-size: 0.75rem;
+    opacity: 0.8;
+}
+
+.yemek-kaynak a {
+    color: white;
+    text-decoration: underline;
+}
+</style>
+
+<!-- ADIM 2: HTML yapısını sayfanıza ekleyin (örneğin İletişim section'ından önce) -->
+<section id="yemek-listesi">
+    <h2>🍽️ Günün Yemek Listesi</h2>
+    <div class="yemek-widget">
+        <h3>Sinop Üniversitesi Yemekhanesi</h3>
+        <div id="yemek-container">
+            <div class="yemek-loading">⏳ Yükleniyor...</div>
+        </div>
+        <div class="yemek-kaynak">
+            <a href="https://sksdb.sinop.edu.tr/yemek-listesi/" target="_blank">Kaynak: SKSDB</a>
+        </div>
+    </div>
+</section>
+
+<!-- ADIM 3: JavaScript kodunu <script> tagları arasına ekleyin (sayfanızın sonuna) -->
+<script>
+// Yemek Listesi Widget
+(function() {
+    const container = document.getElementById('yemek-container');
+    
+    // Türkçe gün adları
+    const gunler = ['Pazar', 'Pazartesi', 'Salı', 'Çarşamba', 'Perşembe', 'Cuma', 'Cumartesi'];
+    const aylar = ['Ocak', 'Şubat', 'Mart', 'Nisan', 'Mayıs', 'Haziran', 
+                   'Temmuz', 'Ağustos', 'Eylül', 'Ekim', 'Kasım', 'Aralık'];
+    
+    async function loadYemekListesi() {
+        try {
+            // Seçenek 1: Direkt fetch (CORS sorunu olabilir)
+            const response = await fetch('https://sksdb.sinop.edu.tr/yemek-listesi/');
+            
+            if (!response.ok) {
+                throw new Error('Veri yüklenemedi');
+            }
+            
+            const html = await response.text();
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(html, 'text/html');
+            
+            // Bugünün menüsünü al
+            const bugunMenusu = doc.querySelector('body')?.textContent.match(/Bugünün Menüsü: (.*?) - Kalori: (\d+) kcal/);
+            
+            if (bugunMenusu) {
+                const menuItems = bugunMenusu[1].split(', ');
+                const kalori = bugunMenusu[2];
+                
+                // Bugünün tarihini al
+                const bugun = new Date();
+                const gun = gunler[bugun.getDay()];
+                const tarih = `${bugun.getDate()} ${aylar[bugun.getMonth()]} ${bugun.getFullYear()}`;
+                
+                // HTML oluştur
+                let html = `
+                    <div class="yemek-tarih">${gun}, ${tarih}</div>
+                    <div class="yemek-icerik">
+                `;
+                
+                menuItems.forEach((item, index) => {
+                    const labels = ['Çorba', 'Ana Yemek', 'Yan Yemek', 'Diğer'];
+                    html += `
+                        <div class="yemek-item">
+                            <strong>${labels[index] || 'Yemek'}</strong>
+                            ${item.trim()}
+                        </div>
+                    `;
+                });
+                
+                html += `
+                        <div class="yemek-kalori">
+                            🔥 Toplam: ${kalori} kcal
+                        </div>
+                    </div>
+                `;
+                
+                container.innerHTML = html;
+            } else {
+                throw new Error('Menü bulunamadı');
+            }
+            
+        } catch (error) {
+            console.error('Yemek listesi yüklenirken hata:', error);
+            container.innerHTML = `
+                <div class="yemek-error">
+                    ⚠️ Yemek listesi şu anda yüklenemiyor.<br>
+                    <small>Lütfen daha sonra tekrar deneyin veya 
+                    <a href="https://sksdb.sinop.edu.tr/yemek-listesi/" target="_blank" style="color: #0779e4;">buradan</a> kontrol edin.</small>
+                </div>
+            `;
+        }
+    }
+    
+    // Sayfa yüklendiğinde çalıştır
+    if (container) {
+        loadYemekListesi();
+    }
+})();
+</script>
+</section>
         <!-- TODO + POMODORO BÖLÜMÜ -->
         <section id="productivity">
             <h2>Üretkenlik Aracı: Todo + Pomodoro</h2>
@@ -649,3 +843,4 @@
     </script>
 </body>
 </html>
+
