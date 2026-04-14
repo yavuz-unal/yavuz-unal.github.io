@@ -324,6 +324,57 @@
             margin: 8px 0;
         }
     </style>
+    .cite-modal-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.45);
+    z-index: 9999;
+    align-items: center;
+    justify-content: center;
+}
+.cite-modal-overlay.active {
+    display: flex;
+}
+.cite-modal {
+    background: #fff;
+    border-radius: 10px;
+    padding: 28px 30px;
+    max-width: 520px;
+    width: 90%;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.18);
+    position: relative;
+}
+.cite-modal h3 {
+    margin: 0 0 14px;
+    color: #0779e4;
+    font-size: 1.1rem;
+}
+.cite-modal .cite-text {
+    background: #f4f4f4;
+    border-radius: 6px;
+    padding: 14px;
+    font-size: 0.92rem;
+    line-height: 1.6;
+    margin-bottom: 16px;
+    word-break: break-word;
+}
+.cite-modal .cite-actions {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+.cite-close {
+    position: absolute;
+    top: 12px;
+    right: 16px;
+    background: none;
+    border: none;
+    font-size: 1.4rem;
+    cursor: pointer;
+    color: #888;
+}
+.cite-close:hover { color: #333; }
 </head>
 <body>
 
@@ -741,7 +792,30 @@
     loadTodos();
     renderTodos();
     updateTimerDisplay();
+        function openCite(text, doi) {
+    document.getElementById('cite-content').textContent = text;
+    document.getElementById('cite-doi-link').href = 'https://doi.org/' + doi;
+    document.getElementById('cite-overlay').classList.add('active');
+}
+function closeCite() {
+    document.getElementById('cite-overlay').classList.remove('active');
+}
+function copyCite() {
+    const text = document.getElementById('cite-content').textContent;
+    navigator.clipboard.writeText(text).then(() => alert('Atıf kopyalandı!'));
+}
     </script>
+    <div class="cite-modal-overlay" id="cite-overlay" onclick="if(event.target===this)closeCite()">
+    <div class="cite-modal">
+        <button class="cite-close" onclick="closeCite()">&times;</button>
+        <h3>Cite this article</h3>
+        <div class="cite-text" id="cite-content"></div>
+        <div class="cite-actions">
+            <button class="btn" onclick="copyCite()">Kopyala</button>
+            <a id="cite-doi-link" href="#" target="_blank" class="btn-secondary">DOI Sayfası</a>
+        </div>
+    </div>
+</div>
 </body>
 </html>
 
