@@ -23,7 +23,6 @@
             overflow: hidden;
             padding: 0 20px;
         }
-        /* Üst Başlık Alanı */
         header {
             background: #333;
             color: #fff;
@@ -39,7 +38,6 @@
             margin: 0;
             font-size: 1.2rem;
         }
-        /* Navigasyon Menüsü */
         nav {
             background: #444;
             color: #fff;
@@ -56,7 +54,6 @@
             background: #0779e4;
             border-radius: 5px;
         }
-        /* Ana İçerik Bölümleri */
         section {
             padding: 20px;
             margin: 20px 0;
@@ -69,7 +66,6 @@
             border-bottom: 2px solid #f4f4f4;
             padding-bottom: 10px;
         }
-        /* Yayınlar Listesi Stili */
         .publication-item {
             margin-bottom: 15px;
             padding-bottom: 15px;
@@ -86,7 +82,6 @@
         .publication-item a:hover {
             text-decoration: underline;
         }
-        /* Alt Bilgi (Footer) */
         footer {
             text-align: center;
             padding: 20px;
@@ -94,8 +89,6 @@
             color: #fff;
             margin-top: 20px;
         }
-
-        /* Datasets Bölümü Stilleri */
         .dataset-item {
             background-color: #f9f9f9;
             border: 1px solid #e0e0e0;
@@ -103,13 +96,10 @@
             padding: 20px;
             margin-bottom: 20px;
         }
-
         .dataset-item h3 {
             margin-top: 0;
             color: #333;
         }
-
-        /* İndirme Butonları için Stiller */
         .btn, .btn-secondary {
             display: inline-block;
             padding: 10px 20px;
@@ -120,30 +110,23 @@
             font-weight: bold;
             transition: background-color 0.3s ease;
         }
-
-        /* Ana Buton (İndir) */
         .btn {
             background-color: #0779e4;
             color: #fff;
             border: 1px solid #0779e4;
+            cursor: pointer;
         }
-
         .btn:hover {
             background-color: #056ab1;
         }
-
-        /* İkincil Buton (Dokümantasyon vb.) */
         .btn-secondary {
             background-color: #6c757d;
             color: #fff;
             border: 1px solid #6c757d;
         }
-
         .btn-secondary:hover {
             background-color: #5a6268;
         }
-
-        /* TODO + POMODORO BÖLÜMÜ */
         #productivity {
             margin: 20px 0;
             background: #fff;
@@ -151,13 +134,11 @@
             box-shadow: 0 0 10px rgba(0,0,0,0.1);
             padding: 20px;
         }
-
         .productivity-container {
             display: flex;
             flex-wrap: wrap;
             gap: 20px;
         }
-
         .todo-section, .pomodoro-section {
             flex: 1 1 280px;
             border: 1px solid #eee;
@@ -165,26 +146,22 @@
             padding: 16px;
             background-color: #fafafa;
         }
-
         .todo-section h3,
         .pomodoro-section h3 {
             margin-top: 0;
             color: #0779e4;
         }
-
         #todo-form {
             display: flex;
             gap: 8px;
             margin-bottom: 12px;
         }
-
         #todo-input {
             flex: 1;
             padding: 8px 10px;
             border-radius: 6px;
             border: 1px solid #ccc;
         }
-
         #todo-form button {
             padding: 8px 12px;
             border: none;
@@ -193,11 +170,9 @@
             color: #fff;
             cursor: pointer;
         }
-
         #todo-form button:hover {
             background-color: #056ab1;
         }
-
         #todo-list {
             list-style: none;
             padding-left: 0;
@@ -206,7 +181,6 @@
             flex-direction: column;
             gap: 6px;
         }
-
         .todo-item {
             display: flex;
             justify-content: space-between;
@@ -216,18 +190,15 @@
             background-color: #fff;
             border: 1px solid #e0e0e0;
         }
-
         .todo-left {
             display: flex;
             align-items: center;
             gap: 8px;
         }
-
         .todo-text.completed {
             text-decoration: line-through;
             color: #999;
         }
-
         .todo-delete {
             background: transparent;
             border-radius: 999px;
@@ -237,28 +208,23 @@
             font-size: 0.8rem;
             cursor: pointer;
         }
-
         .todo-delete:hover {
             background-color: #ffebee;
         }
-
         .pomodoro-section {
             text-align: center;
         }
-
         .timer-display {
             font-size: 2rem;
             font-weight: bold;
             margin: 10px 0 14px;
         }
-
         .timer-controls {
             display: flex;
             justify-content: center;
             gap: 8px;
             margin-bottom: 10px;
         }
-
         .timer-controls button,
         .timer-settings button {
             padding: 6px 10px;
@@ -269,12 +235,10 @@
             cursor: pointer;
             font-size: 0.85rem;
         }
-
         .timer-controls button:hover,
         .timer-settings button:hover {
             background-color: #056ab1;
         }
-
         .timer-settings {
             display: flex;
             flex-direction: column;
@@ -282,7 +246,6 @@
             align-items: center;
             font-size: 0.85rem;
         }
-
         .timer-settings input {
             width: 60px;
             padding: 4px;
@@ -290,22 +253,17 @@
             border: 1px solid #ccc;
             text-align: center;
         }
-
         #mode-toggle {
             background-color: #6c757d;
         }
-
         #mode-toggle:hover {
             background-color: #5a6268;
         }
-
-        /* Ders Notları kartları */
         .course-notes {
             display: flex;
             flex-wrap: wrap;
             gap: 16px;
         }
-
         .course-card {
             flex: 1 1 260px;
             border: 1px solid #eee;
@@ -313,68 +271,68 @@
             padding: 16px;
             background-color: #fafafa;
         }
-
         .course-card h3 {
             margin-top: 0;
             color: #333;
         }
-
         .course-card ul {
             padding-left: 18px;
             margin: 8px 0;
         }
+
+        /* === CITE MODAL === */
+        .cite-modal-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.45);
+            z-index: 9999;
+            align-items: center;
+            justify-content: center;
+        }
+        .cite-modal-overlay.active {
+            display: flex;
+        }
+        .cite-modal {
+            background: #fff;
+            border-radius: 10px;
+            padding: 28px 30px;
+            max-width: 520px;
+            width: 90%;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.18);
+            position: relative;
+        }
+        .cite-modal h3 {
+            margin: 0 0 14px;
+            color: #0779e4;
+            font-size: 1.1rem;
+        }
+        .cite-modal .cite-text {
+            background: #f4f4f4;
+            border-radius: 6px;
+            padding: 14px;
+            font-size: 0.92rem;
+            line-height: 1.6;
+            margin-bottom: 16px;
+            word-break: break-word;
+        }
+        .cite-modal .cite-actions {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        .cite-close {
+            position: absolute;
+            top: 12px;
+            right: 16px;
+            background: none;
+            border: none;
+            font-size: 1.4rem;
+            cursor: pointer;
+            color: #888;
+        }
+        .cite-close:hover { color: #333; }
     </style>
-    .cite-modal-overlay {
-    display: none;
-    position: fixed;
-    inset: 0;
-    background: rgba(0,0,0,0.45);
-    z-index: 9999;
-    align-items: center;
-    justify-content: center;
-}
-.cite-modal-overlay.active {
-    display: flex;
-}
-.cite-modal {
-    background: #fff;
-    border-radius: 10px;
-    padding: 28px 30px;
-    max-width: 520px;
-    width: 90%;
-    box-shadow: 0 8px 32px rgba(0,0,0,0.18);
-    position: relative;
-}
-.cite-modal h3 {
-    margin: 0 0 14px;
-    color: #0779e4;
-    font-size: 1.1rem;
-}
-.cite-modal .cite-text {
-    background: #f4f4f4;
-    border-radius: 6px;
-    padding: 14px;
-    font-size: 0.92rem;
-    line-height: 1.6;
-    margin-bottom: 16px;
-    word-break: break-word;
-}
-.cite-modal .cite-actions {
-    display: flex;
-    gap: 10px;
-    flex-wrap: wrap;
-}
-.cite-close {
-    position: absolute;
-    top: 12px;
-    right: 16px;
-    background: none;
-    border: none;
-    font-size: 1.4rem;
-    cursor: pointer;
-    color: #888;
-}
-.cite-close:hover { color: #333; }
 </head>
 <body>
 
@@ -399,6 +357,19 @@
         </div>
     </nav>
 
+    <!-- CITE MODAL -->
+    <div class="cite-modal-overlay" id="cite-overlay" onclick="if(event.target===this)closeCite()">
+        <div class="cite-modal">
+            <button class="cite-close" onclick="closeCite()">&times;</button>
+            <h3>Cite this article</h3>
+            <div class="cite-text" id="cite-content"></div>
+            <div class="cite-actions">
+                <button class="btn" onclick="copyCite()">Kopyala</button>
+                <a id="cite-doi-link" href="#" target="_blank" class="btn-secondary">DOI Sayfası</a>
+            </div>
+        </div>
+    </div>
+
     <div class="container">
         <!-- HAKKIMDA BÖLÜMÜ -->
         <section id="hakkimda">
@@ -407,7 +378,6 @@
                 <p>
                    Yavuz Ünal is an academic researcher with expertise in image processing, computer vision, and machine learning. His research focuses on deep learning–based feature extraction, image classification, and optimization techniques applied to real-world problems. He has authored and co-authored several scientific publications in international journals and conferences. His academic interests include deep neural networks, computer vision applications, and data-driven intelligent systems.
                 </p>
-                <!-- Fotoğrafınızın dosya adını buraya yazın -->
                 <img src="profil.jpg" alt="Profil Fotoğrafı" class="profile-pic" style="width: 120px; height: 120px;">
             </div>
         </section>
@@ -416,7 +386,6 @@
         <section id="yayinlar">
             <h2>Seçilmiş Yayınlar</h2>
             
-            <!-- Örnek Makale 1 -->
             <div class="publication-item">
                 <p>
                     <strong>Yavuz Ünal, Muzaffer Bolat, Muhammet Nuri Dudak. (2024). "Examining the Performance of a Deep Learning Model Utilizing Yolov8 for Vehicle Make and Model Classification". <em>Journal of Engineering Technology and Applied Sciences,</em> 9(2) 2017 : 131-143.</strong>  
@@ -425,7 +394,6 @@
                 </p>
             </div>
 
-            <!-- Örnek Makale 2 -->
             <div class="publication-item">
                 <p>
                     <strong>Yavuz Ünal, Muzaffer Bolat. "Detecting Wheat Leaf Diseases: A Deep Feature-Based Approach with Machine Learning Classification". <em>Selcuk Journal of Agriculture and Food Sciences</em>, Cilt: 38 Sayı: 3, 463 - 474.</strong>  
@@ -434,15 +402,15 @@
                 </p>
             </div>
      
-   <!-- Örnek Makale 3 -->
             <div class="publication-item">
                 <p>
-                    <strong>Yavuz Ünal, "Automated seven-stage diabetic retinopathy grading using optimized deep networks through systematic hyperparameter tuning". <em>Discover Computing</em>,29, 200 (20206)</strong>  
+                    <strong>Yavuz Ünal, "Automated seven-stage diabetic retinopathy grading using optimized deep networks through systematic hyperparameter tuning". <em>Discover Computing</em>, 29, 200 (2026)</strong>  
                     <a href="https://link.springer.com/article/10.1007/s10791-026-10091-3" target="_blank">[PDF]</a> | 
-                    <a href="#" onclick="openCite('Unal, Y. Automated seven-stage diabetic retinopathy grading using optimized deep networks through systematic hyperparameter tuning. Discov Computing 29, 200 (2026). https://doi.org/10.1007/s10791-026-10091-3','10.1007/s10791-026-10091-3'); return false;">[Cite]</a>
+                    <a href="#" onclick="openCite('Unal, Y. Automated seven-stage diabetic retinopathy grading using optimized deep networks through systematic hyperparameter tuning. Discov Computing 29, 200 (2026). https://doi.org/10.1007/s10791-026-10091-3', '10.1007/s10791-026-10091-3'); return false;">[Cite]</a>
                 </p>
             </div>
         </section>
+
         <!-- ARAŞTIRMA BÖLÜMÜ -->
         <section id="arastirma">
             <h2>Araştırma Alanları</h2>
@@ -463,7 +431,6 @@
                 Araştırmalarım sırasında ürettiğim veya derlediğim kamuya açık veri setlerini aşağıda bulabilirsiniz. Bu veri setlerini atıf yaparak çalışmalarınızda kullanabilirsiniz.
             </p>
             
-            <!-- Örnek Veri Seti 1 -->
             <div class="dataset-item">
                 <h3>Veri Seti Başlığı 1</h3>
                 <p>
@@ -477,7 +444,6 @@
                 <a href="[VERI_SETI_DOKUMANTASYON_LINKI]" class="btn-secondary" target="_blank">Dokümantasyon</a>
             </div>
 
-            <!-- Örnek Veri Seti 2 -->
             <div class="dataset-item">
                 <h3>Görüntü Sınıflandırma için Tıbbi Görüntüler</h3>
                 <p>
@@ -501,7 +467,6 @@
             </p>
 
             <div class="course-notes">
-                <!-- Örnek Ders 1 -->
                 <div class="course-card">
                     <h3>Bilgisayar Mühendisliğine Giriş</h3>
                     <ul>
@@ -513,7 +478,6 @@
                     </ul>
                 </div>
 
-                <!-- Örnek Ders 2 -->
                 <div class="course-card">
                     <h3>Bilgisayar Donanımı</h3>
                     <ul>
@@ -526,7 +490,6 @@
                     </ul>
                 </div>
 
-                <!-- Örnek Ders 3 -->
                 <div class="course-card">
                     <h3>İşletim Sistemleri</h3>
                     <ul>
@@ -535,12 +498,11 @@
                         <li><a href="https://disk.yandex.com.tr/i/ltAPvYiN-j3lDQ" target="_blank">Hafta 3 – İşletim Sistemleri(Slayt)</a></li>
                         <li><a href="https://disk.yandex.com.tr/i/T8NR1WNSVcgqCw" target="_blank">Hafta 4 – Linux Dosya Yapısı (Slayt)</a></li>
                         <li><a href="https://disk.yandex.com.tr/i/gkvh4Z8M0Sbp6w" target="_blank">Hafta 5 – Linux Komutları-I</a></li>
-                         <li><a href="https://disk.yandex.com.tr/i/7P_YkckOMB2Mww" target="_blank">Hafta 6 – İşletim Sistemleri(Slayt)</a></li>
+                        <li><a href="https://disk.yandex.com.tr/i/7P_YkckOMB2Mww" target="_blank">Hafta 6 – İşletim Sistemleri(Slayt)</a></li>
                         <li><a href="#" target="_blank">Extreme Programming – Örnek Uygulama Senaryosu</a></li>
                     </ul>
                 </div>
 
-                <!-- Örnek Ders 4 -->
                 <div class="course-card">
                     <h3>Görüntü İşleme (Lisansüstü)</h3>
                     <ul>
@@ -561,7 +523,6 @@
             </p>
 
             <div class="productivity-container">
-                <!-- TODO LİSTESİ -->
                 <div class="todo-section">
                     <h3>Yapılacaklar</h3>
                     <form id="todo-form">
@@ -571,7 +532,6 @@
                     <ul id="todo-list"></ul>
                 </div>
 
-                <!-- POMODORO -->
                 <div class="pomodoro-section">
                     <h3>Pomodoro Zamanlayıcı</h3>
                     <div class="timer-display" id="timer-display">25:00</div>
@@ -607,7 +567,7 @@
                 <a href="https://www.linkedin.com/in/yavuzunalcan/" target="_blank">LinkedIn</a> |
                 <a href="https://www.researchgate.net/profile/Yavuz-Unal" target="_blank">ResearchGate</a> |
                 <a href="https://unis.sinop.edu.tr/akademisyen-detay/yunal" target="_blank">Unis Profili</a> |
-                 <a href="https://www.scopus.com/authid/detail.uri?authorId=46061541800" target="_blank">Scopus Profili</a> |
+                <a href="https://www.scopus.com/authid/detail.uri?authorId=46061541800" target="_blank">Scopus Profili</a> |
             </p>
         </section>
     </div>
@@ -678,20 +638,14 @@
     }
 
     function addTodo(text) {
-      const newTodo = {
-        id: Date.now(),
-        text,
-        completed: false,
-      };
+      const newTodo = { id: Date.now(), text, completed: false };
       todos.push(newTodo);
       saveTodos();
       renderTodos();
     }
 
     function toggleTodo(id) {
-      todos = todos.map((t) =>
-        t.id === id ? { ...t, completed: !t.completed } : t
-      );
+      todos = todos.map((t) => t.id === id ? { ...t, completed: !t.completed } : t);
       saveTodos();
       renderTodos();
     }
@@ -727,9 +681,7 @@
 
     function updateTimerDisplay() {
       if (!timerDisplay) return;
-      const m = Math.floor(remainingSeconds / 60)
-        .toString()
-        .padStart(2, "0");
+      const m = Math.floor(remainingSeconds / 60).toString().padStart(2, "0");
       const s = (remainingSeconds % 60).toString().padStart(2, "0");
       timerDisplay.textContent = `${m}:${s}`;
     }
@@ -749,10 +701,7 @@
     }
 
     function pauseTimer() {
-      if (timerId) {
-        clearInterval(timerId);
-        timerId = null;
-      }
+      if (timerId) { clearInterval(timerId); timerId = null; }
     }
 
     function resetTimer() {
@@ -778,63 +727,32 @@
     if (modeToggleBtn) modeToggleBtn.addEventListener("click", () => toggleMode(false));
 
     if (focusInput) {
-      focusInput.addEventListener("change", () => {
-        if (isFocusMode) resetTimer();
-      });
+      focusInput.addEventListener("change", () => { if (isFocusMode) resetTimer(); });
     }
     if (breakInput) {
-      breakInput.addEventListener("change", () => {
-        if (!isFocusMode) resetTimer();
-      });
+      breakInput.addEventListener("change", () => { if (!isFocusMode) resetTimer(); });
+    }
+
+    // ---------- CITE MODAL ----------
+    function openCite(text, doi) {
+        document.getElementById('cite-content').textContent = text;
+        document.getElementById('cite-doi-link').href = 'https://doi.org/' + doi;
+        document.getElementById('cite-overlay').classList.add('active');
+    }
+
+    function closeCite() {
+        document.getElementById('cite-overlay').classList.remove('active');
+    }
+
+    function copyCite() {
+        const text = document.getElementById('cite-content').textContent;
+        navigator.clipboard.writeText(text).then(() => alert('Atıf kopyalandı!'));
     }
 
     // ---------- BAŞLANGIÇ ----------
     loadTodos();
     renderTodos();
     updateTimerDisplay();
-        function openCite(text, doi) {
-    document.getElementById('cite-content').textContent = text;
-    document.getElementById('cite-doi-link').href = 'https://doi.org/' + doi;
-    document.getElementById('cite-overlay').classList.add('active');
-}
-function closeCite() {
-    document.getElementById('cite-overlay').classList.remove('active');
-}
-function copyCite() {
-    const text = document.getElementById('cite-content').textContent;
-    navigator.clipboard.writeText(text).then(() => alert('Atıf kopyalandı!'));
-}
     </script>
-    <div class="cite-modal-overlay" id="cite-overlay" onclick="if(event.target===this)closeCite()">
-    <div class="cite-modal">
-        <button class="cite-close" onclick="closeCite()">&times;</button>
-        <h3>Cite this article</h3>
-        <div class="cite-text" id="cite-content"></div>
-        <div class="cite-actions">
-            <button class="btn" onclick="copyCite()">Kopyala</button>
-            <a id="cite-doi-link" href="#" target="_blank" class="btn-secondary">DOI Sayfası</a>
-        </div>
-    </div>
-</div>
 </body>
 </html>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
