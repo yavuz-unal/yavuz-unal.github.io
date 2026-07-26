@@ -1,0 +1,455 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Akademik Yayın Dizini</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+  :root {
+    --ink: #16202e;
+    --muted: #64748b;
+    --line: #e4e8ee;
+    --paper: #ffffff;
+    --bg: #f4f6f9;
+    --accent: #1f5fa8;
+    --accent-dark: #184a82;
+    --accent-soft: #e9f1fa;
+    --ok: #15803d;
+    --ok-soft: #f0fdf4;
+    --warn: #b45309;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    background: var(--bg);
+    color: var(--ink);
+    line-height: 1.6;
+    padding: 32px 18px 80px;
+  }
+  .wrap { max-width: 860px; margin: 0 auto; }
+
+  header { margin-bottom: 30px; text-align: center; }
+  header h1 { font-size: 1.9rem; font-weight: 800; letter-spacing: -0.03em; }
+  header p { color: var(--muted); margin-top: 6px; font-size: 0.98rem; }
+
+  /* ---- ARAMA ---- */
+  .search-box {
+    display: flex; gap: 10px; margin: 0 auto 26px; max-width: 620px;
+  }
+  .search-box input {
+    flex: 1; padding: 14px 16px; border: 1px solid var(--line);
+    border-radius: 11px; font-size: 1rem; font-family: inherit;
+    background: var(--paper); transition: border-color .15s, box-shadow .15s;
+  }
+  .search-box input:focus {
+    outline: none; border-color: var(--accent);
+    box-shadow: 0 0 0 3px var(--accent-soft);
+  }
+
+  /* ---- KATEGORİ KARTLARI ---- */
+  .cats {
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: 12px; margin-bottom: 8px;
+  }
+  .cat-card {
+    background: var(--paper); border: 1px solid var(--line);
+    border-radius: 12px; padding: 16px 18px; cursor: pointer;
+    transition: border-color .15s, transform .12s, box-shadow .15s;
+    text-align: left;
+  }
+  .cat-card:hover {
+    border-color: var(--accent); transform: translateY(-2px);
+    box-shadow: 0 6px 18px rgba(31,95,168,.08);
+  }
+  .cat-card .name { font-weight: 700; font-size: 0.98rem; }
+  .cat-card .count { color: var(--muted); font-size: 0.82rem; margin-top: 2px; }
+
+  /* ---- SONUÇ / LİSTE ---- */
+  .section-head {
+    display: flex; align-items: center; justify-content: space-between;
+    margin: 6px 0 14px; gap: 12px; flex-wrap: wrap;
+  }
+  .section-head h2 { font-size: 1.15rem; font-weight: 700; }
+  .back-link {
+    background: none; border: none; color: var(--accent); cursor: pointer;
+    font-size: 0.9rem; font-weight: 600; font-family: inherit; padding: 4px 0;
+  }
+  .back-link:hover { text-decoration: underline; }
+  .result-count { color: var(--muted); font-size: 0.85rem; }
+
+  .pub-list { list-style: none; }
+  .pub-item {
+    background: var(--paper); border: 1px solid var(--line);
+    border-radius: 11px; padding: 16px 18px; margin-bottom: 10px;
+  }
+  .pub-item .title { font-weight: 700; font-size: 1rem; line-height: 1.4; }
+  .pub-item .meta { color: var(--muted); font-size: 0.87rem; margin-top: 4px; }
+  .pub-item .tag {
+    display: inline-block; background: var(--accent-soft); color: var(--accent-dark);
+    font-size: 0.74rem; font-weight: 600; padding: 2px 9px; border-radius: 20px;
+    margin-top: 8px;
+  }
+  .pub-item a.doi {
+    color: var(--accent); text-decoration: none; font-size: 0.83rem;
+    margin-top: 8px; display: inline-block; margin-left: 8px;
+  }
+  .pub-item a.doi:hover { text-decoration: underline; }
+
+  .empty { color: var(--muted); text-align: center; padding: 30px 0; font-size: 0.95rem; }
+
+  /* ---- SAYFALAMA ---- */
+  .pager {
+    display: flex; justify-content: center; align-items: center; gap: 14px;
+    margin-top: 20px;
+  }
+  .pager button {
+    padding: 9px 16px; border: 1px solid var(--line); background: var(--paper);
+    color: var(--ink); border-radius: 9px; font-size: 0.9rem; font-weight: 600;
+    font-family: inherit; cursor: pointer; transition: all .15s;
+  }
+  .pager button:hover:not(:disabled) { border-color: var(--accent); color: var(--accent); }
+  .pager button:disabled { opacity: .4; cursor: not-allowed; }
+  .pager .page-info { color: var(--muted); font-size: 0.88rem; }
+
+  /* ---- GÖNDERME KARTI ---- */
+  .submit-card {
+    background: var(--paper); border: 1px solid var(--line);
+    border-radius: 14px; padding: 24px; margin-top: 40px;
+  }
+  .submit-card h2 { font-size: 1.1rem; margin-bottom: 4px; }
+  .submit-card .sub { color: var(--muted); font-size: 0.88rem; margin-bottom: 18px; }
+  label { display: block; font-size: 0.82rem; font-weight: 600; margin-bottom: 6px; }
+  input[type=text], select {
+    width: 100%; padding: 11px 13px; border: 1px solid var(--line);
+    border-radius: 9px; font-size: 0.95rem; font-family: inherit; background: var(--paper);
+  }
+  input[type=text]:focus, select:focus { outline: none; border-color: var(--accent); }
+  .row { display: flex; gap: 10px; align-items: flex-end; }
+  .row .grow { flex: 1; }
+  button.primary {
+    padding: 11px 18px; border: none; border-radius: 9px; background: var(--accent);
+    color: #fff; font-size: 0.92rem; font-weight: 600; font-family: inherit;
+    cursor: pointer; transition: background .15s, opacity .15s; white-space: nowrap;
+  }
+  button.primary:hover { background: var(--accent-dark); }
+  button.primary:disabled { opacity: .55; cursor: not-allowed; }
+  button.ghost {
+    padding: 11px 18px; border: none; border-radius: 9px; background: var(--accent-soft);
+    color: var(--accent); font-size: 0.92rem; font-weight: 600; font-family: inherit; cursor: pointer;
+  }
+
+  .preview {
+    margin-top: 16px; padding: 16px; border: 1px dashed var(--line);
+    border-radius: 10px; background: #fafbfc; display: none;
+  }
+  .preview.show { display: block; }
+  .preview .field { display: grid; grid-template-columns: 84px 1fr; gap: 8px; padding: 4px 0; font-size: 0.9rem; }
+  .preview .field span:first-child { color: var(--muted); font-weight: 600; }
+  .preview .cat-select { margin-top: 12px; }
+  .preview .actions { margin-top: 14px; display: flex; gap: 10px; }
+
+  .status-msg { margin-top: 14px; font-size: 0.9rem; padding: 11px 14px; border-radius: 9px; display: none; }
+  .status-msg.show { display: block; }
+  .status-msg.info { background: var(--accent-soft); color: var(--accent); }
+  .status-msg.ok { background: var(--ok-soft); color: var(--ok); }
+  .status-msg.err { background: #fef2f2; color: #b91c1c; }
+
+  @media (max-width: 560px) {
+    .row { flex-direction: column; align-items: stretch; }
+    .row .primary { width: 100%; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <h1>Akademik Yayın Dizini</h1>
+    <p>Türkiye'deki akademik yayınlar için ortak bir vitrin.</p>
+  </header>
+
+  <!-- ARAMA -->
+  <div class="search-box">
+    <input type="text" id="searchInput" placeholder="Başlık, yazar veya dergi ara…">
+  </div>
+
+  <!-- KATEGORİ KARTLARI (ana görünüm) -->
+  <div id="catView">
+    <div class="cats" id="catGrid"></div>
+  </div>
+
+  <!-- SONUÇ LİSTESİ (kategori/arama seçilince) -->
+  <div id="listView" style="display:none;">
+    <div class="section-head">
+      <button class="back-link" onclick="anaSayfa()">← Kategorilere dön</button>
+      <span class="result-count" id="resultCount"></span>
+    </div>
+    <h2 id="listTitle" style="margin-bottom:14px;"></h2>
+    <ul class="pub-list" id="pubList"></ul>
+    <div class="pager" id="pager" style="display:none;">
+      <button id="prevBtn" onclick="sayfaDegis(-1)">← Önceki</button>
+      <span class="page-info" id="pageInfo"></span>
+      <button id="nextBtn" onclick="sayfaDegis(1)">Sonraki →</button>
+    </div>
+  </div>
+
+  <!-- GÖNDERME -->
+  <div class="submit-card">
+    <h2>Yayın ekle</h2>
+    <p class="sub">DOI'nizi girin, künye otomatik gelsin. Gönderiminiz onaya düşer.</p>
+    <div class="row">
+      <div class="grow">
+        <label for="doiInput">DOI</label>
+        <input type="text" id="doiInput" placeholder="10.1109/TIP.2024.123456 veya https://doi.org/...">
+      </div>
+      <button class="primary" id="fetchBtn" onclick="doiCek()">Getir</button>
+    </div>
+    <div class="status-msg" id="fetchStatus"></div>
+
+    <div class="preview" id="preview">
+      <div class="field"><span>Başlık</span><span id="pvTitle">—</span></div>
+      <div class="field"><span>Yazarlar</span><span id="pvAuthors">—</span></div>
+      <div class="field"><span>Dergi</span><span id="pvJournal">—</span></div>
+      <div class="field"><span>Yıl</span><span id="pvYear">—</span></div>
+      <div class="cat-select">
+        <label for="catInput">Kategori seç</label>
+        <select id="catInput"></select>
+      </div>
+      <div class="actions">
+        <button class="primary" id="submitBtn" onclick="gonder()">Bu yayını gönder</button>
+        <button class="ghost" onclick="temizle()">Vazgeç</button>
+      </div>
+    </div>
+    <div class="status-msg" id="submitStatus"></div>
+  </div>
+
+</div>
+
+<script>
+// ==== SUPABASE ====
+const SUPABASE_URL = 'https://epxdfwryvlpolmjyqfgb.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_I32iVvzmTUH_tjs3ZAouRw_s6TtqnxO';
+const db = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+// ==== KATEGORİLER: ana bilim dalları (istediğin gibi ekle/çıkar) ====
+const KATEGORILER = [
+  'Computer Science',
+  'Engineering',
+  'Medicine & Health Sciences',
+  'Life Sciences',
+  'Natural Sciences',
+  'Social Sciences',
+  'Veterinary Sciences',
+  'Agricultural Sciences'
+];
+
+const SAYFA_BOYUTU = 20;   // her sayfada kaç yayın
+
+// Durum
+let aktifKategori = null;
+let aktifArama = '';
+let aktifSayfa = 0;
+let toplamKayit = 0;
+let cekilenVeri = null;
+
+// ---------- YARDIMCILAR ----------
+function mesaj(id, tip, metin) {
+  const el = document.getElementById(id);
+  el.className = 'status-msg show ' + tip; el.textContent = metin;
+}
+function mesajGizle(id) { document.getElementById(id).className = 'status-msg'; }
+function escapeHtml(s) {
+  return String(s ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;')
+    .replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+function metniTemizle(ham) {
+  if (!ham) return '';
+  let s = String(ham).replace(/<\/?[^>]+>/g, '');
+  const t = document.createElement('textarea'); t.innerHTML = s; s = t.value;
+  return s.replace(/[\u2010\u2011\u2012\u2013\u2014]/g, '-')
+          .replace(/[\u00A0\u2007\u202F]/g, ' ')
+          .replace(/\s+/g, ' ').trim();
+}
+function doiTemizle(ham) {
+  return ham.trim().replace(/^https?:\/\/(dx\.)?doi\.org\//i, '').replace(/^doi:/i, '').trim();
+}
+
+// ---------- KATEGORİ KARTLARINI KUR ----------
+async function kategorileriYukle() {
+  const grid = document.getElementById('catGrid');
+  grid.innerHTML = '';
+  for (const kat of KATEGORILER) {
+    // her kategori için onaylı yayın sayısını çek
+    const { count } = await db.from('publications')
+      .select('*', { count: 'exact', head: true })
+      .eq('status', 'approved').eq('category', kat);
+    const card = document.createElement('div');
+    card.className = 'cat-card';
+    card.onclick = () => kategoriAc(kat);
+    card.innerHTML = `<div class="name">${escapeHtml(kat)}</div>
+                      <div class="count">${count || 0} yayın</div>`;
+    grid.appendChild(card);
+  }
+}
+
+// ---------- GÖRÜNÜM GEÇİŞLERİ ----------
+function anaSayfa() {
+  aktifKategori = null; aktifArama = ''; aktifSayfa = 0;
+  document.getElementById('searchInput').value = '';
+  document.getElementById('catView').style.display = 'block';
+  document.getElementById('listView').style.display = 'none';
+  kategorileriYukle();
+}
+function kategoriAc(kat) {
+  aktifKategori = kat; aktifArama = ''; aktifSayfa = 0;
+  document.getElementById('searchInput').value = '';
+  document.getElementById('catView').style.display = 'none';
+  document.getElementById('listView').style.display = 'block';
+  document.getElementById('listTitle').textContent = kat;
+  yayinlariYukle();
+}
+function aramaAc(terim) {
+  aktifKategori = null; aktifArama = terim; aktifSayfa = 0;
+  document.getElementById('catView').style.display = 'none';
+  document.getElementById('listView').style.display = 'block';
+  document.getElementById('listTitle').textContent = `"${terim}" için sonuçlar`;
+  yayinlariYukle();
+}
+
+// ---------- YAYINLARI YÜKLE (sayfalı + filtreli) ----------
+async function yayinlariYukle() {
+  const liste = document.getElementById('pubList');
+  liste.innerHTML = '<li class="empty">Yükleniyor…</li>';
+  document.getElementById('pager').style.display = 'none';
+
+  const bas = aktifSayfa * SAYFA_BOYUTU;
+  const son = bas + SAYFA_BOYUTU - 1;
+
+  let q = db.from('publications')
+    .select('*', { count: 'exact' })
+    .eq('status', 'approved');
+
+  if (aktifKategori) q = q.eq('category', aktifKategori);
+  if (aktifArama) {
+    // başlık, yazar veya dergide ara
+    q = q.or(`title.ilike.%${aktifArama}%,authors.ilike.%${aktifArama}%,journal.ilike.%${aktifArama}%`);
+  }
+  q = q.order('year', { ascending: false }).range(bas, son);
+
+  const { data, count, error } = await q;
+
+  if (error) { liste.innerHTML = `<li class="empty">Hata: ${escapeHtml(error.message)}</li>`; return; }
+
+  toplamKayit = count || 0;
+  document.getElementById('resultCount').textContent = `${toplamKayit} yayın bulundu`;
+
+  if (!data || data.length === 0) {
+    liste.innerHTML = '<li class="empty">Bu kritere uyan yayın yok.</li>';
+    return;
+  }
+
+  liste.innerHTML = data.map(p => `
+    <li class="pub-item">
+      <div class="title">${escapeHtml(p.title)}</div>
+      <div class="meta">${escapeHtml(p.authors || '')} · ${escapeHtml(p.journal || '')} ${p.year ? '('+p.year+')' : ''}</div>
+      <span class="tag">${escapeHtml(p.category || 'Diğer')}</span>
+      ${p.link ? `<a class="doi" href="${escapeHtml(p.link)}" target="_blank" rel="noopener">DOI →</a>` : ''}
+    </li>
+  `).join('');
+
+  // sayfalama
+  const toplamSayfa = Math.ceil(toplamKayit / SAYFA_BOYUTU);
+  if (toplamSayfa > 1) {
+    document.getElementById('pager').style.display = 'flex';
+    document.getElementById('pageInfo').textContent = `Sayfa ${aktifSayfa+1} / ${toplamSayfa}`;
+    document.getElementById('prevBtn').disabled = (aktifSayfa === 0);
+    document.getElementById('nextBtn').disabled = (aktifSayfa >= toplamSayfa-1);
+  }
+}
+function sayfaDegis(yon) {
+  aktifSayfa += yon;
+  if (aktifSayfa < 0) aktifSayfa = 0;
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+  yayinlariYukle();
+}
+
+// ---------- ARAMA (yazarken, 400ms gecikmeli) ----------
+let aramaZaman = null;
+document.getElementById('searchInput').addEventListener('input', e => {
+  const terim = e.target.value.trim();
+  clearTimeout(aramaZaman);
+  aramaZaman = setTimeout(() => {
+    if (terim.length === 0) { anaSayfa(); }
+    else if (terim.length >= 2) { aramaAc(terim); }
+  }, 400);
+});
+
+// ---------- DOI ÇEK (Crossref) ----------
+async function doiCek() {
+  const doi = doiTemizle(document.getElementById('doiInput').value);
+  if (!doi) { mesaj('fetchStatus','err','Lütfen bir DOI girin.'); return; }
+  document.getElementById('preview').className = 'preview';
+  mesajGizle('submitStatus');
+  mesaj('fetchStatus','info','Crossref\'ten getiriliyor…');
+  document.getElementById('fetchBtn').disabled = true;
+  try {
+    const res = await fetch('https://api.crossref.org/works/' + encodeURIComponent(doi));
+    if (!res.ok) throw new Error('DOI bulunamadı ('+res.status+')');
+    const { message } = await res.json();
+    cekilenVeri = {
+      title:   metniTemizle(message.title?.[0] ?? ''),
+      authors: (message.author ?? []).map(a => metniTemizle(`${a.given??''} ${a.family??''}`.trim())).filter(Boolean).join(', '),
+      journal: metniTemizle(message['container-title']?.[0] ?? ''),
+      year:    message.issued?.['date-parts']?.[0]?.[0] ?? null,
+      doi:     message.DOI,
+      link:    message.URL ?? ('https://doi.org/' + message.DOI)
+    };
+    document.getElementById('pvTitle').textContent   = cekilenVeri.title   || '—';
+    document.getElementById('pvAuthors').textContent = cekilenVeri.authors || '—';
+    document.getElementById('pvJournal').textContent = cekilenVeri.journal || '—';
+    document.getElementById('pvYear').textContent    = cekilenVeri.year    || '—';
+    document.getElementById('preview').className = 'preview show';
+    mesajGizle('fetchStatus');
+  } catch (err) {
+    mesaj('fetchStatus','err','Bulunamadı: '+err.message+'. DOI\'yi kontrol edin.');
+    cekilenVeri = null;
+  } finally {
+    document.getElementById('fetchBtn').disabled = false;
+  }
+}
+
+// ---------- GÖNDER (pending) ----------
+async function gonder() {
+  if (!cekilenVeri) return;
+  document.getElementById('submitBtn').disabled = true;
+  mesaj('submitStatus','info','Gönderiliyor…');
+  const { error } = await db.from('publications').insert({
+    title: cekilenVeri.title, authors: cekilenVeri.authors,
+    journal: cekilenVeri.journal, year: cekilenVeri.year,
+    doi: cekilenVeri.doi, link: cekilenVeri.link,
+    category: document.getElementById('catInput').value,
+    status: 'pending'
+  });
+  document.getElementById('submitBtn').disabled = false;
+  if (error) mesaj('submitStatus','err','Hata: '+error.message);
+  else { mesaj('submitStatus','ok','Teşekkürler! Gönderiminiz onaya alındı.'); temizle(); }
+}
+function temizle() {
+  cekilenVeri = null;
+  document.getElementById('doiInput').value = '';
+  document.getElementById('preview').className = 'preview';
+  mesajGizle('fetchStatus');
+}
+
+// ---------- BAŞLAT ----------
+// kategori seçim menüsünü doldur
+const sel = document.getElementById('catInput');
+KATEGORILER.forEach(k => {
+  const o = document.createElement('option'); o.value = k; o.textContent = k; sel.appendChild(o);
+});
+document.getElementById('doiInput').addEventListener('keydown', e => { if (e.key==='Enter') doiCek(); });
+kategorileriYukle();
+</script>
+</body>
+</html>
