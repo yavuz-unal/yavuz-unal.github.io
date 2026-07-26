@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Yayın Havuzu — Prototip</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+  :root {
+    --ink: #1a2b3c;
+    --muted: #64748b;
+    --line: #e2e8f0;
+    --paper: #ffffff;
+    --bg: #f6f7f9;
+    --accent: #2563a8;
+    --accent-soft: #eaf1f8;
+    --ok: #15803d;
+    --ok-soft: #f0fdf4;
+    --warn: #b45309;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    background: var(--bg);
+    color: var(--ink);
+    line-height: 1.6;
+    padding: 40px 20px;
+  }
+  .wrap { max-width: 760px; margin: 0 auto; }
+  header { margin-bottom: 36px; }
+  header h1 { font-size: 1.7rem; font-weight: 700; letter-spacing: -0.02em; }
+  header p { color: var(--muted); margin-top: 4px; font-size: 0.95rem; }
+
+  .card {
+    background: var(--paper);
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    padding: 26px;
+    margin-bottom: 28px;
+  }
+  .card h2 { font-size: 1.05rem; margin-bottom: 4px; }
+  .card .sub { color: var(--muted); font-size: 0.88rem; margin-bottom: 18px; }
+
+  label { display: block; font-size: 0.82rem; font-weight: 600; margin-bottom: 6px; color: var(--ink); }
+  input[type=text] {
+    width: 100%;
+    padding: 11px 13px;
+    border: 1px solid var(--line);
+    border-radius: 9px;
+    font-size: 0.95rem;
+    font-family: inherit;
+    transition: border-color .15s;
+  }
+  input[type=text]:focus { outline: none; border-color: var(--accent); }
+
+  .row { display: flex; gap: 10px; align-items: flex-end; }
+  .row .grow { flex: 1; }
+
+  button {
+    padding: 11px 18px;
+    border: none;
+    border-radius: 9px;
+    background: var(--accent);
+    color: #fff;
+    font-size: 0.92rem;
+    font-weight: 600;
+    font-family: inherit;
+    cursor: pointer;
+    transition: background .15s, opacity .15s;
+    white-space: nowrap;
+  }
+  button:hover { background: #1e5290; }
+  button:disabled { opacity: .55; cursor: not-allowed; }
+  button.ghost { background: var(--accent-soft); color: var(--accent); }
+  button.ghost:hover { background: #dce8f4; }
+
+  .preview {
+    margin-top: 18px;
+    padding: 16px;
+    border: 1px dashed var(--line);
+    border-radius: 10px;
+    background: #fafbfc;
+    display: none;
+  }
+  .preview.show { display: block; }
+  .preview .field { display: grid; grid-template-columns: 80px 1fr; gap: 8px; padding: 4px 0; font-size: 0.9rem; }
+  .preview .field span:first-child { color: var(--muted); font-weight: 600; }
+  .preview .actions { margin-top: 14px; display: flex; gap: 10px; }
+
+  .status-msg { margin-top: 14px; font-size: 0.9rem; padding: 11px 14px; border-radius: 9px; display: none; }
+  .status-msg.show { display: block; }
+  .status-msg.info { background: var(--accent-soft); color: var(--accent); }
+  .status-msg.ok { background: var(--ok-soft); color: var(--ok); }
+  .status-msg.err { background: #fef2f2; color: #b91c1c; }
+
+  .pub-list { list-style: none; }
+  .pub-item {
+    padding: 16px 0;
+    border-bottom: 1px solid var(--line);
+  }
+  .pub-item:last-child { border-bottom: none; }
+  .pub-item .title { font-weight: 600; font-size: 0.98rem; }
+  .pub-item .meta { color: var(--muted); font-size: 0.86rem; margin-top: 3px; }
+  .pub-item a { color: var(--accent); text-decoration: none; font-size: 0.85rem; }
+  .pub-item a:hover { text-decoration: underline; }
+  .empty { color: var(--muted); font-size: 0.9rem; padding: 10px 0; }
+
+  .note {
+    font-size: 0.82rem;
+    color: var(--warn);
+    background: #fffbeb;
+    border: 1px solid #fde68a;
+    border-radius: 9px;
+    padding: 12px 14px;
+    margin-top: 16px;
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <h1>Yayın Havuzu</h1>
+    <p>DOI'nizi girin, künye otomatik gelsin — gönderiminiz onaya düşer.</p>
+  </header>
+
+  <!-- GÖNDERME KARTI -->
+  <div class="card">
+    <h2>Yayın gönder</h2>
+    <p class="sub">Makalenizin DOI'sini yapıştırın. Bilgiler otomatik doldurulur.</p>
+
+    <div class="row">
+      <div class="grow">
+        <label for="doiInput">DOI</label>
+        <input type="text" id="doiInput" placeholder="10.1109/TIP.2024.123456 veya https://doi.org/...">
+      </div>
+      <button id="fetchBtn" onclick="doiCek()">Getir</button>
+    </div>
+
+    <div class="status-msg" id="fetchStatus"></div>
+
+    <!-- ÖNİZLEME -->
+    <div class="preview" id="preview">
+      <div class="field"><span>Başlık</span><span id="pvTitle">—</span></div>
+      <div class="field"><span>Yazarlar</span><span id="pvAuthors">—</span></div>
+      <div class="field"><span>Dergi</span><span id="pvJournal">—</span></div>
+      <div class="field"><span>Yıl</span><span id="pvYear">—</span></div>
+      <div class="actions">
+        <button id="submitBtn" onclick="gonder()">Bu yayını gönder</button>
+        <button class="ghost" onclick="temizle()">Vazgeç</button>
+      </div>
+    </div>
+
+    <div class="status-msg" id="submitStatus"></div>
+  </div>
+
+  <!-- ONAYLI YAYINLAR -->
+  <div class="card">
+    <h2>Onaylı yayınlar</h2>
+    <p class="sub">Yalnızca onaylanmış gönderimler burada görünür.</p>
+    <ul class="pub-list" id="pubList">
+      <li class="empty">Yükleniyor…</li>
+    </ul>
+  </div>
+
+</div>
+
+<script>
+// ==== SUPABASE BAĞLANTISI ====
+const SUPABASE_URL = 'https://epxdfwryvlpolmjyqfgb.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_I32iVvzmTUH_tjs3ZAouRw_s6TtqnxO';
+const db = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+// Çekilen künye burada tutulur
+let cekilenVeri = null;
+
+// ---- Yardımcı: durum mesajı göster ----
+function mesaj(id, tip, metin) {
+  const el = document.getElementById(id);
+  el.className = 'status-msg show ' + tip;
+  el.textContent = metin;
+}
+function mesajGizle(id) {
+  document.getElementById(id).className = 'status-msg';
+}
+
+// ---- DOI'yi temizle (https://doi.org/ önekini at) ----
+function doiTemizle(ham) {
+  return ham.trim()
+    .replace(/^https?:\/\/(dx\.)?doi\.org\//i, '')
+    .replace(/^doi:/i, '')
+    .trim();
+}
+
+// ---- CROSSREF'TEN KÜNYE ÇEK ----
+async function doiCek() {
+  const ham = document.getElementById('doiInput').value;
+  const doi = doiTemizle(ham);
+  if (!doi) { mesaj('fetchStatus', 'err', 'Lütfen bir DOI girin.'); return; }
+
+  document.getElementById('preview').className = 'preview';
+  mesajGizle('submitStatus');
+  mesaj('fetchStatus', 'info', 'Crossref\'ten bilgiler getiriliyor…');
+  document.getElementById('fetchBtn').disabled = true;
+
+  try {
+    const res = await fetch('https://api.crossref.org/works/' + encodeURIComponent(doi));
+    if (!res.ok) throw new Error('DOI bulunamadı (' + res.status + ')');
+    const { message } = await res.json();
+
+    cekilenVeri = {
+      title:   message.title?.[0] ?? '',
+      authors: (message.author ?? [])
+                 .map(a => `${a.given ?? ''} ${a.family ?? ''}`.trim())
+                 .filter(Boolean).join(', '),
+      journal: message['container-title']?.[0] ?? '',
+      year:    message.issued?.['date-parts']?.[0]?.[0] ?? null,
+      doi:     message.DOI,
+      link:    message.URL ?? ('https://doi.org/' + message.DOI)
+    };
+
+    // Önizlemeyi doldur
+    document.getElementById('pvTitle').textContent   = cekilenVeri.title   || '—';
+    document.getElementById('pvAuthors').textContent = cekilenVeri.authors || '—';
+    document.getElementById('pvJournal').textContent = cekilenVeri.journal || '—';
+    document.getElementById('pvYear').textContent    = cekilenVeri.year    || '—';
+    document.getElementById('preview').className = 'preview show';
+    mesajGizle('fetchStatus');
+
+  } catch (err) {
+    mesaj('fetchStatus', 'err', 'Bulunamadı: ' + err.message + '. DOI\'yi kontrol edin.');
+    cekilenVeri = null;
+  } finally {
+    document.getElementById('fetchBtn').disabled = false;
+  }
+}
+
+// ---- VERİTABANINA GÖNDER (pending olarak) ----
+async function gonder() {
+  if (!cekilenVeri) return;
+  document.getElementById('submitBtn').disabled = true;
+  mesaj('submitStatus', 'info', 'Gönderiliyor…');
+
+  const { error } = await db.from('publications').insert({
+    title:   cekilenVeri.title,
+    authors: cekilenVeri.authors,
+    journal: cekilenVeri.journal,
+    year:    cekilenVeri.year,
+    doi:     cekilenVeri.doi,
+    link:    cekilenVeri.link,
+    status:  'pending'          // her zaman bekliyor → senin onayına düşer
+  });
+
+  document.getElementById('submitBtn').disabled = false;
+
+  if (error) {
+    mesaj('submitStatus', 'err', 'Hata: ' + error.message);
+  } else {
+    mesaj('submitStatus', 'ok', 'Teşekkürler! Gönderiminiz onaya alındı. Onaylandığında listede görünecek.');
+    temizle();
+  }
+}
+
+// ---- Formu temizle ----
+function temizle() {
+  cekilenVeri = null;
+  document.getElementById('doiInput').value = '';
+  document.getElementById('preview').className = 'preview';
+  mesajGizle('fetchStatus');
+}
+
+// ---- ONAYLI YAYINLARI LİSTELE ----
+async function yayinlariYukle() {
+  const liste = document.getElementById('pubList');
+  const { data, error } = await db
+    .from('publications')
+    .select('*')
+    .eq('status', 'approved')       // RLS zaten bunu zorluyor ama yine de belirtelim
+    .order('year', { ascending: false });
+
+  if (error) {
+    liste.innerHTML = '<li class="empty">Yüklenemedi: ' + error.message + '</li>';
+    return;
+  }
+  if (!data || data.length === 0) {
+    liste.innerHTML = '<li class="empty">Henüz onaylı yayın yok.</li>';
+    return;
+  }
+
+  liste.innerHTML = data.map(p => `
+    <li class="pub-item">
+      <div class="title">${escapeHtml(p.title)}</div>
+      <div class="meta">${escapeHtml(p.authors || '')} · ${escapeHtml(p.journal || '')} ${p.year ? '(' + p.year + ')' : ''}</div>
+      ${p.link ? `<a href="${escapeHtml(p.link)}" target="_blank" rel="noopener">DOI → ${escapeHtml(p.doi || '')}</a>` : ''}
+    </li>
+  `).join('');
+}
+
+// Basit HTML kaçışı (güvenlik için)
+function escapeHtml(s) {
+  return String(s ?? '')
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+}
+
+// Enter tuşuyla getir
+document.getElementById('doiInput').addEventListener('keydown', e => {
+  if (e.key === 'Enter') doiCek();
+});
+
+// Sayfa açılınca yayınları yükle
+yayinlariYukle();
+</script>
+</body>
+</html>
