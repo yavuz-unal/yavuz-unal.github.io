@@ -174,6 +174,24 @@ const db = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 // Çekilen künye burada tutulur
 let cekilenVeri = null;
 
+// ---- Crossref metnini temizle (gömülü etiketler, özel karakterler) ----
+function metniTemizle(ham) {
+  if (!ham) return '';
+  let s = String(ham);
+  // 1) Gömülü HTML/XML etiketlerini kaldır: <scp>, <i>, <sub>, <sup>, <b> vb.
+  s = s.replace(/<\/?[^>]+>/g, '');
+  // 2) HTML kod karşılıklarını çöz (&amp; &lt; &gt; &quot; &#39; ...)
+  const t = document.createElement('textarea');
+  t.innerHTML = s;
+  s = t.value;
+  // 3) Özel tire/boşluk karakterlerini normalleştir
+  s = s.replace(/[\u2010\u2011\u2012\u2013\u2014]/g, '-')  // çeşitli tireler → -
+       .replace(/[\u00A0\u2007\u202F]/g, ' ')              // özel boşluklar → normal boşluk
+       .replace(/\s+/g, ' ')                                // fazla boşlukları tekle
+       .trim();
+  return s;
+}
+
 // ---- Yardımcı: durum mesajı göster ----
 function mesaj(id, tip, metin) {
   const el = document.getElementById(id);
@@ -209,11 +227,11 @@ async function doiCek() {
     const { message } = await res.json();
 
     cekilenVeri = {
-      title:   message.title?.[0] ?? '',
+      title:   metniTemizle(message.title?.[0] ?? ''),
       authors: (message.author ?? [])
-                 .map(a => `${a.given ?? ''} ${a.family ?? ''}`.trim())
+                 .map(a => metniTemizle(`${a.given ?? ''} ${a.family ?? ''}`.trim()))
                  .filter(Boolean).join(', '),
-      journal: message['container-title']?.[0] ?? '',
+      journal: metniTemizle(message['container-title']?.[0] ?? ''),
       year:    message.issued?.['date-parts']?.[0]?.[0] ?? null,
       doi:     message.DOI,
       link:    message.URL ?? ('https://doi.org/' + message.DOI)
