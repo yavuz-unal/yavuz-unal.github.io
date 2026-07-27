@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://yavuz-unal.github.io/sitemap.xml
