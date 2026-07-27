@@ -3,7 +3,43 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Akademik Yayın Dizini</title>
+
+<!-- ==== SEO ==== -->
+<title>Akademik Yayın Dizini | Türkiye Araştırma Yayınları</title>
+<meta name="description" content="Türkiye'deki akademik yayınlar için ortak bir dizin. Bilim dallarına göre makale arayın, kendi yayınınızı DOI ile ekleyin. Bilgisayar bilimleri, mühendislik, tıp, sosyal bilimler ve daha fazlası.">
+<meta name="keywords" content="akademik yayın, makale dizini, Türkiye araştırma, DOI, bilimsel makale, akademik arama, yayın havuzu, araştırma makalesi">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://yavuz-unal.github.io/yayin-dizini.html">
+
+<!-- ==== Sosyal paylaşım (Open Graph) ==== -->
+<meta property="og:type" content="website">
+<meta property="og:title" content="Akademik Yayın Dizini | Türkiye Araştırma Yayınları">
+<meta property="og:description" content="Türkiye'deki akademik yayınlar için ortak bir dizin. Bilim dallarına göre makale arayın, kendi yayınınızı DOI ile ekleyin.">
+<meta property="og:url" content="https://yavuz-unal.github.io/yayin-dizini.html">
+<meta property="og:locale" content="tr_TR">
+
+<!-- ==== Twitter kartı ==== -->
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Akademik Yayın Dizini">
+<meta name="twitter:description" content="Türkiye'deki akademik yayınlar için ortak bir dizin. Makale arayın, yayınınızı ekleyin.">
+
+<!-- ==== Yapısal veri (Google için) ==== -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebSite",
+  "name": "Akademik Yayın Dizini",
+  "description": "Türkiye'deki akademik yayınlar için ortak bir dizin.",
+  "url": "https://yavuz-unal.github.io/yayin-dizini.html",
+  "inLanguage": "tr",
+  "potentialAction": {
+    "@type": "SearchAction",
+    "target": "https://yavuz-unal.github.io/yayin-dizini.html?q={search_term_string}",
+    "query-input": "required name=search_term_string"
+  }
+}
+</script>
+
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
   :root {
@@ -164,16 +200,34 @@
 <body>
 <div class="wrap">
 
+  <!-- DİL GEÇİŞİ -->
+  <div style="text-align:right;max-width:860px;margin:0 auto 8px;">
+    <button id="langBtn" onclick="dilDegis()"
+      style="background:#fff;border:1px solid #e4e8ee;border-radius:8px;
+             padding:6px 12px;font-size:0.85rem;font-weight:600;cursor:pointer;
+             color:#1f5fa8;font-family:inherit;">EN</button>
+  </div>
+
   <header>
-    <h1>Akademik Yayın Dizini</h1>
-    <p>Türkiye'deki akademik yayınlar için ortak bir vitrin.</p>
+    <h1 id="t_title">Akademik Yayın Dizini</h1>
+    <p id="t_subtitle">Türkiye'deki akademik yayınlar için ortak bir vitrin.</p>
   </header>
+
+  <!-- Google botunun JS beklemeden göreceği statik tanıtım metni -->
+  <section style="max-width:720px;margin:0 auto 28px;color:#475569;font-size:0.95rem;line-height:1.7;">
+    <p id="t_intro">Bu dizin, Türkiye'deki akademisyenlerin araştırma yayınlarını bilim dallarına
+    göre bir araya getiren açık bir platformdur. Ziyaretçiler makaleleri başlık,
+    yazar veya dergiye göre arayabilir; araştırmacılar ise kendi yayınlarını
+    yalnızca DOI numarasıyla, birkaç saniyede ekleyebilir. Bilgisayar bilimleri,
+    mühendislik, tıp ve sağlık bilimleri, yaşam bilimleri, temel bilimler, sosyal
+    bilimler, veterinerlik ve tarım bilimleri gibi ana dallarda yayınlar
+    listelenmektedir. Eklenen her yayın, yayına çıkmadan önce incelemeden geçer.</p>
+  </section>
 
   <!-- ARAMA -->
   <div class="search-box">
     <input type="text" id="searchInput" placeholder="Başlık, yazar veya dergi ara…">
   </div>
-
   <!-- KATEGORİ KARTLARI (ana görünüm) -->
   <div id="catView">
     <div class="cats" id="catGrid"></div>
@@ -182,7 +236,7 @@
   <!-- SONUÇ LİSTESİ (kategori/arama seçilince) -->
   <div id="listView" style="display:none;">
     <div class="section-head">
-      <button class="back-link" onclick="anaSayfa()">← Kategorilere dön</button>
+      <button class="back-link" id="t_back" onclick="anaSayfa()">← Kategorilere dön</button>
       <span class="result-count" id="resultCount"></span>
     </div>
     <h2 id="listTitle" style="margin-bottom:14px;"></h2>
@@ -196,8 +250,8 @@
 
   <!-- GÖNDERME -->
   <div class="submit-card">
-    <h2>Yayın ekle</h2>
-    <p class="sub">DOI'nizi girin, künye otomatik gelsin. Gönderiminiz onaya düşer.</p>
+    <h2 id="t_addHead">Yayın ekle</h2>
+    <p class="sub" id="t_addSub">DOI'nizi girin, künye otomatik gelsin. Gönderiminiz onaya düşer.</p>
     <div class="row">
       <div class="grow">
         <label for="doiInput">DOI</label>
@@ -208,17 +262,17 @@
     <div class="status-msg" id="fetchStatus"></div>
 
     <div class="preview" id="preview">
-      <div class="field"><span>Başlık</span><span id="pvTitle">—</span></div>
-      <div class="field"><span>Yazarlar</span><span id="pvAuthors">—</span></div>
-      <div class="field"><span>Dergi</span><span id="pvJournal">—</span></div>
-      <div class="field"><span>Yıl</span><span id="pvYear">—</span></div>
+      <div class="field"><span id="t_fTitle">Başlık</span><span id="pvTitle">—</span></div>
+      <div class="field"><span id="t_fAuthors">Yazarlar</span><span id="pvAuthors">—</span></div>
+      <div class="field"><span id="t_fJournal">Dergi</span><span id="pvJournal">—</span></div>
+      <div class="field"><span id="t_fYear">Yıl</span><span id="pvYear">—</span></div>
       <div class="cat-select">
-        <label for="catInput">Kategori seç</label>
+        <label for="catInput" id="t_catLabel">Kategori seç</label>
         <select id="catInput"></select>
       </div>
       <div class="actions">
         <button class="primary" id="submitBtn" onclick="gonder()">Bu yayını gönder</button>
-        <button class="ghost" onclick="temizle()">Vazgeç</button>
+        <button class="ghost" id="t_cancel" onclick="temizle()">Vazgeç</button>
       </div>
     </div>
     <div class="status-msg" id="submitStatus"></div>
@@ -245,6 +299,98 @@ const KATEGORILER = [
 ];
 
 const SAYFA_BOYUTU = 20;   // her sayfada kaç yayın
+
+// ==== DİL SİSTEMİ ====
+let dil = 'tr';
+const T = {
+  tr: {
+    title: 'Akademik Yayın Dizini',
+    subtitle: 'Türkiye\'deki akademik yayınlar için ortak bir vitrin.',
+    intro: 'Bu dizin, Türkiye\'deki akademisyenlerin araştırma yayınlarını bilim dallarına göre bir araya getiren açık bir platformdur. Ziyaretçiler makaleleri başlık, yazar veya dergiye göre arayabilir; araştırmacılar ise kendi yayınlarını yalnızca DOI numarasıyla, birkaç saniyede ekleyebilir. Bilgisayar bilimleri, mühendislik, tıp ve sağlık bilimleri, yaşam bilimleri, temel bilimler, sosyal bilimler, veterinerlik ve tarım bilimleri gibi ana dallarda yayınlar listelenmektedir. Eklenen her yayın, yayına çıkmadan önce incelemeden geçer.',
+    searchPh: 'Başlık, yazar veya dergi ara…',
+    back: '← Kategorilere dön',
+    prev: '← Önceki',
+    next: 'Sonraki →',
+    addHead: 'Yayın ekle',
+    addSub: 'DOI\'nizi girin, künye otomatik gelsin. Gönderiminiz onaya düşer.',
+    fetch: 'Getir',
+    fTitle: 'Başlık', fAuthors: 'Yazarlar', fJournal: 'Dergi', fYear: 'Yıl',
+    catLabel: 'Kategori seç',
+    submit: 'Bu yayını gönder',
+    cancel: 'Vazgeç',
+    langBtn: 'EN',
+    pubCount: n => `${n} yayın`,
+    found: n => `${n} yayın bulundu`,
+    page: (a,b) => `Sayfa ${a} / ${b}`,
+    loading: 'Yükleniyor…',
+    noneCat: 'Bu kritere uyan yayın yok.',
+    results: t => `"${t}" için sonuçlar`,
+    fetching: 'Crossref\'ten getiriliyor…',
+    enterDoi: 'Lütfen bir DOI girin.',
+    notFound: 'Bulunamadı: ',
+    checkDoi: '. DOI\'yi kontrol edin.',
+    sending: 'Gönderiliyor…',
+    thanks: 'Teşekkürler! Gönderiminiz onaya alındı.',
+    err: 'Hata: '
+  },
+  en: {
+    title: 'Academic Publication Directory',
+    subtitle: 'A shared showcase for academic publications in Turkey.',
+    intro: 'This directory is an open platform that brings together the research publications of academics in Turkey, organized by scientific discipline. Visitors can search articles by title, author, or journal; researchers can add their own publications in seconds using only a DOI. Publications are listed under main branches such as computer science, engineering, medicine and health sciences, life sciences, natural sciences, social sciences, veterinary sciences, and agricultural sciences. Every submitted publication is reviewed before it goes live.',
+    searchPh: 'Search by title, author, or journal…',
+    back: '← Back to categories',
+    prev: '← Previous',
+    next: 'Next →',
+    addHead: 'Add a publication',
+    addSub: 'Enter your DOI and the details fill in automatically. Your submission goes to review.',
+    fetch: 'Fetch',
+    fTitle: 'Title', fAuthors: 'Authors', fJournal: 'Journal', fYear: 'Year',
+    catLabel: 'Select category',
+    submit: 'Submit this publication',
+    cancel: 'Cancel',
+    langBtn: 'TR',
+    pubCount: n => `${n} publications`,
+    found: n => `${n} publications found`,
+    page: (a,b) => `Page ${a} / ${b}`,
+    loading: 'Loading…',
+    noneCat: 'No publications match this criterion.',
+    results: t => `Results for "${t}"`,
+    fetching: 'Fetching from Crossref…',
+    enterDoi: 'Please enter a DOI.',
+    notFound: 'Not found: ',
+    checkDoi: '. Please check the DOI.',
+    sending: 'Submitting…',
+    thanks: 'Thank you! Your submission has been sent for review.',
+    err: 'Error: '
+  }
+};
+
+function dilDegis() {
+  dil = (dil === 'tr') ? 'en' : 'tr';
+  document.documentElement.lang = dil;
+  const t = T[dil];
+  document.getElementById('t_title').textContent = t.title;
+  document.getElementById('t_subtitle').textContent = t.subtitle;
+  document.getElementById('t_intro').textContent = t.intro;
+  document.getElementById('searchInput').placeholder = t.searchPh;
+  document.getElementById('t_back').textContent = t.back;
+  document.getElementById('prevBtn').textContent = t.prev;
+  document.getElementById('nextBtn').textContent = t.next;
+  document.getElementById('t_addHead').textContent = t.addHead;
+  document.getElementById('t_addSub').textContent = t.addSub;
+  document.getElementById('fetchBtn').textContent = t.fetch;
+  document.getElementById('t_fTitle').textContent = t.fTitle;
+  document.getElementById('t_fAuthors').textContent = t.fAuthors;
+  document.getElementById('t_fJournal').textContent = t.fJournal;
+  document.getElementById('t_fYear').textContent = t.fYear;
+  document.getElementById('t_catLabel').textContent = t.catLabel;
+  document.getElementById('submitBtn').textContent = t.submit;
+  document.getElementById('t_cancel').textContent = t.cancel;
+  document.getElementById('langBtn').textContent = t.langBtn;
+  // açık olan görünümü tazele
+  kategorileriYukle();
+  if (document.getElementById('listView').style.display !== 'none') yayinlariYukle();
+}
 
 // Durum
 let aktifKategori = null;
@@ -288,7 +434,7 @@ async function kategorileriYukle() {
     card.className = 'cat-card';
     card.onclick = () => kategoriAc(kat);
     card.innerHTML = `<div class="name">${escapeHtml(kat)}</div>
-                      <div class="count">${count || 0} yayın</div>`;
+                      <div class="count">${T[dil].pubCount(count || 0)}</div>`;
     grid.appendChild(card);
   }
 }
@@ -313,14 +459,14 @@ function aramaAc(terim) {
   aktifKategori = null; aktifArama = terim; aktifSayfa = 0;
   document.getElementById('catView').style.display = 'none';
   document.getElementById('listView').style.display = 'block';
-  document.getElementById('listTitle').textContent = `"${terim}" için sonuçlar`;
+  document.getElementById('listTitle').textContent = T[dil].results(terim);
   yayinlariYukle();
 }
 
 // ---------- YAYINLARI YÜKLE (sayfalı + filtreli) ----------
 async function yayinlariYukle() {
   const liste = document.getElementById('pubList');
-  liste.innerHTML = '<li class="empty">Yükleniyor…</li>';
+  liste.innerHTML = `<li class="empty">${T[dil].loading}</li>`;
   document.getElementById('pager').style.display = 'none';
 
   const bas = aktifSayfa * SAYFA_BOYUTU;
@@ -342,10 +488,10 @@ async function yayinlariYukle() {
   if (error) { liste.innerHTML = `<li class="empty">Hata: ${escapeHtml(error.message)}</li>`; return; }
 
   toplamKayit = count || 0;
-  document.getElementById('resultCount').textContent = `${toplamKayit} yayın bulundu`;
+  document.getElementById('resultCount').textContent = T[dil].found(toplamKayit);
 
   if (!data || data.length === 0) {
-    liste.innerHTML = '<li class="empty">Bu kritere uyan yayın yok.</li>';
+    liste.innerHTML = `<li class="empty">${T[dil].noneCat}</li>`;
     return;
   }
 
@@ -362,7 +508,7 @@ async function yayinlariYukle() {
   const toplamSayfa = Math.ceil(toplamKayit / SAYFA_BOYUTU);
   if (toplamSayfa > 1) {
     document.getElementById('pager').style.display = 'flex';
-    document.getElementById('pageInfo').textContent = `Sayfa ${aktifSayfa+1} / ${toplamSayfa}`;
+    document.getElementById('pageInfo').textContent = T[dil].page(aktifSayfa+1, toplamSayfa);
     document.getElementById('prevBtn').disabled = (aktifSayfa === 0);
     document.getElementById('nextBtn').disabled = (aktifSayfa >= toplamSayfa-1);
   }
@@ -388,14 +534,14 @@ document.getElementById('searchInput').addEventListener('input', e => {
 // ---------- DOI ÇEK (Crossref) ----------
 async function doiCek() {
   const doi = doiTemizle(document.getElementById('doiInput').value);
-  if (!doi) { mesaj('fetchStatus','err','Lütfen bir DOI girin.'); return; }
+  if (!doi) { mesaj('fetchStatus','err',T[dil].enterDoi); return; }
   document.getElementById('preview').className = 'preview';
   mesajGizle('submitStatus');
-  mesaj('fetchStatus','info','Crossref\'ten getiriliyor…');
+  mesaj('fetchStatus','info',T[dil].fetching);
   document.getElementById('fetchBtn').disabled = true;
   try {
     const res = await fetch('https://api.crossref.org/works/' + encodeURIComponent(doi));
-    if (!res.ok) throw new Error('DOI bulunamadı ('+res.status+')');
+    if (!res.ok) throw new Error('DOI ('+res.status+')');
     const { message } = await res.json();
     cekilenVeri = {
       title:   metniTemizle(message.title?.[0] ?? ''),
@@ -412,7 +558,7 @@ async function doiCek() {
     document.getElementById('preview').className = 'preview show';
     mesajGizle('fetchStatus');
   } catch (err) {
-    mesaj('fetchStatus','err','Bulunamadı: '+err.message+'. DOI\'yi kontrol edin.');
+    mesaj('fetchStatus','err',T[dil].notFound+err.message+T[dil].checkDoi);
     cekilenVeri = null;
   } finally {
     document.getElementById('fetchBtn').disabled = false;
@@ -423,7 +569,7 @@ async function doiCek() {
 async function gonder() {
   if (!cekilenVeri) return;
   document.getElementById('submitBtn').disabled = true;
-  mesaj('submitStatus','info','Gönderiliyor…');
+  mesaj('submitStatus','info',T[dil].sending);
   const { error } = await db.from('publications').insert({
     title: cekilenVeri.title, authors: cekilenVeri.authors,
     journal: cekilenVeri.journal, year: cekilenVeri.year,
@@ -432,8 +578,8 @@ async function gonder() {
     status: 'pending'
   });
   document.getElementById('submitBtn').disabled = false;
-  if (error) mesaj('submitStatus','err','Hata: '+error.message);
-  else { mesaj('submitStatus','ok','Teşekkürler! Gönderiminiz onaya alındı.'); temizle(); }
+  if (error) mesaj('submitStatus','err',T[dil].err+error.message);
+  else { mesaj('submitStatus','ok',T[dil].thanks); temizle(); }
 }
 function temizle() {
   cekilenVeri = null;
