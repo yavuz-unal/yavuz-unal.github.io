@@ -1,0 +1,560 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TEKNOFEST & TÜBİTAK Ortak Bulma Panosu | Dr. Yavuz Ünal</title>
+<meta name="description" content="TEKNOFEST ve TÜBİTAK yarışmaları için takım ortağı bul. Beceriye göre proje ve kişi ilanları — gömülü sistem, yapay zeka, mekanik tasarım ve daha fazlası.">
+<meta name="robots" content="noindex, follow">
+<link rel="canonical" href="https://yavuz-unal.github.io/proje.html">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+  :root {
+    --ink: #16202e;
+    --muted: #64748b;
+    --line: #e4e8ee;
+    --paper: #ffffff;
+    --bg: #f4f6f9;
+    --accent: #1f5fa8;
+    --accent-dark: #184a82;
+    --accent-soft: #e9f1fa;
+    --ok: #15803d;
+    --ok-soft: #f0fdf4;
+    --warn: #b45309;
+    --proje: #1f5fa8;
+    --proje-soft: #e9f1fa;
+    --kisi: #7c3aed;
+    --kisi-soft: #f3ecfd;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    background: var(--bg);
+    color: var(--ink);
+    line-height: 1.6;
+    padding: 28px 16px 90px;
+  }
+  .wrap { max-width: 900px; margin: 0 auto; }
+
+  header { margin-bottom: 8px; text-align: center; }
+  header h1 { font-size: 1.85rem; font-weight: 800; letter-spacing: -0.03em; line-height: 1.2; }
+  header p.sub { color: var(--muted); margin-top: 8px; font-size: 1rem; max-width: 620px; margin-left: auto; margin-right: auto; }
+  .backlink { display: inline-block; margin-top: 12px; color: var(--accent); text-decoration: none; font-size: 0.9rem; font-weight: 600; }
+  .backlink:hover { text-decoration: underline; }
+
+  /* ---- SEGMENTED TABS ---- */
+  .tabs {
+    display: flex; gap: 6px; background: var(--paper); border: 1px solid var(--line);
+    border-radius: 13px; padding: 5px; max-width: 380px; margin: 26px auto 24px;
+  }
+  .tab {
+    flex: 1; text-align: center; padding: 11px 10px; border-radius: 9px;
+    font-weight: 700; font-size: 0.95rem; cursor: pointer; border: none;
+    background: transparent; color: var(--muted); font-family: inherit; transition: all .15s;
+  }
+  .tab.active { background: var(--accent); color: #fff; }
+
+  .view { display: none; }
+  .view.active { display: block; }
+
+  /* ---- FILTERS ---- */
+  .filters { background: var(--paper); border: 1px solid var(--line); border-radius: 14px; padding: 18px; margin-bottom: 20px; }
+  .filter-row { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 14px; }
+  .seg { display: flex; gap: 5px; background: var(--bg); border-radius: 10px; padding: 4px; }
+  .seg button {
+    border: none; background: transparent; padding: 8px 14px; border-radius: 7px;
+    font-weight: 600; font-size: 0.88rem; cursor: pointer; color: var(--muted); font-family: inherit;
+  }
+  .seg button.on { background: var(--paper); color: var(--ink); box-shadow: 0 1px 3px rgba(0,0,0,.08); }
+
+  .search-box { position: relative; flex: 1; min-width: 200px; }
+  .search-box input {
+    width: 100%; padding: 11px 14px; border: 1px solid var(--line);
+    border-radius: 10px; font-size: 0.95rem; font-family: inherit; background: var(--bg);
+  }
+  .search-box input:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); background: var(--paper); }
+
+  select.filter-select {
+    padding: 11px 14px; border: 1px solid var(--line); border-radius: 10px;
+    font-size: 0.9rem; font-family: inherit; background: var(--bg); color: var(--ink); cursor: pointer; min-width: 150px;
+  }
+
+  .label-sm { font-size: 0.78rem; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: .04em; margin-bottom: 8px; }
+
+  /* ---- SKILL CHIPS ---- */
+  .chips { display: flex; flex-wrap: wrap; gap: 7px; }
+  .chip {
+    border: 1px solid var(--line); background: var(--bg); color: var(--ink);
+    padding: 6px 12px; border-radius: 20px; font-size: 0.83rem; cursor: pointer;
+    font-family: inherit; transition: all .12s; user-select: none;
+  }
+  .chip:hover { border-color: var(--accent); }
+  .chip.sel { background: var(--accent); border-color: var(--accent); color: #fff; }
+
+  .clear-btn { background: none; border: none; color: var(--accent); font-size: 0.85rem; cursor: pointer; font-family: inherit; font-weight: 600; padding: 0; }
+
+  /* ---- RESULT CARDS ---- */
+  .count { font-size: 0.88rem; color: var(--muted); margin-bottom: 14px; }
+  .card {
+    background: var(--paper); border: 1px solid var(--line); border-radius: 14px;
+    padding: 20px; margin-bottom: 14px; transition: box-shadow .15s, transform .15s;
+  }
+  .card:hover { box-shadow: 0 6px 20px rgba(20,32,46,.07); transform: translateY(-1px); }
+  .card-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; margin-bottom: 8px; }
+  .card h3 { font-size: 1.12rem; font-weight: 750; line-height: 1.35; }
+  .badge {
+    flex-shrink: 0; font-size: 0.72rem; font-weight: 800; padding: 4px 10px; border-radius: 6px;
+    text-transform: uppercase; letter-spacing: .03em; white-space: nowrap;
+  }
+  .badge.proje { background: var(--proje-soft); color: var(--proje); }
+  .badge.kisi { background: var(--kisi-soft); color: var(--kisi); }
+  .card .desc { color: #33404f; font-size: 0.94rem; margin-bottom: 12px; white-space: pre-wrap; }
+  .card-skills { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 12px; }
+  .skill-tag { background: var(--accent-soft); color: var(--accent-dark); font-size: 0.78rem; font-weight: 600; padding: 3px 10px; border-radius: 6px; }
+  .skill-tag.diger { background: #f1f5f9; color: var(--muted); }
+  .card-meta { display: flex; flex-wrap: wrap; gap: 14px; font-size: 0.83rem; color: var(--muted); border-top: 1px solid var(--line); padding-top: 12px; margin-bottom: 12px; }
+  .card-meta span { display: inline-flex; align-items: center; gap: 5px; }
+  .contact-btn {
+    display: inline-block; background: var(--accent); color: #fff; text-decoration: none;
+    padding: 9px 18px; border-radius: 9px; font-weight: 700; font-size: 0.9rem; border: none; cursor: pointer; font-family: inherit;
+  }
+  .contact-btn:hover { background: var(--accent-dark); }
+
+  .empty { text-align: center; padding: 50px 20px; color: var(--muted); }
+  .empty strong { display: block; color: var(--ink); font-size: 1.05rem; margin-bottom: 6px; }
+
+  /* ---- FORM ---- */
+  .form-card { background: var(--paper); border: 1px solid var(--line); border-radius: 16px; padding: 26px; }
+  .form-card h2 { font-size: 1.3rem; font-weight: 800; margin-bottom: 4px; }
+  .form-card > p.intro { color: var(--muted); font-size: 0.92rem; margin-bottom: 22px; }
+  .field { margin-bottom: 18px; }
+  .field label { display: block; font-weight: 700; font-size: 0.9rem; margin-bottom: 7px; }
+  .field .hint { font-weight: 400; color: var(--muted); font-size: 0.82rem; }
+  .field input[type=text], .field textarea, .field select {
+    width: 100%; padding: 11px 13px; border: 1px solid var(--line); border-radius: 10px;
+    font-size: 0.95rem; font-family: inherit; background: var(--bg); color: var(--ink);
+  }
+  .field input:focus, .field textarea:focus, .field select:focus {
+    outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); background: var(--paper);
+  }
+  .field textarea { resize: vertical; min-height: 90px; }
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  .type-choice { display: flex; gap: 10px; }
+  .type-choice .opt {
+    flex: 1; border: 2px solid var(--line); border-radius: 12px; padding: 14px; cursor: pointer; text-align: center; transition: all .15s;
+  }
+  .type-choice .opt.on { border-color: var(--accent); background: var(--accent-soft); }
+  .type-choice .opt strong { display: block; font-size: 0.98rem; }
+  .type-choice .opt span { font-size: 0.82rem; color: var(--muted); }
+  .submit-btn {
+    width: 100%; background: var(--accent); color: #fff; border: none; padding: 14px;
+    border-radius: 11px; font-size: 1rem; font-weight: 800; cursor: pointer; font-family: inherit; margin-top: 4px;
+  }
+  .submit-btn:hover { background: var(--accent-dark); }
+  .submit-btn:disabled { opacity: .6; cursor: not-allowed; }
+  .form-msg { padding: 14px 16px; border-radius: 11px; margin-top: 16px; font-size: 0.92rem; font-weight: 600; display: none; }
+  .form-msg.ok { background: var(--ok-soft); color: var(--ok); display: block; }
+  .form-msg.err { background: #fef2f2; color: #b91c1c; display: block; }
+
+  .diger-wrap { display: none; margin-top: 10px; }
+  .diger-wrap.show { display: block; }
+
+  @media (max-width: 560px) {
+    .two-col { grid-template-columns: 1fr; }
+    header h1 { font-size: 1.5rem; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <h1>TEKNOFEST &amp; TÜBİTAK Ortak Bulma Panosu</h1>
+    <p class="sub">Yarışma takımına ortak mı arıyorsun, yoksa katılacak bir takım mı? Beceriye göre eşleş. İlanlar yarışma dönemine bağlı, dönem bitince arşivlenir.</p>
+    <a class="backlink" href="https://yavuz-unal.github.io/">← Dr. Yavuz Ünal ana sayfaya dön</a>
+  </header>
+
+  <div class="tabs">
+    <button class="tab active" data-view="browse">İlanlara Göz At</button>
+    <button class="tab" data-view="post">İlan Ver</button>
+  </div>
+
+  <!-- ============ BROWSE VIEW ============ -->
+  <div class="view active" id="view-browse">
+    <div class="filters">
+      <div class="filter-row">
+        <div class="seg" id="type-seg">
+          <button class="on" data-type="">Hepsi</button>
+          <button data-type="proje">Proje ortak arıyor</button>
+          <button data-type="kisi">Kişi takım arıyor</button>
+        </div>
+        <div class="search-box">
+          <input type="text" id="search" placeholder="Ara: başlık, açıklama...">
+        </div>
+      </div>
+      <div class="filter-row">
+        <select class="filter-select" id="cat-filter"><option value="">Tüm kategoriler</option></select>
+        <select class="filter-select" id="city-filter"><option value="">Tüm şehirler</option></select>
+        <select class="filter-select" id="period-filter"><option value="">Tüm dönemler</option></select>
+      </div>
+      <div>
+        <div class="label-sm" style="display:flex; justify-content:space-between; align-items:center;">
+          <span>Beceriye göre filtrele</span>
+          <button class="clear-btn" id="clear-skills" style="display:none;">temizle</button>
+        </div>
+        <div class="chips" id="skill-filter"></div>
+      </div>
+    </div>
+
+    <div class="count" id="count">Yükleniyor...</div>
+    <div id="results"></div>
+  </div>
+
+  <!-- ============ POST VIEW ============ -->
+  <div class="view" id="view-post">
+    <div class="form-card">
+      <h2>İlan Ver</h2>
+      <p class="intro">Gönderdiğin ilan önce onaya düşer, onaylandıktan sonra panoda görünür. E-posta adresini açıkta bırakmana gerek yok — istediğin iletişim kanalını sen seçersin.</p>
+
+      <div class="field">
+        <label>İlan türü</label>
+        <div class="type-choice" id="form-type">
+          <div class="opt on" data-type="proje">
+            <strong>Proje ortak arıyor</strong>
+            <span>Takımım var, ortak lazım</span>
+          </div>
+          <div class="opt" data-type="kisi">
+            <strong>Takım arıyorum</strong>
+            <span>Katılabileceğim takım lazım</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="field">
+        <label>Başlık</label>
+        <input type="text" id="f-baslik" maxlength="120" placeholder="Örn: Tarım İHA'sı için gömülü yazılımcı arıyoruz">
+      </div>
+
+      <div class="field">
+        <label>Açıklama</label>
+        <textarea id="f-aciklama" maxlength="800" placeholder="Projeni / kendini kısaca anlat. Ne yapıyorsun, tam olarak neye/kime ihtiyacın var?"></textarea>
+      </div>
+
+      <div class="field">
+        <label>Beceriler <span class="hint">— aranan ya da sahip olunan beceriler (birden fazla seçebilirsin)</span></label>
+        <div class="chips" id="form-skills"></div>
+        <div class="diger-wrap" id="diger-wrap">
+          <input type="text" id="f-diger" maxlength="120" placeholder="Diğer beceriyi yaz (virgülle ayırabilirsin)">
+        </div>
+      </div>
+
+      <div class="two-col">
+        <div class="field">
+          <label>Yarışma kategorisi</label>
+          <select id="f-kategori"></select>
+        </div>
+        <div class="field">
+          <label>Şehir</label>
+          <select id="f-sehir"></select>
+        </div>
+      </div>
+
+      <div class="two-col">
+        <div class="field">
+          <label>Yarışma</label>
+          <select id="f-yarisma">
+            <option>TEKNOFEST</option>
+            <option>TÜBİTAK 2242</option>
+            <option>TÜBİTAK 2209</option>
+            <option>Diğer</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Dönem (yıl)</label>
+          <select id="f-donem">
+            <option>2026</option>
+            <option>2027</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="two-col">
+        <div class="field">
+          <label>İletişim kanalı</label>
+          <select id="f-iletisim-tipi">
+            <option>LinkedIn</option>
+            <option>Google Form</option>
+            <option>E-posta</option>
+            <option>Diğer</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>İletişim bağlantısı / adresi</label>
+          <input type="text" id="f-iletisim-link" maxlength="200" placeholder="Örn: linkedin.com/in/... veya e-posta">
+        </div>
+      </div>
+
+      <button class="submit-btn" id="submit-btn">İlanı gönder</button>
+      <div class="form-msg" id="form-msg"></div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+// ---------- SABİT LİSTELER ----------
+const SKILLS = [
+  "Gömülü Sistem", "Makine Öğrenmesi", "Derin Öğrenme", "Görüntü İşleme",
+  "Mobil Uygulama", "Web Geliştirme", "Backend/API", "Veri Analizi",
+  "Gömülü Görüntü İşleme (Edge AI)", "Robotik Yazılım (ROS)",
+  "PCB Tasarım", "Elektronik Devre Tasarım", "Mikrodenetleyici (STM32/Arduino)",
+  "Sensör Entegrasyonu", "Güç Elektroniği", "Haberleşme Sistemleri (RF/Telemetri)",
+  "Mekanik Tasarım (CAD)", "3B Modelleme & Baskı", "Aerodinamik",
+  "Kontrol Sistemleri", "Uçuş Kontrol (Otopilot)", "Malzeme & Kompozit",
+  "Biyomedikal", "Kimya/Biyoteknoloji", "Harita/GIS", "UI/UX Tasarım",
+  "Proje Yönetimi", "İş Geliştirme/Sunum"
+];
+const CATEGORIES = [
+  "Havacılık & İHA", "Roket & Uzay", "Savunma & Güvenlik Sistemleri",
+  "Otonom & Robotik Sistemler", "Sağlık & Biyoteknoloji", "Tarım Teknolojileri",
+  "Yapay Zeka & Veri", "Ulaşım & Akıllı Şehir", "Enerji & Çevre",
+  "Siber Güvenlik & Haberleşme", "Yazılım & Uygulama", "Elektronik & Çip Tasarım",
+  "Sosyal İnovasyon & İnsanlık Yararına", "Girişim & Diğer"
+];
+const CITIES = ["Adana","Adıyaman","Afyonkarahisar","Ağrı","Amasya","Ankara","Antalya","Ardahan","Artvin","Aydın","Balıkesir","Bartın","Batman","Bayburt","Bilecik","Bingöl","Bitlis","Bolu","Burdur","Bursa","Çanakkale","Çankırı","Çorum","Denizli","Diyarbakır","Düzce","Edirne","Elazığ","Erzincan","Erzurum","Eskişehir","Gaziantep","Giresun","Gümüşhane","Hakkâri","Hatay","Iğdır","Isparta","İstanbul","İzmir","Kahramanmaraş","Karabük","Karaman","Kars","Kastamonu","Kayseri","Kırıkkale","Kırklareli","Kırşehir","Kilis","Kocaeli","Konya","Kütahya","Malatya","Manisa","Mardin","Mersin","Muğla","Muş","Nevşehir","Niğde","Ordu","Osmaniye","Rize","Sakarya","Samsun","Siirt","Sinop","Sivas","Şanlıurfa","Şırnak","Tekirdağ","Tokat","Trabzon","Tunceli","Uşak","Van","Yalova","Yozgat","Zonguldak"];
+
+// ---------- SUPABASE ----------
+const SB_URL = "https://epxdfwryvlpolmjyqfgb.supabase.co";
+const SB_KEY = "sb_publishable_I32iVvzmTUH_tjs3ZAouRw_s6TtqnxO";
+const sb = supabase.createClient(SB_URL, SB_KEY);
+
+// ---------- STATE ----------
+let allListings = [];
+let filterType = "";
+let filterSkills = new Set();
+let formType = "proje";
+let formSkills = new Set();
+
+// ---------- INIT ----------
+function fillSelect(el, items, firstOption) {
+  if (firstOption) { /* keep existing first option */ }
+  items.forEach(i => {
+    const o = document.createElement("option");
+    o.value = i; o.textContent = i;
+    el.appendChild(o);
+  });
+}
+
+// filter selects
+fillSelect(document.getElementById("cat-filter"), CATEGORIES);
+fillSelect(document.getElementById("city-filter"), CITIES);
+["2026","2027"].forEach(y => {
+  const o = document.createElement("option"); o.value=y; o.textContent=y;
+  document.getElementById("period-filter").appendChild(o);
+});
+// form selects
+fillSelect(document.getElementById("f-kategori"), CATEGORIES);
+fillSelect(document.getElementById("f-sehir"), CITIES);
+
+// skill chips - filter
+const skillFilterEl = document.getElementById("skill-filter");
+SKILLS.forEach(s => {
+  const c = document.createElement("button");
+  c.className = "chip"; c.textContent = s; c.type = "button";
+  c.onclick = () => {
+    if (filterSkills.has(s)) { filterSkills.delete(s); c.classList.remove("sel"); }
+    else { filterSkills.add(s); c.classList.add("sel"); }
+    document.getElementById("clear-skills").style.display = filterSkills.size ? "block" : "none";
+    render();
+  };
+  skillFilterEl.appendChild(c);
+});
+document.getElementById("clear-skills").onclick = () => {
+  filterSkills.clear();
+  document.querySelectorAll("#skill-filter .chip").forEach(c => c.classList.remove("sel"));
+  document.getElementById("clear-skills").style.display = "none";
+  render();
+};
+
+// skill chips - form
+const formSkillEl = document.getElementById("form-skills");
+[...SKILLS, "Diğer"].forEach(s => {
+  const c = document.createElement("button");
+  c.className = "chip"; c.textContent = s; c.type = "button";
+  c.onclick = () => {
+    if (formSkills.has(s)) { formSkills.delete(s); c.classList.remove("sel"); }
+    else { formSkills.add(s); c.classList.add("sel"); }
+    document.getElementById("diger-wrap").classList.toggle("show", formSkills.has("Diğer"));
+    render();
+  };
+  formSkillEl.appendChild(c);
+});
+
+// tabs
+document.querySelectorAll(".tab").forEach(t => {
+  t.onclick = () => {
+    document.querySelectorAll(".tab").forEach(x => x.classList.remove("active"));
+    document.querySelectorAll(".view").forEach(x => x.classList.remove("active"));
+    t.classList.add("active");
+    document.getElementById("view-" + t.dataset.view).classList.add("active");
+  };
+});
+
+// type segment (browse)
+document.querySelectorAll("#type-seg button").forEach(b => {
+  b.onclick = () => {
+    document.querySelectorAll("#type-seg button").forEach(x => x.classList.remove("on"));
+    b.classList.add("on");
+    filterType = b.dataset.type;
+    render();
+  };
+});
+
+// type choice (form)
+document.querySelectorAll("#form-type .opt").forEach(o => {
+  o.onclick = () => {
+    document.querySelectorAll("#form-type .opt").forEach(x => x.classList.remove("on"));
+    o.classList.add("on");
+    formType = o.dataset.type;
+  };
+});
+
+// search + selects trigger render
+["search","cat-filter","city-filter","period-filter"].forEach(id => {
+  document.getElementById(id).addEventListener("input", render);
+});
+
+// ---------- LOAD ----------
+async function load() {
+  const { data, error } = await sb
+    .from("ilanlar")
+    .select("*")
+    .eq("status", "approved")
+    .order("created_at", { ascending: false });
+  if (error) {
+    document.getElementById("count").textContent = "İlanlar yüklenemedi. Tabloyu oluşturdunuz mu?";
+    console.error(error);
+    return;
+  }
+  allListings = data || [];
+  render();
+}
+
+// ---------- RENDER ----------
+function esc(s) { return (s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;"); }
+
+function render() {
+  const q = document.getElementById("search").value.toLowerCase().trim();
+  const cat = document.getElementById("cat-filter").value;
+  const city = document.getElementById("city-filter").value;
+  const period = document.getElementById("period-filter").value;
+
+  let list = allListings.filter(x => {
+    if (filterType && x.ilan_turu !== filterType) return false;
+    if (cat && x.kategori !== cat) return false;
+    if (city && x.sehir !== city) return false;
+    if (period && x.donem !== period) return false;
+    if (filterSkills.size) {
+      const xs = x.beceriler || [];
+      for (const s of filterSkills) if (!xs.includes(s)) return false;
+    }
+    if (q) {
+      const hay = (x.baslik + " " + x.aciklama).toLowerCase();
+      if (!hay.includes(q)) return false;
+    }
+    return true;
+  });
+
+  document.getElementById("count").textContent =
+    list.length + " ilan" + (filterSkills.size || cat || city || period || q || filterType ? " (filtreli)" : "");
+
+  const el = document.getElementById("results");
+  if (!list.length) {
+    el.innerHTML = '<div class="empty"><strong>Henüz ilan yok</strong>Filtrelerini gevşetmeyi dene ya da ilk ilanı sen ver.</div>';
+    return;
+  }
+
+  el.innerHTML = list.map(x => {
+    const isProje = x.ilan_turu === "proje";
+    const skills = (x.beceriler || []).map(s =>
+      `<span class="skill-tag">${esc(s)}</span>`).join("");
+    const diger = x.beceri_diger ?
+      `<span class="skill-tag diger">${esc(x.beceri_diger)}</span>` : "";
+    const link = x.iletisim_link.startsWith("http") ? x.iletisim_link :
+      (x.iletisim_tipi === "E-posta" ? "mailto:" + x.iletisim_link : "https://" + x.iletisim_link);
+    return `
+      <div class="card">
+        <div class="card-top">
+          <h3>${esc(x.baslik)}</h3>
+          <span class="badge ${isProje ? "proje" : "kisi"}">${isProje ? "Ortak arıyor" : "Takım arıyor"}</span>
+        </div>
+        <div class="desc">${esc(x.aciklama)}</div>
+        <div class="card-skills">${skills}${diger}</div>
+        <div class="card-meta">
+          <span>🏆 ${esc(x.kategori)}</span>
+          ${x.sehir ? `<span>📍 ${esc(x.sehir)}</span>` : ""}
+          <span>📅 ${esc(x.yarisma)} ${esc(x.donem)}</span>
+        </div>
+        <a class="contact-btn" href="${esc(link)}" target="_blank" rel="noopener nofollow">İletişime geç (${esc(x.iletisim_tipi)})</a>
+      </div>`;
+  }).join("");
+}
+
+// ---------- SUBMIT ----------
+document.getElementById("submit-btn").onclick = async () => {
+  const btn = document.getElementById("submit-btn");
+  const msg = document.getElementById("form-msg");
+  msg.className = "form-msg";
+
+  const baslik = document.getElementById("f-baslik").value.trim();
+  const aciklama = document.getElementById("f-aciklama").value.trim();
+  const iletisimLink = document.getElementById("f-iletisim-link").value.trim();
+  const beceriler = [...formSkills].filter(s => s !== "Diğer");
+  const beceriDiger = formSkills.has("Diğer") ? document.getElementById("f-diger").value.trim() : "";
+
+  if (!baslik || !aciklama) { msg.className="form-msg err"; msg.textContent="Başlık ve açıklama zorunlu."; return; }
+  if (!iletisimLink) { msg.className="form-msg err"; msg.textContent="İletişim bağlantısı zorunlu — karşı taraf sana nasıl ulaşsın?"; return; }
+  if (!beceriler.length && !beceriDiger) { msg.className="form-msg err"; msg.textContent="En az bir beceri seç."; return; }
+
+  btn.disabled = true; btn.textContent = "Gönderiliyor...";
+
+  const row = {
+    ilan_turu: formType,
+    baslik, aciklama,
+    beceriler,
+    beceri_diger: beceriDiger || null,
+    kategori: document.getElementById("f-kategori").value,
+    sehir: document.getElementById("f-sehir").value,
+    yarisma: document.getElementById("f-yarisma").value,
+    donem: document.getElementById("f-donem").value,
+    iletisim_tipi: document.getElementById("f-iletisim-tipi").value,
+    iletisim_link: iletisimLink,
+    status: "pending"
+  };
+
+  const { error } = await sb.from("ilanlar").insert([row]);
+  btn.disabled = false; btn.textContent = "İlanı gönder";
+
+  if (error) {
+    msg.className = "form-msg err";
+    msg.textContent = "Gönderilemedi: " + error.message;
+    console.error(error);
+  } else {
+    msg.className = "form-msg ok";
+    msg.textContent = "İlanın onaya gönderildi. Onaylandığında panoda görünecek.";
+    // reset
+    document.getElementById("f-baslik").value = "";
+    document.getElementById("f-aciklama").value = "";
+    document.getElementById("f-iletisim-link").value = "";
+    document.getElementById("f-diger").value = "";
+    formSkills.clear();
+    document.querySelectorAll("#form-skills .chip").forEach(c => c.classList.remove("sel"));
+    document.getElementById("diger-wrap").classList.remove("show");
+  }
+};
+
+// ---------- GO ----------
+load();
+</script>
+</body>
+</html>
