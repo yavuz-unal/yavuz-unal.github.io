@@ -118,7 +118,7 @@
   position:relative;aspect-ratio:16/10;overflow:hidden;
   display:flex;align-items:flex-end;padding:14px;
 }
-.ye-kapak img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.ye-kapak img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center top}
 .ye-kapak::after{content:"";position:absolute;inset:0;
   background:linear-gradient(180deg,rgba(15,42,63,0) 35%,rgba(15,42,63,.55) 100%)}
 .ye-kapak .ye-ikon{
@@ -212,54 +212,51 @@
      'gorsel': gerçek afiş URL'si koyarsanız kapakta o görünür.
      'kategori' değerleri Sinop Üniversitesi'nin kendi kategorileridir.
   ----------------------------------------------------------------*/
+  /* NOT: Aşağıdaki başlık, görsel ve link'ler GERÇEK — sinop.edu.tr/etkinlikler
+     sayfasından alındı. Tarih/saat/yer alanları o listede görünmediğinden
+     ÖRNEK olarak dolduruldu (detay sayfalarından gerçeği çekilebilir). */
   var ETKINLIKLER = [
-    { baslik:"Derin Öğrenme ile Tıbbi Görüntü Analizi Semineri",
-      kategori:"Bilimsel Etkinlik", bolum:"Bilgisayar Mühendisliği",
-      gunSonra:2, saat:"14:00", yer:"Mühendislik Fak. Konferans Salonu",
-      aciklama:"YOLOv8 ve Vision Transformer tabanlı sınıflandırma üzerine uygulamalı seminer.",
-      gorsel:"", link:"#" },
-
-    { baslik:"II. Karadeniz Su Ürünleri Sempozyumu",
-      kategori:"Sempozyum", bolum:"Su Ürünleri Fakültesi",
-      gunSonra:5, saat:"09:30", yer:"Rektörlük Senato Salonu",
-      aciklama:"Sürdürülebilir balıkçılık ve akuakültür üzerine iki günlük ulusal sempozyum.",
-      gorsel:"", link:"#" },
-
-    { baslik:"Bahar Şenliği Açılış Konseri",
-      kategori:"Sosyal Etkinlik", bolum:"Genel",
-      gunSonra:0, saat:"19:00", yer:"Kuzey Kampüs Açık Hava Sahnesi",
-      aciklama:"Öğrenci topluluklarının hazırladığı sahne programı ve canlı müzik.",
-      gorsel:"", link:"#" },
-
-    { baslik:"Erasmus+ Başvuru Bilgilendirme Toplantısı",
-      kategori:"Bilgilendirme", bolum:"Genel",
-      gunSonra:1, saat:"11:00", yer:"Uluslararası İlişkiler Ofisi",
-      aciklama:"2026 hareketlilik dönemi başvuru adımları, belgeler ve son tarihler.",
-      gorsel:"", link:"#" },
-
-    { baslik:"Akademik İngilizce Sertifika Programı",
+    { baslik:"Sualtı Dalış Eğitimi",
       kategori:"SÜSEM", bolum:"Genel",
-      gunSonra:9, saat:"18:00", yer:"SÜSEM Derslik B-2",
-      aciklama:"Sürekli Eğitim Merkezi'nin 8 haftalık akademik yazım ve sunum programı.",
-      gorsel:"", link:"#" },
+      gunSonra:2, saat:"10:00", yer:"SÜSEM / Sinop",
+      aciklama:"Sürekli Eğitim Merkezi tarafından düzenlenen sualtı dalış eğitim programı.",
+      gorsel:"https://www.sinop.edu.tr/wp-content/uploads/2026/07/sualtisusem.webp",
+      link:"https://www.sinop.edu.tr/etkinlik/sualti-dalis-egitimi/" },
 
-    { baslik:"Görüntü İşlemede Optimizasyon Teknikleri Çalıştayı",
-      kategori:"Bilimsel Etkinlik", bolum:"Bilgisayar Mühendisliği",
-      gunSonra:14, saat:"13:30", yer:"Yapay Zeka Laboratuvarı",
-      aciklama:"Gray Wolf Optimization ve hiperparametre ayarı üzerine uygulamalı çalıştay.",
-      gorsel:"", link:"#" },
+    { baslik:"30 Ağustos Zafer Bayramı — Masters Tenis Turnuvası",
+      kategori:"Sosyal Etkinlik", bolum:"Genel",
+      gunSonra:4, saat:"09:00", yer:"Üniversite Tenis Kortları",
+      aciklama:"30 Ağustos Zafer Bayramı kapsamında düzenlenen Masters tenis turnuvası.",
+      gorsel:"https://www.sinop.edu.tr/wp-content/uploads/2026/07/30agustotenis.webp",
+      link:"https://www.sinop.edu.tr/etkinlik/30-agustos-zafer-bayrami-tenis-turnuvasi/" },
 
-    { baslik:"Kariyer Günleri: Sektör Buluşmaları",
+    { baslik:"7. Uluslararası Mühendislik ve Yaşam Bilimleri Kongresi (CELISS 2026)",
+      kategori:"Sempozyum", bolum:"Mühendislik ve Doğa Bilimleri",
+      gunSonra:9, saat:"09:30", yer:"Kongre ve Kültür Merkezi",
+      aciklama:"Mühendislik ve yaşam bilimleri alanında uluslararası bilimsel kongre.",
+      gorsel:"https://www.sinop.edu.tr/wp-content/uploads/2026/06/celiss2026.jpg",
+      link:"https://www.sinop.edu.tr/etkinlik/7-the-international-congress-on-engineering-and-life-science/" },
+
+    { baslik:"Türk Halklarının Manevi Entegrasyonu; Dili, Edebiyatı ve Kültürü",
+      kategori:"Sempozyum", bolum:"Genel",
+      gunSonra:12, saat:"10:00", yer:"Rektörlük Senato Salonu",
+      aciklama:"Türk halklarının dili, edebiyatı ve kültürü üzerine uluslararası sempozyum.",
+      gorsel:"https://www.sinop.edu.tr/wp-content/uploads/2026/06/turkhalklari.png",
+      link:"https://www.sinop.edu.tr/etkinlik/turk-halklarinin-manevi-entegrasyonu-dili-edebiyati-ve-kulturu/" },
+
+    { baslik:"ÜNİDES; “Çevre ve İklim” Özel Çağrı Dönemi",
       kategori:"Bilgilendirme", bolum:"Genel",
-      gunSonra:7, saat:"10:00", yer:"Kongre ve Kültür Merkezi",
-      aciklama:"Mezunlar ve sektör temsilcileriyle staj ve iş fırsatları paneli.",
-      gorsel:"", link:"#" },
+      gunSonra:1, saat:"12:00", yer:"Proje ve Veri Yönetim Ofisi",
+      aciklama:"ÜNİDES çevre ve iklim özel çağrı dönemi başvuruları hakkında bilgilendirme.",
+      gorsel:"https://www.sinop.edu.tr/wp-content/uploads/2026/06/cevre-iklimi.webp",
+      link:"https://www.sinop.edu.tr/etkinlik/unides-cevre-ve-iklim-ozel-cagri-donemi/" },
 
-    { baslik:"Kısa Film Gösterimi ve Söyleşi",
-      kategori:"Sosyal Etkinlik", bolum:"Eğitim Fakültesi",
-      gunSonra:4, saat:"20:00", yer:"Merkez Kütüphane Sinevizyon",
-      aciklama:"Öğrenci yapımı kısa filmlerin gösterimi ve yönetmen söyleşisi.",
-      gorsel:"", link:"#" }
+    { baslik:"Tanıtım ve Tercih Günleri",
+      kategori:"Bilgilendirme", bolum:"Genel",
+      gunSonra:0, saat:"10:00", yer:"Kuzey Kampüs",
+      aciklama:"Aday öğrenciler için tanıtım, tercih danışmanlığı ve kampüs gezisi.",
+      gorsel:"https://www.sinop.edu.tr/wp-content/uploads/2026/07/slider.jpeg",
+      link:"https://www.sinop.edu.tr/etkinlik/tanitim-ve-tercih-gunleri/" }
   ];
 
   /* Kategori -> renk deseni + ikon (afiş yoksa kapakta kullanılır) */
