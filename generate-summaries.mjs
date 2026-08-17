@@ -43,19 +43,18 @@ Kurallar:
   (ör. FCMAE V2-WPAT, ConvNeXt V2, CBAM, ResNet-50). Bunları Türkçeleştirme.
 - Övgü dili kullanma: "çığır açan", "önemli bir katkı", "dikkat çekici",
   "kapsamlı bir şekilde" gibi ifadeler yasak. Nötr ve betimleyici yaz.
-- Ağır edilgen yapıdan kaçın. "Gerçekleştirilmiştir", "sağlanmaktadır"
-  yerine daha doğrudan kurulumlar tercih et.
+- Edilgen yapıyı üst üste yığma. Mümkün olduğunda çalışmayı özne yap:
+  "Model, X hastalığını ayırt etti" gibi doğrudan kurulumlar tercih et.
 - Şu sırayı takip et: çalışma neyi ele alıyor → hangi yöntemi kullanıyor
   → ne sonuç elde ediyor.
-- Metnin içinde "bu çalışmada" ifadesini en fazla bir kez kullan.
-- Yalnızca paragrafı döndür. Başlık, giriş cümlesi, madde işareti,
-  markdown, tırnak işareti kullanma, 
-  - Çalışma tamamlanmış ve yayımlanmış. Geçmiş zaman kullan:
+- Çalışma tamamlanmış ve yayımlanmıştır. GEÇMİŞ ZAMAN kullan:
   "gerçekleştirilmiştir", "elde edilmiştir", "yükselmiştir".
-  Geniş zaman ("gerçekleştirilmektedir") KULLANMA.
+  Geniş zaman ("gerçekleştirilmektedir", "hedeflenmektedir") KULLANMA.
 - Çalışmaya atıfta bulunan ifadeleri ("bu çalışmada", "yapılan
-  araştırmada", "incelemede") metin genelinde en fazla bir kez kullan.
-  Eşanlamlılarıyla tekrarlama.`;
+  araştırmada", "incelemede", "çalışma kapsamında") metnin tamamında
+  en fazla BİR kez kullan. Eşanlamlılarıyla tekrarlama.
+- Yalnızca paragrafı döndür. Başlık, giriş cümlesi, madde işareti,
+  markdown, tırnak işareti kullanma.`;
 
 // ==================== YARDIMCILAR ====================
 const bekle = ms => new Promise(r => setTimeout(r, ms));
