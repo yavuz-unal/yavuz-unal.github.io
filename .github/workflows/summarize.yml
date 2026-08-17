@@ -1,0 +1,27 @@
+name: Türkçe özet üret
+
+on:
+  schedule:
+    - cron: '30 5 * * *'   # her gün 05:30 UTC — build-pages'ten (06:00) 30 dk önce
+  workflow_dispatch:        # elle tetikleme
+
+# Aynı anda iki kopya çalışmasın (kuota ve çift yazma riski)
+concurrency:
+  group: ozet-uret
+  cancel-in-progress: false
+
+jobs:
+  ozet:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Özetleri üret
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
+        run: node generate-summaries.mjs
