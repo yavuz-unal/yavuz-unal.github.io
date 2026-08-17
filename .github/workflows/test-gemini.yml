@@ -12,7 +12,7 @@ jobs:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
         run: |
           node -e '
-          const MODEL = "gemini-2.5-flash";   // AI Studiodaki guncel Flash modeli
+          const MODEL = "gemini-3.6-flash";   // AI Studiodaki guncel Flash modeli
           const key = process.env.GEMINI_API_KEY;
 
           if (!key) {
