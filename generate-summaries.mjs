@@ -123,7 +123,11 @@ async function ozetUret(baslik, abstract) {
     }],
     generationConfig: {
       temperature: 0.4,
-      maxOutputTokens: 900,
+      // DİKKAT: Gemini 3'te bu bütçe düşünme + çıktı TOPLAMI için geçerli.
+      // Düşük tutarsan model çıktıyı cümle ortasında keser.
+      maxOutputTokens: 4000,
+      // Gemini 3 sayısal thinkingBudget'ı yok sayar, thinkingLevel kullanır.
+      thinkingConfig: { thinkingLevel: 'low' },
     },
   };
 
@@ -143,8 +147,17 @@ async function ozetUret(baslik, abstract) {
     if (!res.ok) throw new Error(`Gemini ${res.status}: ${(await res.text()).slice(0, 300)}`);
 
     const veri = await res.json();
-    const metin = veri?.candidates?.[0]?.content?.parts
-      ?.map(p => p.text ?? '').join('').trim();
+    const aday  = veri?.candidates?.[0];
+    const neden = aday?.finishReason;
+
+    if (neden && neden !== 'STOP') {
+      const kul = veri?.usageMetadata ?? {};
+      console.log(`   ⚠ finishReason: ${neden}`
+        + ` (düşünme: ${kul.thoughtsTokenCount ?? '?'},`
+        + ` çıktı: ${kul.candidatesTokenCount ?? '?'} token)`);
+    }
+
+    const metin = aday?.content?.parts?.map(p => p.text ?? '').join('').trim();
     return (metin || '').replace(/^["'`]+|["'`]+$/g, '').trim();
   }
   throw new Error('Gemini: tekrar denemeler tükendi');
