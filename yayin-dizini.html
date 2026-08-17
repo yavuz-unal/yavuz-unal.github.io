@@ -417,6 +417,17 @@ function metniTemizle(ham) {
           .replace(/[\u00A0\u2007\u202F]/g, ' ')
           .replace(/\s+/g, ' ').trim();
 }
+  function jatsTemizle(ham) {
+  if (!ham) return null;
+  let s = String(ham)
+    .replace(/<jats:title[^>]*>.*?<\/jats:title>/gis, '')
+    .replace(/<[^>]+>/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+  const t = document.createElement('textarea'); t.innerHTML = s; s = t.value;
+  s = s.replace(/\s+/g, ' ').trim();
+  return s.length > 80 ? s : null;
+}
 function doiTemizle(ham) {
   return ham.trim().replace(/^https?:\/\/(dx\.)?doi\.org\//i, '').replace(/^doi:/i, '').trim();
 }
@@ -550,6 +561,7 @@ async function doiCek() {
       year:    message.issued?.['date-parts']?.[0]?.[0] ?? null,
       doi:     message.DOI,
       link:    message.URL ?? ('https://doi.org/' + message.DOI)
+      abstract: jatsTemizle(message.abstract)
     };
     document.getElementById('pvTitle').textContent   = cekilenVeri.title   || '—';
     document.getElementById('pvAuthors').textContent = cekilenVeri.authors || '—';
@@ -574,6 +586,7 @@ async function gonder() {
     title: cekilenVeri.title, authors: cekilenVeri.authors,
     journal: cekilenVeri.journal, year: cekilenVeri.year,
     doi: cekilenVeri.doi, link: cekilenVeri.link,
+    abstract: cekilenVeri.abstract,
     category: document.getElementById('catInput').value,
     status: 'pending'
   });
