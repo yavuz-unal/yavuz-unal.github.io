@@ -49,7 +49,13 @@ Kurallar:
   → ne sonuç elde ediyor.
 - Metnin içinde "bu çalışmada" ifadesini en fazla bir kez kullan.
 - Yalnızca paragrafı döndür. Başlık, giriş cümlesi, madde işareti,
-  markdown, tırnak işareti kullanma.`;
+  markdown, tırnak işareti kullanma, 
+  - Çalışma tamamlanmış ve yayımlanmış. Geçmiş zaman kullan:
+  "gerçekleştirilmiştir", "elde edilmiştir", "yükselmiştir".
+  Geniş zaman ("gerçekleştirilmektedir") KULLANMA.
+- Çalışmaya atıfta bulunan ifadeleri ("bu çalışmada", "yapılan
+  araştırmada", "incelemede") metin genelinde en fazla bir kez kullan.
+  Eşanlamlılarıyla tekrarlama.`;
 
 // ==================== YARDIMCILAR ====================
 const bekle = ms => new Promise(r => setTimeout(r, ms));
