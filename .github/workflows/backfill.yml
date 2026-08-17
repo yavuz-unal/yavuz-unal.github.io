@@ -1,0 +1,23 @@
+name: Abstract doldur
+
+on:
+  workflow_dispatch:
+
+concurrency:
+  group: abstract-doldur
+  cancel-in-progress: false
+
+jobs:
+  doldur:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+
+      - name: Crossref'ten abstract cek
+        env:
+          SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
+        run: node backfill-abstracts.mjs
