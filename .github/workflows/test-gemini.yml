@@ -1,0 +1,56 @@
+name: Gemini anahtar testi
+
+on:
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Anahtari dene
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        run: |
+          node -e '
+          const MODEL = "gemini-2.5-flash";   // AI Studiodaki guncel Flash modeli
+          const key = process.env.GEMINI_API_KEY;
+
+          if (!key) {
+            console.log("X  GEMINI_API_KEY secret bulunamadi.");
+            console.log("   Repo > Settings > Secrets and variables > Actions");
+            process.exit(1);
+          }
+          console.log("Anahtar bulundu. Uzunluk: " + key.length + ", basi: " + key.slice(0,3));
+          if (key !== key.trim()) console.log("!  UYARI: anahtarin basinda/sonunda bosluk var.");
+
+          const url = "https://generativelanguage.googleapis.com/v1beta/models/" + MODEL + ":generateContent";
+
+          fetch(url, {
+            method: "POST",
+            headers: { "Content-Type": "application/json", "x-goog-api-key": key },
+            body: JSON.stringify({ contents: [{ parts: [{ text: "Sadece TAMAM yaz." }] }] })
+          })
+          .then(async r => {
+            const t = await r.text();
+            if (r.ok) {
+              let cevap = "";
+              try { cevap = JSON.parse(t).candidates[0].content.parts.map(p=>p.text).join(""); } catch {}
+              console.log("");
+              console.log("OK  Anahtar calisiyor.");
+              console.log("    Model: " + MODEL);
+              console.log("    Modelin cevabi: " + cevap.trim());
+              return;
+            }
+            console.log("");
+            console.log("X  HTTP " + r.status);
+            if (r.status === 400 || r.status === 401 || r.status === 403)
+              console.log("   Anahtar gecersiz veya yetkisiz olabilir.");
+            if (r.status === 404)
+              console.log("   Model adi yanlis. AI Studiodaki guncel ID ile MODEL satirini degistir.");
+            if (r.status === 429)
+              console.log("   Kuota asildi. Biraz bekleyip tekrar dene.");
+            console.log("   Sunucu yaniti: " + t.slice(0, 500));
+            process.exit(1);
+          })
+          .catch(e => { console.log("X  Baglanti hatasi: " + e.message); process.exit(1); });
+          '
