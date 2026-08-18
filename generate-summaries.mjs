@@ -43,13 +43,20 @@ Kurallar:
   (ör. FCMAE V2-WPAT, ConvNeXt V2, CBAM, ResNet-50). Bunları Türkçeleştirme.
 - Övgü dili kullanma: "çığır açan", "önemli bir katkı", "dikkat çekici",
   "kapsamlı bir şekilde" gibi ifadeler yasak. Nötr ve betimleyici yaz.
-- Edilgen yapıyı üst üste yığma. Mümkün olduğunda çalışmayı özne yap:
-  "Model, X hastalığını ayırt etti" gibi doğrudan kurulumlar tercih et.
+- Edilgen yapıyı üst üste yığma. Mümkün olduğunda çalışmayı ya da
+  yöntemi özne yap: "Model, X hastalığını ayırt etmiştir" gibi.
 - Şu sırayı takip et: çalışma neyi ele alıyor → hangi yöntemi kullanıyor
   → ne sonuç elde ediyor.
-- Çalışma tamamlanmış ve yayımlanmıştır. GEÇMİŞ ZAMAN kullan:
-  "gerçekleştirilmiştir", "elde edilmiştir", "yükselmiştir".
-  Geniş zaman ("gerçekleştirilmektedir", "hedeflenmektedir") KULLANMA.
+- ZAMAN KİPİ - iki farklı bölüm için iki farklı kip kullan:
+  * Arka plan bilgisi (konunun önemi, sorunun tanımı, genel doğrular)
+    -> GENİŞ ZAMAN: "taşımaktadır", "kullanılmaktadır", "yol açmaktadır".
+    Bu bilgiler bugün de geçerlidir, geçmişte kalmamıştır.
+  * Çalışmanın kendisi (yöntem, deney, sonuç) -> -MİŞ'Lİ GEÇMİŞ ZAMAN:
+    "gerçekleştirilmiştir", "entegre edilmiştir", "yükselmiştir".
+  * BELİRLİ GEÇMİŞ ZAMAN (-di) ASLA KULLANMA. "yükseldi", "yapıldı",
+    "taşıdı", "neden oldu" gibi kurulumlar akademik metne uygun değildir.
+- SAYI YAZIMI: ondalık ayracı VİRGÜL olmalı. Doğru: %92,73 - Yanlış: %92.73
+  Binlik ayracı nokta olmalı: 1.250 örnek.
 - Çalışmaya atıfta bulunan ifadeleri ("bu çalışmada", "yapılan
   araştırmada", "incelemede", "çalışma kapsamında") metnin tamamında
   en fazla BİR kez kullan. Eşanlamlılarıyla tekrarlama.
@@ -85,6 +92,25 @@ function gecerliMi(metin, abstract) {
   // Modelin abstract'tan uzun bir cümleyi aynen kopyalamadığını kontrol et
   const ilk = abstract.slice(0, 120).toLowerCase();
   if (metin.toLowerCase().includes(ilk)) return 'abstract kopyalanmış';
+
+  // Belirli geçmiş zaman (-di) akademik metne uygun değil:
+  // "yükseldi", "yapıldı", "taşıdı" gibi yüklemler. -miş'li geçmiş beklenir.
+  const HARF = 'a-zçğıöşü';
+  const diKalibi = new RegExp(
+    `(?:^|[\\s("'])([${HARF}]{3,}[dt][iıuü](?:lar|ler)?)(?=[\\s.,;:!?)"']|$)`, 'gi');
+  const beyazListe = new Set(['maddi','ciddi','şiddetli','gibi','kadar','sonucu',
+    'veri','veya','birlikte','nedeni','tespiti','elde','madde','kaydı','oranı',
+    'değeri','türü','adı','kendi','şimdi','sanayi']);
+  const diBulgu = [];
+  for (const e of String(metin).matchAll(diKalibi)) {
+    if (!beyazListe.has(e[1].toLowerCase())) diBulgu.push(e[1]);
+  }
+  if (diBulgu.length >= 3)
+    return `belirli geçmiş zaman (-di): ${diBulgu.slice(0, 4).join(', ')}`;
+
+  // Ondalık ayracı Türkçede virgül olmalı
+  if (/%\s?\d+\.\d/.test(metin)) return 'ondalık ayracı nokta (virgül olmalı)';
+
   return null;
 }
 
