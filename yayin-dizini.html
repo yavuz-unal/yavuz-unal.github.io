@@ -560,7 +560,7 @@ async function doiCek() {
       journal: metniTemizle(message['container-title']?.[0] ?? ''),
       year:    message.issued?.['date-parts']?.[0]?.[0] ?? null,
       doi:     message.DOI,
-      link:    message.URL ?? ('https://doi.org/' + message.DOI)
+      link:    message.URL ?? ('https://doi.org/' + message.DOI),
       abstract: jatsTemizle(message.abstract)
     };
     document.getElementById('pvTitle').textContent   = cekilenVeri.title   || '—';
