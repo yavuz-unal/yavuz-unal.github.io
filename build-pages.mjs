@@ -26,6 +26,7 @@ const F = {
   doi:      'doi',
   link:     'link',
   category: 'category',
+  ozet:     'summary_tr',
 };
 
 // ==================== YARDIMCILAR ====================
@@ -99,7 +100,11 @@ function sayfaHtml(p, slug) {
   const yil      = p[F.year] ? String(p[F.year]) : '';
   const kat      = String(p[F.category] ?? '').trim();
   const dl       = doiLink(p);
-  const aciklama = kirp([yazarlar, dergi, yil].filter(Boolean).join(', ') + (baslik ? ' — ' + baslik : ''), 155);
+  const ozet     = temizle(p[F.ozet] ?? '') || '';
+  // Ozet varsa meta description olarak onu kullan - kunye listesinden cok daha iyi
+  const aciklama = ozet
+    ? kirp(ozet, 155)
+    : kirp([yazarlar, dergi, yil].filter(Boolean).join(', ') + (baslik ? ' — ' + baslik : ''), 155);
 
   // JSON-LD (Google akademik makale olarak tanısın)
   const jsonld = {
@@ -112,6 +117,7 @@ function sayfaHtml(p, slug) {
     ...(yazarlar && { author: yazarListesi(yazarlar).map(n => ({ '@type': 'Person', name: n })) }),
     ...(yil && { datePublished: yil }),
     ...(dergi && { isPartOf: { '@type': 'Periodical', name: dergi } }),
+    ...(ozet && { abstract: ozet, description: ozet }),
     ...(dl && { sameAs: dl }),
     ...(p[F.doi] && { identifier: { '@type': 'PropertyValue', propertyID: 'DOI', value: String(p[F.doi]) } }),
   };
@@ -163,6 +169,12 @@ ${JSON.stringify(jsonld, null, 2)}
   .kunye-kutu h2 { font-size:.8rem; text-transform:uppercase; letter-spacing:.05em;
                    color:var(--muted); margin:0 0 10px; }
   .kunye-metin { font-size:.92rem; color:var(--ink); word-break:break-word; }
+  .ozet-kutu { margin:30px 0 6px; }
+  .ozet-kutu h2 { font-size:.8rem; text-transform:uppercase; letter-spacing:.05em;
+                  color:var(--muted); margin:0 0 10px; }
+  .ozet-kutu p { margin:0 0 10px; }
+  .ozet-not { font-size:.82rem; color:#94a3b8; font-style:italic; }
+  .ozet-not a { color:#94a3b8; }
   footer { margin-top:48px; padding-top:20px; border-top:1px solid var(--line);
            color:#94a3b8; font-size:.82rem; }
   footer a { color:#94a3b8; }
@@ -176,6 +188,13 @@ ${JSON.stringify(jsonld, null, 2)}
     <h1>${esc(baslik)}</h1>
     ${yazarlar ? `<p class="yazarlar">${esc(yazarlar)}</p>` : ''}
     ${(dergi || yil) ? `<p class="dergi">${esc([dergi, yil].filter(Boolean).join(', '))}</p>` : ''}
+
+    ${ozet ? `<div class="ozet-kutu">
+      <h2>Özet</h2>
+      <p>${esc(ozet)}</p>
+      <p class="ozet-not">Bu özet, makalenin özgün İngilizce abstract'ından yapay zekâ ile
+      otomatik oluşturulmuştur. Özgün metin için${dl ? ` <a href="${esc(dl)}" target="_blank" rel="noopener">makaleye</a>` : ' makaleye'} bakınız.</p>
+    </div>` : ''}
 
     ${p[F.doi] ? `<p class="meta-satir">DOI: ${esc(p[F.doi])}</p>` : ''}
 
