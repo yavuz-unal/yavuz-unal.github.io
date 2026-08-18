@@ -120,6 +120,8 @@
     border-radius: 11px; padding: 16px 18px; margin-bottom: 10px;
   }
   .pub-item .title { font-weight: 700; font-size: 1rem; line-height: 1.4; }
+  .pub-item .title a { color: inherit; text-decoration: none; }
+  .pub-item .title a:hover { color: var(--accent); text-decoration: underline; }
   .pub-item .meta { color: var(--muted); font-size: 0.87rem; margin-top: 4px; }
   .pub-item .tag {
     display: inline-block; background: var(--accent-soft); color: var(--accent-dark);
@@ -409,6 +411,41 @@ function escapeHtml(s) {
   return String(s ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;')
     .replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
+// build-pages.mjs icindeki slugify ile BIREBIR ayni olmali - yoksa linkler 404 verir
+function slugify(s) {
+  const map = { 'ı':'i','İ':'i','ş':'s','Ş':'s','ğ':'g','Ğ':'g','ü':'u','Ü':'u','ö':'o','Ö':'o','ç':'c','Ç':'c' };
+  return String(s ?? '')
+    .replace(/[ıİşŞğĞüÜöÖçÇ]/g, c => map[c] || c)
+    .toLowerCase()
+    .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '')
+    .slice(0, 80) || 'yayin';
+}
+
+// id -> slug haritasi. build-pages.mjs ile ayni sirada uretilir.
+const slugHaritasi = new Map();
+async function slugHaritasiKur() {
+  if (slugHaritasi.size) return;
+  const { data, error } = await db.from('publications')
+    .select('id,title')
+    .eq('status', 'approved')
+    .order('year', { ascending: false, nullsFirst: false });
+  if (error || !data) return;
+  const gorulen = new Map();
+  for (const p of data) {
+    let slug = slugify(p.title);
+    if (gorulen.has(slug)) {
+      const n = gorulen.get(slug) + 1;
+      gorulen.set(slug, n);
+      slug = `${slug}-${n}`;
+    } else {
+      gorulen.set(slug, 1);
+    }
+    slugHaritasi.set(p.id, slug);
+  }
+}
+
 function metniTemizle(ham) {
   if (!ham) return '';
   let s = String(ham).replace(/<\/?[^>]+>/g, '');
@@ -496,6 +533,8 @@ async function yayinlariYukle() {
 
   const { data, count, error } = await q;
 
+  await slugHaritasiKur();
+
   if (error) { liste.innerHTML = `<li class="empty">Hata: ${escapeHtml(error.message)}</li>`; return; }
 
   toplamKayit = count || 0;
@@ -508,7 +547,9 @@ async function yayinlariYukle() {
 
   liste.innerHTML = data.map(p => `
     <li class="pub-item">
-      <div class="title">${escapeHtml(p.title)}</div>
+      <div class="title">${slugHaritasi.has(p.id)
+        ? `<a href="y/${slugHaritasi.get(p.id)}.html">${escapeHtml(p.title)}</a>`
+        : escapeHtml(p.title)}</div>
       <div class="meta">${escapeHtml(p.authors || '')} · ${escapeHtml(p.journal || '')} ${p.year ? '('+p.year+')' : ''}</div>
       <span class="tag">${escapeHtml(p.category || 'Diğer')}</span>
       ${p.link ? `<a class="doi" href="${escapeHtml(p.link)}" target="_blank" rel="noopener">DOI →</a>` : ''}
