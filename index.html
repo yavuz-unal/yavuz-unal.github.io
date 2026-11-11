@@ -338,6 +338,20 @@
             color: #888;
         }
         .cite-close:hover { color: #333; }
+        .profile-container { display:flex; gap:24px; align-items:flex-start; flex-wrap:wrap; }
+.profile-container p { flex:1 1 320px; margin-top:0; }
+.gallery { display:flex; gap:10px; flex-wrap:wrap; }
+.gallery img {
+    width:120px; height:120px; object-fit:cover; border-radius:8px;
+    cursor:zoom-in; transition:transform .25s, box-shadow .25s;
+}
+.gallery img:hover { transform:scale(1.08); box-shadow:0 6px 18px rgba(0,0,0,.25); }
+.lightbox {
+    display:none; position:fixed; inset:0; background:rgba(0,0,0,.85);
+    z-index:10000; align-items:center; justify-content:center; cursor:zoom-out;
+}
+.lightbox.active { display:flex; }
+.lightbox img { max-width:90vw; max-height:90vh; border-radius:8px; }
     </style>
 </head>
 <body>
@@ -384,7 +398,11 @@
                 <p>
                    Yavuz Ünal is an academic researcher with expertise in image processing, computer vision, and machine learning. His research focuses on deep learning–based feature extraction, image classification, and optimization techniques applied to real-world problems. He has authored and co-authored several scientific publications in international journals and conferences. His academic interests include deep neural networks, computer vision applications, and data-driven intelligent systems.
                 </p>
-                <img src="profil.jpg" alt="Profil Fotoğrafı" class="profile-pic" style="width: 120px; height: 120px;">
+                <div class="gallery">
+    <img src="profil.jpg" alt="Dr. Yavuz Ünal">
+    <img src="foto2.jpg" alt="Konferans sunumu">
+    <img src="foto3.jpg" alt="Laboratuvar">
+</div>
             </div>
         </section>
 
@@ -857,6 +875,15 @@
     loadTodos();
     renderTodos();
     updateTimerDisplay();
+        <div class="lightbox" id="lightbox"><img alt=""></div>
+        const lb = document.getElementById('lightbox');
+document.querySelectorAll('.gallery img').forEach(img =>
+    img.addEventListener('click', () => {
+        lb.querySelector('img').src = img.src;
+        lb.classList.add('active');
+    })
+);
+lb.addEventListener('click', () => lb.classList.remove('active'));
     </script>
 </body>
 </html>
