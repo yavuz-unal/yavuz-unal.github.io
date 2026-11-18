@@ -393,6 +393,16 @@
             color: #666;
             margin-top: 2px;
         }
+        /* === RISC-V SİMÜLATÖR === */
+        .sim-intro { display:flex; justify-content:space-between; align-items:flex-start; gap:16px; flex-wrap:wrap; }
+        .sim-intro p { flex:1 1 420px; margin-top:0; }
+        .sim-tags { display:flex; gap:6px; flex-wrap:wrap; margin:6px 0 14px; }
+        .sim-tags span { background:#e9f1fa; color:#1f5fa8; border-radius:999px; padding:3px 10px; font-size:.8rem; font-weight:600; }
+        .sim-frame {
+            width:100%; height:820px; border:0; border-radius:10px; display:block;
+            background:#0f172a; box-shadow:0 4px 18px rgba(0,0,0,.18);
+        }
+        @media (max-width: 1100px) { .sim-frame { height:1750px; } }
         .metrics-note {
             font-size: 0.85rem;
             color: #777;
@@ -419,6 +429,7 @@
             <a href="#arastirma">Araştırma</a>
             <a href="#datasets">Datasets</a>
             <a href="#ders-notlari">Ders Notları</a>
+            <a href="#simulator">Simülatör</a>
             <a href="#productivity">Üretkenlik</a>
             <a href="#iletisim">İletişim</a>
         </div>
@@ -693,7 +704,8 @@
                         <li><a href="https://disk.yandex.com.tr/i/vZysxqJtd_OXMw" target="_blank"> Hafta 2-Bilgisayar Başarımı </a></li>
                         <li><a href="https://disk.yandex.com.tr/i/s2w-JTbWZd28cg" target="_blank">Hafta 3- Buyruk Kümesi Mimarisi</a></li>
                         <li><a href="https://disk.yandex.com.tr/i/AskaKTLHpHM-BA" target="_blank">Hafta 4- Adresleme Kipleri </a></li>
-                        <li><a href="https://disk.yandex.com.tr/i/jGdAFfrgFOB_gg" target="_blank">Hafta 5- İşlecmi Tasarımı </a></li>
+                        <li><a href="https://disk.yandex.com.tr/i/jGdAFfrgFOB_gg" target="_blank">Hafta 5- İşlemci Tasarımı </a></li>
+                        <li><a href="#simulator"><strong>🎮 RISC-V Simülatöründe Dene</strong></a></li>
                        
                     </ul>
                 </div>
@@ -729,6 +741,21 @@
                     </ul>
                 </div>
             </div>
+        </section>
+
+        <!-- RISC-V SİMÜLATÖR BÖLÜMÜ -->
+        <section id="simulator">
+            <h2>Etkileşimli Uygulama: RISC-V Mini Simülatör</h2>
+            <div class="sim-intro">
+                <p>
+                    Bilgisayar Mimarisi dersi için hazırlanmış bu simülatörde RISC-V (RV32I) assembly kodu yazabilir,
+                    komutların makine koduna nasıl çevrildiğini görebilir ve her komutun yazmaçları ve belleği nasıl
+                    değiştirdiğini adım adım izleyebilirsiniz. Örnek programlarla başlayın, sonra 🎯 görevleri çözmeyi deneyin!
+                </p>
+                <a href="riscv.html" target="_blank" rel="noopener" class="btn" style="margin-top:0">Tam ekranda aç ↗</a>
+            </div>
+            <div class="sim-tags"><span>32 yazmaç</span><span>Makine kodu (hex)</span><span>IF · ID · EX · MEM · WB</span><span>5 görev</span></div>
+            <iframe id="riscv-frame" class="sim-frame" src="riscv.html" loading="lazy" title="RISC-V Mini Simülatör"></iframe>
         </section>
 
         <!-- TODO + POMODORO BÖLÜMÜ -->
@@ -968,6 +995,19 @@
         const text = document.getElementById('cite-content').textContent;
         navigator.clipboard.writeText(text).then(() => alert('Atıf kopyalandı!'));
     }
+
+    // ---------- RISC-V SİMÜLATÖR: iframe yüksekliğini içeriğe uydur ----------
+    (function () {
+        const f = document.getElementById('riscv-frame');
+        if (!f) return;
+        function fit() {
+            try { f.style.height = (f.contentDocument.body.offsetHeight + 4) + 'px'; } catch (e) {}
+        }
+        f.addEventListener('load', () => {
+            fit();
+            try { new ResizeObserver(fit).observe(f.contentDocument.body); } catch (e) {}
+        });
+    })();
 
     // ---------- BAŞLANGIÇ ----------
     loadTodos();
