@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>RISC-V Mini Simülatör</title>
+<style>
+:root{--bg:#0f172a;--card:#1e293b;--line:#334155;--txt:#e2e8f0;--mut:#94a3b8;--acc:#38bdf8;--ok:#4ade80;--warn:#fbbf24;--err:#f87171}
+*{box-sizing:border-box}
+body{margin:0;font-family:system-ui,Segoe UI,Roboto,sans-serif;background:var(--bg);color:var(--txt)}
+header{padding:14px 20px;border-bottom:1px solid var(--line);display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between}
+h1{font-size:18px;margin:0}h1 span{color:var(--acc)}
+.sub{color:var(--mut);font-size:13px}
+main{display:grid;grid-template-columns:minmax(300px,1.15fr) minmax(320px,1.1fr) minmax(250px,.8fr);gap:14px;padding:14px 20px}
+@media(max-width:1000px){main{grid-template-columns:1fr}}
+.card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:12px;min-width:0}
+.card h2{font-size:13px;text-transform:uppercase;letter-spacing:.06em;color:var(--mut);margin:0 0 10px}
+select,button{font:inherit;font-size:13px;border-radius:6px;border:1px solid var(--line);background:#0b1222;color:var(--txt);padding:6px 10px;cursor:pointer}
+button:hover{border-color:var(--acc)}
+button.pri{background:var(--acc);color:#082032;border-color:var(--acc);font-weight:600}
+button:disabled{opacity:.4;cursor:default}
+.row{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+.code{font-family:ui-monospace,Consolas,monospace;font-size:13px}
+#editor{width:100%;height:280px;resize:vertical;background:#0b1222;color:var(--txt);border:1px solid var(--line);border-radius:6px;padding:8px;line-height:1.5;tab-size:4}
+#listing{height:280px;overflow:auto;border:1px solid var(--line);border-radius:6px;background:#0b1222}
+#listing div{padding:2px 8px;white-space:pre;display:flex;gap:12px}
+#listing .ad{color:var(--mut)}#listing .hx{color:#a78bfa}#listing .ps{color:var(--mut);font-style:italic}
+#listing div.cur{background:rgba(56,189,248,.18);box-shadow:inset 3px 0 var(--acc)}
+.regs{display:grid;grid-template-columns:repeat(4,1fr);gap:4px}
+.reg{background:#0b1222;border:1px solid var(--line);border-radius:6px;padding:3px 6px;display:flex;justify-content:space-between;align-items:baseline;gap:4px;transition:background .4s;font-size:12px}
+.reg .n{color:var(--mut);font-size:11px;white-space:nowrap}.reg .n b{color:var(--txt);font-weight:600}
+.reg .v{font-family:ui-monospace,monospace;overflow:hidden;text-overflow:ellipsis}
+.reg.zero .v{color:var(--mut)}
+.reg.nz{border-color:#475569}
+.big{display:grid;grid-template-columns:1fr 2.2fr;gap:6px;margin-bottom:8px}
+.box{background:#0b1222;border:1px solid var(--line);border-radius:8px;padding:6px 8px;transition:background .4s}
+.box .n{font-size:11px;color:var(--mut)}.box .v{font-family:ui-monospace,monospace;font-size:15px;font-weight:600}
+.box .s{font-family:ui-monospace,monospace;font-size:12px;color:#a78bfa}
+.flash{background:rgba(251,191,36,.33)!important;border-color:var(--warn)!important}
+.rd{background:rgba(56,189,248,.22)!important;border-color:var(--acc)!important}
+.mem{display:grid;grid-template-columns:repeat(2,1fr);gap:5px}
+.cell{background:#0b1222;border:1px solid var(--line);border-radius:6px;padding:5px 8px;display:flex;justify-content:space-between;cursor:pointer;transition:background .4s}
+.cell .n{font-size:11px;color:var(--mut);font-family:ui-monospace,monospace}.cell .v{font-family:ui-monospace,monospace;font-size:13px}
+.pipe{display:grid;grid-template-columns:repeat(5,1fr);gap:4px;margin:10px 0}
+.pipe span{text-align:center;padding:5px 2px;border-radius:6px;border:1px solid var(--line);font-size:11px;color:var(--mut);line-height:1.25}
+.pipe span b{display:block;font-size:12px}
+.pipe span.skip{opacity:.3;text-decoration:line-through}
+.pipe span.on{background:var(--acc);color:#082032;border-color:var(--acc)}
+#log{max-height:180px;overflow:auto;font-size:13px;line-height:1.55}
+#log p{margin:0 0 4px;padding-left:8px;border-left:2px solid var(--line)}
+#log p.e{border-color:var(--err);color:var(--err)}#log p.o{border-color:var(--ok);color:var(--ok)}
+.task{background:#0b1222;border:1px dashed var(--warn);border-radius:8px;padding:10px;font-size:13px;margin-bottom:10px}
+.task b{color:var(--warn)}
+details{font-size:12.5px;color:var(--mut);margin-top:10px}
+details table{border-collapse:collapse;width:100%;margin-top:6px}
+details td{padding:3px 6px;border-bottom:1px solid var(--line);vertical-align:top}
+details td:first-child{color:var(--acc);font-family:ui-monospace,monospace;white-space:nowrap}
+details td.k{color:var(--mut);font-size:11px}
+.stat{font-size:12px;color:var(--mut);margin-top:6px}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:6px;overflow:hidden}
+.seg button{border:0;border-radius:0}.seg button.on{background:var(--acc);color:#082032}
+</style>
+</head>
+<body>
+<header>
+  <div><h1><span>RISC-V</span> Mini Simülatör</h1><div class="sub">Bilgisayar Mimarisi · RV32I alt kümesi · komutları adım adım izleyin</div></div>
+  <div class="row">
+    <div class="seg"><button id="fDec" class="on">Onluk</button><button id="fHex">Hex</button></div>
+    <select id="mode"></select>
+  </div>
+</header>
+
+<main>
+  <section class="card">
+    <h2>Program</h2>
+    <div id="taskBox" class="task" style="display:none"></div>
+    <textarea id="editor" class="code" spellcheck="false"></textarea>
+    <div id="listing" class="code" style="display:none"></div>
+    <div class="row" style="margin-top:8px">
+      <button id="bLoad" class="pri">Derle ve Yükle</button>
+      <button id="bEdit" disabled>Düzenle</button>
+      <button id="bStep" disabled>Adım ▶</button>
+      <button id="bRun" disabled>Çalıştır ▶▶</button>
+      <button id="bReset" disabled>Sıfırla</button>
+      <select id="speed"><option value="900">Yavaş</option><option value="400" selected>Orta</option><option value="60">Hızlı</option></select>
+    </div>
+    <details><summary>Desteklenen komutlar</summary>
+      <table>
+        <tr><td colspan="2" class="k">Aritmetik / mantık (R-tipi)</td></tr>
+        <tr><td>add rd, rs1, rs2</td><td>rd ← rs1 + rs2 (sub, and, or, xor, sll, srl, slt de var)</td></tr>
+        <tr><td colspan="2" class="k">Sabitli (I-tipi)</td></tr>
+        <tr><td>addi rd, rs1, imm</td><td>rd ← rs1 + imm (andi, ori, xori, slti, slli, srli)</td></tr>
+        <tr><td colspan="2" class="k">Bellek</td></tr>
+        <tr><td>lw rd, ofs(rs1)</td><td>rd ← M[rs1+ofs] (4 baytlık kelime)</td></tr>
+        <tr><td>sw rs2, ofs(rs1)</td><td>M[rs1+ofs] ← rs2</td></tr>
+        <tr><td colspan="2" class="k">Dallanma ve atlama</td></tr>
+        <tr><td>beq rs1, rs2, etiket</td><td>eşitse atla (bne, blt, bge)</td></tr>
+        <tr><td>jal rd, etiket</td><td>rd ← PC+4, etikete atla</td></tr>
+        <tr><td>jalr rd, ofs(rs1)</td><td>rd ← PC+4, rs1+ofs adresine atla</td></tr>
+        <tr><td>lui rd, imm</td><td>rd ← imm &lt;&lt; 12</td></tr>
+        <tr><td>ecall</td><td>programı durdurur</td></tr>
+        <tr><td colspan="2" class="k">Sözde komutlar (derleyici gerçek komuta çevirir)</td></tr>
+        <tr><td>li rd, sayı</td><td>addi (gerekirse lui + addi)</td></tr>
+        <tr><td>mv rd, rs</td><td>addi rd, rs, 0</td></tr>
+        <tr><td>j etiket</td><td>jal zero, etiket</td></tr>
+        <tr><td>jr rs / ret</td><td>jalr zero, 0(rs) / jalr zero, 0(ra)</td></tr>
+        <tr><td>nop</td><td>addi zero, zero, 0</td></tr>
+      </table>
+      <p>Yazmaçlar: x0–x31 ya da ABI adları (zero, ra, sp, t0–t6, s0–s11, a0–a7). Yorum: <span class="code"># açıklama</span>. Bellek 64 bayt (16 kelime); adresler 4'ün katı olmalı.</p>
+    </details>
+  </section>
+
+  <section class="card">
+    <h2>İşlemci</h2>
+    <div class="big">
+      <div class="box" id="pcBox"><div class="n">PC (program sayacı)</div><div class="v" id="pc">0x00</div></div>
+      <div class="box" id="irBox"><div class="n">IR (komut yazmacı)</div><div class="v" id="ir">—</div><div class="s" id="irHex">&nbsp;</div></div>
+    </div>
+    <div class="pipe">
+      <span id="st0"><b>IF</b>Getir</span><span id="st1"><b>ID</b>Çöz</span><span id="st2"><b>EX</b>Yürüt</span><span id="st3"><b>MEM</b>Bellek</span><span id="st4"><b>WB</b>Geri yaz</span>
+    </div>
+    <div class="regs" id="regs"></div>
+    <h2 style="margin-top:12px">Ne oldu?</h2>
+    <div id="log"></div>
+    <div class="stat" id="stat"></div>
+  </section>
+
+  <section class="card">
+    <h2>Bellek (64 bayt)</h2>
+    <div class="mem" id="mem"></div>
+    <p class="stat">Program yüklenmeden önce bir hücreye tıklayıp başlangıç değerini değiştirebilirsiniz.</p>
+  </section>
+</main>
+
+<script>
+// ---------- Veriler
+const ABI=['zero','ra','sp','gp','tp','t0','t1','t2','s0','s1','a0','a1','a2','a3','a4','a5','a6','a7','s2','s3','s4','s5','s6','s7','s8','s9','s10','s11','t3','t4','t5','t6'];
+const EXAMPLES={
+"Örnek: İki sayıyı topla":{mem:{0:7,1:5},code:
+`# 0x00 ve 0x04'teki sayıları topla, sonucu 0x08'e yaz
+    lw   t0, 0(zero)      # t0 <- M[0x00]
+    lw   t1, 4(zero)      # t1 <- M[0x04]
+    add  t2, t0, t1       # t2 <- t0 + t1
+    sw   t2, 8(zero)      # M[0x08] <- t2
+    ecall`},
+"Örnek: Geri sayım döngüsü":{mem:{},code:
+`    li   t0, 5
+loop:
+    sw   t0, 0(zero)
+    addi t0, t0, -1
+    bne  t0, zero, loop   # t0 != 0 ise başa dön
+    ecall`},
+"Örnek: Çarpma (tekrarlı toplama)":{mem:{0:6,1:4},code:
+`# M[0x00] x M[0x04] -> M[0x08]
+    lw   a0, 0(zero)      # çarpılan
+    lw   a1, 4(zero)      # sayaç
+    li   a2, 0            # sonuç
+loop:
+    beq  a1, zero, bitti
+    add  a2, a2, a0
+    addi a1, a1, -1
+    j    loop
+bitti:
+    sw   a2, 8(zero)
+    ecall`},
+"Örnek: Fonksiyon çağrısı (jal / ret)":{mem:{},code:
+`    li   a0, 9
+    jal  ra, ikikati      # ra <- dönüş adresi
+    sw   a0, 0(zero)
+    li   a0, 21
+    jal  ra, ikikati
+    sw   a0, 4(zero)
+    ecall
+
+ikikati:                  # a0 <- 2 * a0
+    slli a0, a0, 1
+    ret`},
+"Örnek: Büyük sabit (lui + addi)":{mem:{},code:
+`    li   t0, 0x12345      # 12 bite sığmaz: lui + addi olur
+    li   t1, -1
+    srli t2, t1, 28       # mantıksal sağa kaydırma
+    sw   t0, 0(zero)
+    sw   t2, 4(zero)
+    ecall`},
+};
+const TASKS=[
+ {name:"Görev 1: Değiş tokuş",text:"0x00 ve 0x04 adreslerindeki değerleri <b>yer değiştirin</b>.",mem:{0:12,1:30},
+  check:m=>m[0]===30&&m[1]===12,code:"# 0x00 <-> 0x04\n\n    ecall"},
+ {name:"Görev 2: 1+2+…+10",text:"1'den 10'a kadar olan sayıların toplamını <b>0x3C</b> adresine yazın.",mem:{},
+  check:m=>m[15]===55,code:"\n\n    ecall"},
+ {name:"Görev 3: Büyük olan",text:"0x00 ve 0x04'teki sayılardan <b>büyük olanı</b> 0x08'e yazın. (İpucu: blt / bge.) Çözümünüz başka sayılarla da denenecek!",mem:{0:42,1:17},
+  check:m=>m[2]===42,alt:{mem:{0:-5,1:73},exp:73},code:"\n\n    ecall"},
+ {name:"Görev 4: Çarpma yapmadan ×8",text:"0x00'daki sayıyı <b>8 ile çarpıp</b> 0x04'e yazın. ecall dahil <b>en fazla 4 komut</b> çalışsın!",mem:{0:11},
+  check:(m,s)=>m[1]===88&&s<=4,code:"\n\n    ecall"},
+ {name:"Görev 5: Dizi toplamı",text:"0x00–0x0C arasındaki <b>4 sayının toplamını</b> 0x10'a yazın. Döngü kullanın!",mem:{0:3,1:14,2:-2,3:25},
+  check:m=>m[4]===40,alt:{mem:{0:1,1:2,2:3,3:4},exp:10,at:4},code:"\n\n    ecall"},
+];
+
+// ---------- Durum
+const $=id=>document.getElementById(id);
+let prog=[],X=new Array(32).fill(0),M=new Array(16).fill(0),PC=0,steps=0,halted=false,loaded=false,timer=null,initMem={},current=null,hex=false;
+const fmt=v=>hex?'0x'+(v>>>0).toString(16).padStart(8,'0'):String(v|0);
+const fa=a=>'0x'+a.toString(16).padStart(2,'0').toUpperCase();
+const h8=v=>(v>>>0).toString(16).padStart(8,'0');
+
+// ---------- Derleyici
+function regN(s){s=(s||'').trim().toLowerCase();if(s==='fp')return 8;const m=/^x(\d+)$/.exec(s);if(m&&+m[1]<32)return +m[1];const i=ABI.indexOf(s);if(i>=0)return i;throw `"${s}" geçerli bir yazmaç değil`}
+function immN(s){s=(s||'').trim();const n=/^-?0x[0-9a-f]+$/i.test(s)?parseInt(s,16):/^-?\d+$/.test(s)?parseInt(s,10):NaN;if(isNaN(n))throw `"${s}" sayı değil`;return n}
+function memOp(s){const m=/^(.*)\((.+)\)$/.exec((s||'').trim());if(!m)throw `"${s}" bellek işleneni olmalı, örn. 4(t0)`;return{imm:m[1].trim()?immN(m[1]):0,rs1:regN(m[2])}}
+const rng=(v,lo,hi,w)=>{if(v<lo||v>hi)throw `${w} ${lo}..${hi} aralığında olmalı (${v})`;return v};
+const R3=['add','sub','and','or','xor','sll','srl','slt'],I3=['addi','andi','ori','xori','slti','slli','srli'],BR=['beq','bne','blt','bge'];
+
+function expand(op,a,line){ // sözde komutları açar -> [{op,args}]
+  switch(op){
+    case 'li':{if(a.length!==2)throw 'li 2 parametre ister';const v=immN(a[1])|0;
+      if(v>=-2048&&v<=2047)return[{op:'addi',a:[a[0],'zero',String(v)]}];
+      const lo=(v<<20)>>20,hi=((v-lo)>>>12)&0xfffff;const r=[{op:'lui',a:[a[0],String(hi)]}];if(lo)r.push({op:'addi',a:[a[0],a[0],String(lo)]});return r}
+    case 'mv':return[{op:'addi',a:[a[0],a[1],'0']}];
+    case 'j':return[{op:'jal',a:['zero',a[0]]}];
+    case 'jr':return[{op:'jalr',a:['zero','0('+a[0]+')']}];
+    case 'ret':return[{op:'jalr',a:['zero','0(ra)']}];
+    case 'nop':return[{op:'addi',a:['zero','zero','0']}];
+    case 'jal':return a.length===1?[{op:'jal',a:['ra',a[0]]}]:[{op,a}];
+    default:return[{op,a}];
+  }
+}
+function assemble(src){
+  const items=[],labels={},errs=[];
+  src.split('\n').forEach((raw,li)=>{
+    let line=raw.replace(/[#;].*/,'').trim();if(!line)return;
+    let m;while((m=/^([A-Za-z_çğıöşüÇĞİÖŞÜ][\wçğıöşüÇĞİÖŞÜ]*)\s*:\s*(.*)$/.exec(line))){labels[m[1].toLowerCase()]=items.length;line=m[2].trim()}
+    if(!line)return;
+    const sp=line.search(/\s/),op=(sp<0?line:line.slice(0,sp)).toLowerCase(),args=sp<0?[]:line.slice(sp).split(',').map(s=>s.trim()).filter(Boolean);
+    try{const ex=expand(op,args,li+1);ex.forEach((e,k)=>items.push({...e,src:raw.replace(/[#;].*/,'').replace(/^\s*\S+:\s*/,'').trim(),pseudo:ex.length>1||e.op!==op,first:k===0,line:li+1}))}
+    catch(e){errs.push(`Satır ${li+1}: ${e}`)}
+  });
+  const out=items.map((it,idx)=>{
+    try{
+      const a=it.a,o=it.op,need=n=>{if(a.length!==n)throw `${o} ${n} parametre ister`};let ins={op:o,line:it.line,src:it.src,pseudo:it.pseudo,first:it.first};
+      if(R3.includes(o)){need(3);Object.assign(ins,{rd:regN(a[0]),rs1:regN(a[1]),rs2:regN(a[2])})}
+      else if(I3.includes(o)){need(3);const v=immN(a[2]);Object.assign(ins,{rd:regN(a[0]),rs1:regN(a[1]),imm:o==='slli'||o==='srli'?rng(v,0,31,'Kaydırma miktarı'):rng(v,-2048,2047,'Sabit')})}
+      else if(o==='lw'){need(2);const q=memOp(a[1]);Object.assign(ins,{rd:regN(a[0]),rs1:q.rs1,imm:rng(q.imm,-2048,2047,'Ofset')})}
+      else if(o==='sw'){need(2);const q=memOp(a[1]);Object.assign(ins,{rs2:regN(a[0]),rs1:q.rs1,imm:rng(q.imm,-2048,2047,'Ofset')})}
+      else if(BR.includes(o)){need(3);const l=a[2].toLowerCase();if(!(l in labels))throw `"${a[2]}" etiketi bulunamadı`;Object.assign(ins,{rs1:regN(a[0]),rs2:regN(a[1]),target:labels[l],label:a[2],imm:(labels[l]-idx)*4})}
+      else if(o==='jal'){need(2);const l=a[1].toLowerCase();if(!(l in labels))throw `"${a[1]}" etiketi bulunamadı`;Object.assign(ins,{rd:regN(a[0]),target:labels[l],label:a[1],imm:(labels[l]-idx)*4})}
+      else if(o==='jalr'){let q;if(a.length===2)q=memOp(a[1]);else{need(3);q={rs1:regN(a[1]),imm:immN(a[2])}}Object.assign(ins,{rd:regN(a[0]),rs1:q.rs1,imm:rng(q.imm,-2048,2047,'Ofset')})}
+      else if(o==='lui'){need(2);Object.assign(ins,{rd:regN(a[0]),imm:rng(immN(a[1]),0,0xfffff,'lui sabiti')})}
+      else if(o==='ecall'){need(0)}
+      else throw `bilinmeyen komut "${o}"`;
+      ins.asm=disasm(ins);ins.code=encode(ins);return ins;
+    }catch(e){errs.push(`Satır ${it.line}: ${e}`);return null}
+  });
+  return{prog:out,errs};
+}
+const rn=r=>ABI[r];
+function disasm(i){const o=i.op;
+  if(R3.includes(o))return `${o} ${rn(i.rd)}, ${rn(i.rs1)}, ${rn(i.rs2)}`;
+  if(I3.includes(o))return `${o} ${rn(i.rd)}, ${rn(i.rs1)}, ${i.imm}`;
+  if(o==='lw')return `lw ${rn(i.rd)}, ${i.imm}(${rn(i.rs1)})`;
+  if(o==='sw')return `sw ${rn(i.rs2)}, ${i.imm}(${rn(i.rs1)})`;
+  if(BR.includes(o))return `${o} ${rn(i.rs1)}, ${rn(i.rs2)}, ${i.label}`;
+  if(o==='jal')return `jal ${rn(i.rd)}, ${i.label}`;
+  if(o==='jalr')return `jalr ${rn(i.rd)}, ${i.imm}(${rn(i.rs1)})`;
+  if(o==='lui')return `lui ${rn(i.rd)}, 0x${i.imm.toString(16)}`;
+  return 'ecall';
+}
+function encode(i){const o=i.op;let w;
+  const F3={add:0,sub:0,sll:1,slt:2,xor:4,srl:5,or:6,and:7,addi:0,slti:2,xori:4,ori:6,andi:7,slli:1,srli:5,beq:0,bne:1,blt:4,bge:5};
+  if(R3.includes(o))w=((o==='sub'?0x20:0)<<25)|(i.rs2<<20)|(i.rs1<<15)|(F3[o]<<12)|(i.rd<<7)|0x33;
+  else if(I3.includes(o))w=((i.imm&0xfff)<<20)|(i.rs1<<15)|(F3[o]<<12)|(i.rd<<7)|0x13;
+  else if(o==='lw')w=((i.imm&0xfff)<<20)|(i.rs1<<15)|(2<<12)|(i.rd<<7)|0x03;
+  else if(o==='jalr')w=((i.imm&0xfff)<<20)|(i.rs1<<15)|(i.rd<<7)|0x67;
+  else if(o==='sw')w=(((i.imm>>5)&0x7f)<<25)|(i.rs2<<20)|(i.rs1<<15)|(2<<12)|((i.imm&0x1f)<<7)|0x23;
+  else if(BR.includes(o)){const b=i.imm;w=(((b>>12)&1)<<31)|(((b>>5)&0x3f)<<25)|(i.rs2<<20)|(i.rs1<<15)|(F3[o]<<12)|(((b>>1)&0xf)<<8)|(((b>>11)&1)<<7)|0x63}
+  else if(o==='jal'){const j=i.imm;w=(((j>>20)&1)<<31)|(((j>>1)&0x3ff)<<21)|(((j>>11)&1)<<20)|(((j>>12)&0xff)<<12)|(i.rd<<7)|0x6f}
+  else if(o==='lui')w=(i.imm<<12)|(i.rd<<7)|0x37;
+  else w=0x73;
+  return w>>>0;
+}
+
+// ---------- Yürütme (saf fonksiyon: hem ekranda hem gizli doğrulamada kullanılır)
+const STAGES={R:[0,1,2,4],I:[0,1,2,4],lw:[0,1,2,3,4],sw:[0,1,2,3],B:[0,1,2],J:[0,1,2,4],ecall:[0,1]};
+function stagesOf(o){return R3.includes(o)||I3.includes(o)||o==='lui'?STAGES.R:o==='lw'?STAGES.lw:o==='sw'?STAGES.sw:BR.includes(o)?STAGES.B:o==='ecall'?STAGES.ecall:STAGES.J}
+function exec(S,i,idx){
+  const x=S.x,o=i.op,r={next:idx+1,msg:'',w:[],rd:[]};
+  const wr=(rd,v)=>{if(rd===0){r.msg+=' <i>(x0 her zaman 0 kalır, yazma yok sayıldı)</i>';return}x[rd]=v|0;r.w.push('r'+rd)};
+  const n=k=>`${rn(k)}(${x[k]})`;
+  const addrChk=a=>{if(a%4!==0)throw `Adres ${fa(a)} 4'ün katı değil (hizalama hatası)`;if(a<0||a>60)throw `Adres ${a} bellek dışında (0x00–0x3C)`;return a/4};
+  const alu={add:(a,b)=>a+b,sub:(a,b)=>a-b,and:(a,b)=>a&b,or:(a,b)=>a|b,xor:(a,b)=>a^b,sll:(a,b)=>a<<(b&31),srl:(a,b)=>a>>>(b&31),slt:(a,b)=>a<b?1:0};
+  const sym={add:'+',sub:'−',and:'&',or:'|',xor:'^',sll:'<<',srl:'>>>',slt:'<'};
+  if(R3.includes(o)){const v=alu[o](x[i.rs1],x[i.rs2])|0;r.msg=`ALU: ${rn(i.rd)} ← ${n(i.rs1)} ${sym[o]} ${n(i.rs2)} = ${v}`;wr(i.rd,v)}
+  else if(I3.includes(o)){const b=o.slice(0,-1);const v=alu[b](x[i.rs1],i.imm)|0;r.msg=`ALU: ${rn(i.rd)} ← ${n(i.rs1)} ${sym[b]} ${i.imm} = ${v}`;wr(i.rd,v)}
+  else if(o==='lw'){const a=(x[i.rs1]+i.imm)|0,k=addrChk(a);r.msg=`Adres = ${n(i.rs1)} + ${i.imm} = ${fa(a)} → bellekten oku: ${rn(i.rd)} ← ${S.m[k]}`;r.rd.push('m'+k);wr(i.rd,S.m[k])}
+  else if(o==='sw'){const a=(x[i.rs1]+i.imm)|0,k=addrChk(a);S.m[k]=x[i.rs2];r.w.push('m'+k);r.msg=`Adres = ${n(i.rs1)} + ${i.imm} = ${fa(a)} → belleğe yaz: M[${fa(a)}] ← ${n(i.rs2)}`}
+  else if(BR.includes(o)){const a=x[i.rs1],b=x[i.rs2],c={beq:a===b,bne:a!==b,blt:a<b,bge:a>=b}[o],s={beq:'=',bne:'≠',blt:'<',bge:'≥'}[o];
+    r.msg=`Karşılaştır: ${a} ${s} ${b} ? → ${c?`evet, "${i.label}" etiketine dallan (PC ${i.imm>=0?'+':''}${i.imm})`:'hayır, sıradaki komuta geç'}`;if(c)r.next=i.target}
+  else if(o==='jal'){r.next=i.target;r.msg=`Atla → "${i.label}"`+(i.rd?`, dönüş adresi ${rn(i.rd)} ← ${fa((idx+1)*4)}`:'');if(i.rd)wr(i.rd,(idx+1)*4)}
+  else if(o==='jalr'){const t=(x[i.rs1]+i.imm)&~1;if(t%4||t<0)throw `Geçersiz atlama adresi ${t}`;r.next=t/4;r.msg=`Adrese atla: ${n(i.rs1)} + ${i.imm} = ${fa(t)}`+(i.rd?`, ${rn(i.rd)} ← ${fa((idx+1)*4)}`:(i.rs1===1?' (fonksiyondan dönüş)':''));if(i.rd)wr(i.rd,(idx+1)*4)}
+  else if(o==='lui'){const v=(i.imm<<12)|0;r.msg=`${rn(i.rd)} ← 0x${i.imm.toString(16)} << 12 = ${v}`;wr(i.rd,v)}
+  else if(o==='ecall'){r.halt=true;r.next=idx;r.msg='ecall: program sonlandı.'}
+  return r;
+}
+
+// ---------- Arayüz
+const modeSel=$('mode');
+Object.keys(EXAMPLES).forEach(k=>modeSel.add(new Option(k,'ex:'+k)));
+TASKS.forEach((t,i)=>modeSel.add(new Option('🎯 '+t.name,'task:'+i)));
+modeSel.onchange=()=>selectMode(modeSel.value);
+$('fDec').onclick=()=>{hex=false;$('fDec').classList.add('on');$('fHex').classList.remove('on');render()};
+$('fHex').onclick=()=>{hex=true;$('fHex').classList.add('on');$('fDec').classList.remove('on');render()};
+
+function build(){
+  $('regs').innerHTML=X.map((v,i)=>`<div class="reg" id="r${i}" title="x${i} (${ABI[i]})"><span class="n">x${i} <b>${ABI[i]}</b></span><span class="v">0</span></div>`).join('');
+  $('mem').innerHTML=M.map((v,i)=>`<div class="cell" id="m${i}" onclick="editCell(${i})"><span class="n">${fa(i*4)}</span><span class="v">0</span></div>`).join('');
+}
+window.editCell=i=>{if(loaded)return;const v=prompt(`${fa(i*4)} adresindeki kelime:`,M[i]);if(v===null)return;try{M[i]=immN(v)|0;initMem[i]=M[i];render()}catch(e){}};
+
+function selectMode(v){
+  stop();loaded=false;const [t,k]=v.split(/:(.*)/);current={type:t,key:k};
+  const src=t==='ex'?EXAMPLES[k]:TASKS[k];
+  $('taskBox').style.display=t==='task'?'block':'none';if(t==='task')$('taskBox').innerHTML=`<b>${src.name}</b><br>${src.text}`;
+  $('editor').value=src.code;initMem={...src.mem};resetMachine();showEditor(true);$('log').innerHTML='';
+  log('Programı inceleyin, sonra <b>Derle ve Yükle</b>ye basın.');
+}
+function resetMachine(){X=new Array(32).fill(0);X[2]=64;M=new Array(16).fill(0);Object.entries(initMem).forEach(([k,v])=>M[k]=v|0);PC=0;steps=0;halted=false;
+  [0,1,2,3,4].forEach(s=>$('st'+s).className='');$('ir').textContent='—';$('irHex').innerHTML='&nbsp;';render()}
+function flash(id,c='flash'){const e=$(id);if(!e)return;e.classList.remove(c);void e.offsetWidth;e.classList.add(c);setTimeout(()=>e.classList.remove(c),Math.max(500,+$('speed').value))}
+function animStages(list){const d=Math.min(110,+$('speed').value/6);[0,1,2,3,4].forEach(s=>$('st'+s).className=list.includes(s)?'':'skip');
+  list.forEach((s,k)=>setTimeout(()=>{list.forEach(q=>$('st'+q).classList.remove('on'));$('st'+s).classList.add('on')},k*d))}
+
+function step(){
+  if(halted||!loaded)return false;
+  if(PC<0||PC>=prog.length){halted=true;log('Program sonuna gelindi (ecall yok).');finish();return false}
+  const ins=prog[PC];
+  $('ir').textContent=ins.asm;$('irHex').textContent='0x'+h8(ins.code);flash('irBox');animStages(stagesOf(ins.op));
+  let r;try{r=exec({x:X,m:M},ins,PC)}catch(e){log(`Satır ${ins.line}: ${e}`,'e');halted=true;finish();render();return false}
+  steps++;r.w.forEach(id=>flash(id));r.rd.forEach(id=>flash(id,'rd'));
+  log(`<b>${steps}.</b> <span class="code">${ins.asm}</span> — ${r.msg}`);
+  if(r.next!==PC+1&&!r.halt)flash('pcBox');
+  PC=r.next;
+  if(r.halt)halted=true;
+  if(steps>=1000&&!halted){halted=true;log('1000 adım aşıldı — sonsuz döngü olabilir!','e')}
+  render();if(halted)finish();return !halted;
+}
+function runSilent(mem){const S={x:new Array(32).fill(0),m:new Array(16).fill(0)};S.x[2]=64;Object.entries(mem).forEach(([k,v])=>S.m[k]=v);let pc=0,n=0;
+  try{while(pc>=0&&pc<prog.length&&n<1000){const r=exec(S,prog[pc],pc);n++;if(r.halt)break;pc=r.next}}catch(e){return null}return S.m}
+function finish(){stop();$('bStep').disabled=$('bRun').disabled=true;
+  if(current?.type!=='task')return;const t=TASKS[current.key];let ok=t.check(M,steps);
+  if(ok&&t.alt){const m=runSilent(t.alt.mem);ok=!!m&&m[t.alt.at??2]===t.alt.exp;if(!ok){log('Bu veriyle doğru sonuç çıktı ama farklı sayılarla denenince yanlış sonuç verdi. Çözüm genel olmalı!','e');return}}
+  log(ok?`🎉 Görev tamamlandı! (${steps} komut çalıştı)`:'✗ Görev henüz tamamlanmadı. Belleği kontrol edin, Sıfırla ile tekrar deneyin ya da Düzenle ile kodu değiştirin.',ok?'o':'e');
+}
+function render(){
+  X.forEach((v,i)=>{const e=$('r'+i);if(!e)return;e.querySelector('.v').textContent=fmt(v);e.classList.toggle('zero',v===0);e.classList.toggle('nz',v!==0)});
+  M.forEach((v,i)=>{const e=$('m'+i);if(e)e.querySelector('.v').textContent=fmt(v)});
+  $('pc').textContent=fa(PC*4);
+  [...$('listing').children].forEach((d,i)=>d.classList.toggle('cur',i===PC&&!halted&&loaded));
+  const c=$('listing').querySelector('.cur');if(c)c.scrollIntoView({block:'nearest'});
+  $('stat').textContent=loaded?`Çalışan komut sayısı: ${steps}`:'';
+}
+function log(h,c=''){const p=document.createElement('p');p.innerHTML=h;if(c)p.className=c;$('log').appendChild(p);$('log').scrollTop=1e9}
+function showEditor(e){$('editor').style.display=e?'block':'none';$('listing').style.display=e?'none':'block';
+  $('bLoad').disabled=!e;$('bEdit').disabled=e;$('bStep').disabled=$('bRun').disabled=$('bReset').disabled=e}
+function stop(){clearInterval(timer);timer=null;$('bRun').textContent='Çalıştır ▶▶'}
+const esc=s=>s.replace(/&/g,'&amp;').replace(/</g,'&lt;');
+
+$('bLoad').onclick=()=>{
+  const a=assemble($('editor').value);$('log').innerHTML='';
+  if(a.errs.length){a.errs.forEach(e=>log(e,'e'));return}
+  if(!a.prog.length){log('Program boş.','e');return}
+  prog=a.prog;loaded=true;resetMachine();
+  $('listing').innerHTML=prog.map((i,k)=>`<div><span class="ad">${fa(k*4)}</span><span class="hx">${h8(i.code)}</span><span>${esc(i.asm)}</span>${i.pseudo&&i.first?`<span class="ps">← ${esc(i.src)}</span>`:''}</div>`).join('');
+  showEditor(false);render();
+  log(`Derlendi: ${prog.length} komut, ${prog.length*4} bayt makine kodu. Mor sütun her komutun 32 bitlik kodlaması. <b>Adım</b> ile ilerleyin.`);
+};
+$('bEdit').onclick=()=>{stop();loaded=false;resetMachine();showEditor(true)};
+$('bStep').onclick=()=>{stop();step()};
+$('bRun').onclick=()=>{if(timer){stop();return}$('bRun').textContent='Duraklat ❚❚';timer=setInterval(()=>{if(!step())stop()},+$('speed').value)};
+$('bReset').onclick=()=>{stop();resetMachine();$('log').innerHTML='';log('Sıfırlandı.');$('bStep').disabled=$('bRun').disabled=false};
+
+build();selectMode(modeSel.options[0].value);
+</script>
+</body>
+</html>
