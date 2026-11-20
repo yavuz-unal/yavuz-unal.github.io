@@ -1,0 +1,1700 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>Hakemden Kaçış: Reviewer 2 Survival</title>
+  <style>
+    :root {
+      --bg-dark: #0f141c;
+      --bg-card: rgba(22, 29, 44, 0.9);
+      --accent-latex: #00d2ff;
+      --accent-red: #ff3366;
+      --accent-coffee: #f39c12;
+      --accent-accept: #2ecc71;
+      --accent-purple: #9b59b6;
+      --text-main: #f0f4f8;
+      --text-muted: #8b9bb4;
+      --border-color: rgba(0, 210, 255, 0.25);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+
+    body {
+      background: radial-gradient(circle at 50% 20%, #1a2236 0%, var(--bg-dark) 100%);
+      color: var(--text-main);
+      font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, sans-serif;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      overflow: hidden;
+      touch-action: none;
+    }
+
+    #game-wrapper {
+      position: relative;
+      width: 100vw;
+      height: 100vh;
+      max-width: 850px;
+      max-height: 850px;
+      background: #090d15;
+      border: 1px solid var(--border-color);
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.8), 0 0 20px rgba(0, 210, 255, 0.2);
+      border-radius: 14px;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    canvas {
+      width: 100%;
+      height: 100%;
+      display: block;
+      cursor: crosshair;
+    }
+
+    /* ÜST AKADEMİK HUD */
+    #hud {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      padding: 12px 18px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: linear-gradient(180deg, rgba(9, 13, 21, 0.95) 0%, rgba(9, 13, 21, 0) 100%);
+      pointer-events: none;
+      z-index: 10;
+    }
+
+    .hud-box {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .hud-metric {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .metric-title {
+      font-size: 10px;
+      font-weight: 700;
+      color: var(--text-muted);
+      letter-spacing: 1px;
+      text-transform: uppercase;
+    }
+
+    .metric-value {
+      font-size: 19px;
+      font-weight: 800;
+      font-family: 'Courier New', monospace;
+      color: var(--accent-latex);
+      text-shadow: 0 0 10px rgba(0, 210, 255, 0.5);
+    }
+
+    /* Can / Motivasyon & Kabul Olasılığı Barları */
+    .bars-container {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+      width: 140px;
+    }
+
+    .bar-row {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .bar-label {
+      display: flex;
+      justify-content: space-between;
+      font-size: 10px;
+      font-weight: 700;
+      color: var(--text-muted);
+    }
+
+    .bar-track {
+      width: 100%;
+      height: 7px;
+      background: rgba(255, 255, 255, 0.08);
+      border-radius: 4px;
+      overflow: hidden;
+    }
+
+    .bar-fill-stamina {
+      height: 100%;
+      width: 100%;
+      background: linear-gradient(90deg, #ff3366, #f39c12);
+      transition: width 0.15s ease;
+      box-shadow: 0 0 6px #f39c12;
+    }
+
+    .bar-fill-accept {
+      height: 100%;
+      width: 15%;
+      background: linear-gradient(90deg, #00d2ff, #2ecc71);
+      transition: width 0.25s ease;
+      box-shadow: 0 0 6px #2ecc71;
+    }
+
+    .hud-controls {
+      display: flex;
+      gap: 8px;
+      pointer-events: auto;
+    }
+
+    .hud-btn {
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      color: var(--text-main);
+      border-radius: 6px;
+      padding: 6px 10px;
+      font-size: 13px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .hud-btn:hover {
+      background: rgba(0, 210, 255, 0.2);
+      border-color: var(--accent-latex);
+    }
+
+    /* OVERLAY / MENÜ PANELLERİ */
+    .screen-overlay {
+      position: absolute;
+      inset: 0;
+      background: rgba(9, 13, 21, 0.88);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      padding: 24px;
+      text-align: center;
+      z-index: 20;
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    .academic-title {
+      font-family: 'Times New Roman', Times, serif;
+      font-size: 38px;
+      font-weight: 900;
+      letter-spacing: 1px;
+      background: linear-gradient(135deg, #ffffff 0%, var(--accent-latex) 55%, var(--accent-coffee) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 4px;
+      text-shadow: 0 0 20px rgba(0, 210, 255, 0.3);
+    }
+
+    .academic-subtitle {
+      font-size: 13px;
+      font-style: italic;
+      color: var(--text-muted);
+      margin-bottom: 20px;
+    }
+
+    .paper-card {
+      background: var(--bg-card);
+      border: 1px solid rgba(0, 210, 255, 0.3);
+      border-radius: 12px;
+      padding: 20px 24px;
+      width: 100%;
+      max-width: 440px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.6);
+      margin-bottom: 20px;
+    }
+
+    .key-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin: 8px 0;
+      font-size: 13px;
+    }
+
+    .latex-badge {
+      background: rgba(0, 210, 255, 0.12);
+      border: 1px solid rgba(0, 210, 255, 0.35);
+      padding: 3px 8px;
+      border-radius: 4px;
+      font-family: 'Courier New', monospace;
+      font-weight: bold;
+      color: var(--accent-latex);
+    }
+
+    .btn {
+      background: linear-gradient(135deg, #00d2ff 0%, #0077ff 100%);
+      color: #fff;
+      border: none;
+      padding: 12px 28px;
+      font-size: 15px;
+      font-weight: 700;
+      border-radius: 8px;
+      letter-spacing: 0.5px;
+      cursor: pointer;
+      box-shadow: 0 0 15px rgba(0, 119, 255, 0.4);
+      transition: transform 0.15s, box-shadow 0.15s;
+      margin: 5px;
+    }
+
+    .btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 0 22px rgba(0, 210, 255, 0.7);
+    }
+
+    .btn-secondary {
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      box-shadow: none;
+    }
+
+    .btn-secondary:hover {
+      background: rgba(255, 255, 255, 0.16);
+      box-shadow: 0 0 10px rgba(255, 255, 255, 0.2);
+    }
+
+    .reviewer-quote-box {
+      border-left: 3px solid var(--accent-red);
+      padding: 10px 14px;
+      background: rgba(255, 51, 102, 0.08);
+      border-radius: 0 8px 8px 0;
+      text-align: left;
+      font-size: 13px;
+      font-style: italic;
+      color: #ff99aa;
+      margin: 12px 0;
+    }
+
+    /* Skor Tablosu */
+    .table-hall {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 10px;
+      font-size: 13px;
+    }
+
+    .table-hall th {
+      color: var(--text-muted);
+      padding: 6px 8px;
+      text-align: left;
+      font-size: 10px;
+      text-transform: uppercase;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .table-hall td {
+      padding: 8px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+      text-align: left;
+    }
+
+    .input-author {
+      width: 100%;
+      padding: 9px 12px;
+      margin: 10px 0;
+      background: rgba(0, 0, 0, 0.4);
+      border: 1px solid var(--accent-latex);
+      border-radius: 6px;
+      color: #fff;
+      font-size: 14px;
+      text-align: center;
+      outline: none;
+    }
+
+    /* DOKUNMATİK MOBİL BUTONLAR */
+    #touch-bar {
+      display: none;
+      position: absolute;
+      bottom: 14px;
+      left: 0;
+      right: 0;
+      padding: 0 20px;
+      justify-content: space-between;
+      pointer-events: none;
+      z-index: 10;
+    }
+
+    .touch-btn {
+      pointer-events: auto;
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      background: rgba(22, 29, 44, 0.85);
+      border: 2px solid var(--accent-latex);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      color: #fff;
+      box-shadow: 0 0 12px rgba(0, 0, 0, 0.6);
+    }
+
+    .touch-btn:active {
+      background: rgba(0, 210, 255, 0.3);
+      transform: scale(0.95);
+    }
+
+    @media (pointer: coarse) {
+      #touch-bar {
+        display: flex;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div id="game-wrapper">
+    <canvas id="gameCanvas"></canvas>
+
+    <!-- ÜST AKADEMİK GÖSTERGE ÇUBUĞU (HUD) -->
+    <div id="hud">
+      <div class="hud-box">
+        <div class="hud-metric">
+          <span class="metric-title">ATIF (SKOR)</span>
+          <span id="hud-score" class="metric-value">0</span>
+        </div>
+        <div class="hud-metric">
+          <span class="metric-title">DERGİ / STATÜ</span>
+          <span id="hud-tier" class="metric-value" style="color: var(--accent-coffee); font-size: 15px;">arXiv Preprint</span>
+        </div>
+      </div>
+
+      <div class="hud-box">
+        <div class="bars-container">
+          <!-- Motivasyon / Kahve Seviyesi -->
+          <div class="bar-row">
+            <div class="bar-label">
+              <span>☕ KAHVE / MOTİVASYON</span>
+              <span id="hud-stamina-val">100%</span>
+            </div>
+            <div class="bar-track">
+              <div id="hud-stamina-bar" class="bar-fill-stamina"></div>
+            </div>
+          </div>
+          <!-- Kabul Olasılığı -->
+          <div class="bar-row">
+            <div class="bar-label">
+              <span>🎯 KABUL OLASILIĞI</span>
+              <span id="hud-accept-val" style="color: var(--accent-accept);">15%</span>
+            </div>
+            <div class="bar-track">
+              <div id="hud-accept-bar" class="bar-fill-accept"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="hud-controls">
+          <button id="btn-sound" class="hud-btn" title="Ses">🔊</button>
+          <button id="btn-pause" class="hud-btn" title="Duraklat">⏸️</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- MOBİL BUTONLAR -->
+    <div id="touch-bar">
+      <div style="font-size: 11px; color: var(--text-muted); align-self: center;">
+        Sürükle: Makaleyi Yönet<br>Ateş: Rebuttal Fırlat
+      </div>
+      <div style="display: flex; gap: 12px;">
+        <div id="btn-touch-bomb" class="touch-btn" style="border-color: var(--accent-purple);" title="Point-by-Point">💡</div>
+        <div id="btn-touch-fire" class="touch-btn" title="Rebuttal Fırlat">✉️</div>
+      </div>
+    </div>
+
+    <!-- BAŞLANGIÇ EKRANI -->
+    <div id="start-screen" class="screen-overlay">
+      <h1 class="academic-title">HAKEMDEN KAÇIŞ</h1>
+      <p class="academic-subtitle">"Escape from Reviewer 2: The Peer-Review Survival Simulator"</p>
+
+      <div class="paper-card">
+        <h3 style="color: var(--accent-latex); margin-bottom: 12px; font-size: 15px;">AKADEMİK REHBER</h3>
+        <p style="font-size: 12px; color: var(--text-muted); margin-bottom: 12px; line-height: 1.4;">
+          Görev: <strong>"Draft_vFINAL_v2_son.pdf"</strong> isimli makalenizi ölümcül hakem eleştirilerinden koruyup kabul ettirin!
+        </p>
+
+        <div class="key-row">
+          <span>Makale Hareketi:</span>
+          <div>
+            <span class="latex-badge">W A S D</span> / <span class="latex-badge">Yön Tuşları</span> / <span class="latex-badge">Fare</span>
+          </div>
+        </div>
+        <div class="key-row">
+          <span>Rebuttal Mektubu (Ateş):</span>
+          <span class="latex-badge">BOŞLUK (Space)</span> veya <span class="latex-badge">Sol Tık</span>
+        </div>
+        <div class="key-row">
+          <span>Madde Madde Cevap Bombası:</span>
+          <span class="latex-badge">B</span> veya <span class="latex-badge">💡 Butonu</span>
+        </div>
+        <div class="key-row">
+          <span>Toplanacaklar:</span>
+          <span>☕ Kahve • 📚 Atıf • 🛡️ Overleaf Pro</span>
+        </div>
+      </div>
+
+      <div style="display: flex; gap: 10px;">
+        <button id="btn-start" class="btn">MAKALEYİ GÖNDER (SUBMIT)</button>
+        <button id="btn-hall-open" class="btn btn-secondary">KABUL DUVARI</button>
+      </div>
+
+      <button id="btn-embed-code" class="hud-btn" style="margin-top: 15px; font-size: 11px;">
+        📋 Web Sayfana Gömme Kodunu Kopyala (iframe)
+      </button>
+    </div>
+
+    <!-- OYUN BİTTİ (REDDEDİLDİ) EKRANI -->
+    <div id="game-over-screen" class="screen-overlay hidden">
+      <h1 class="academic-title" style="background: linear-gradient(135deg, #ff3366, #ff9900); -webkit-background-clip: text;">
+        DESK REJECTED!
+      </h1>
+      <p class="academic-subtitle">"We regret to inform you that your manuscript could not be considered..."</p>
+
+      <div class="paper-card">
+        <div class="reviewer-quote-box" id="reviewer-random-quote">
+          "The author clearly failed to cite my 2013 paper which already solved this problem."
+        </div>
+
+        <div style="display: flex; justify-content: space-around; margin: 12px 0;">
+          <div>
+            <span class="metric-title">TOPLANAN ATIF</span>
+            <div id="final-score" class="metric-value">0</div>
+          </div>
+          <div>
+            <span class="metric-title">KABUL DERECESİ</span>
+            <div id="final-accept-rate" class="metric-value" style="color: var(--accent-accept);">15%</div>
+          </div>
+        </div>
+
+        <input type="text" id="author-name-input" class="input-author" maxlength="20" placeholder="Yazar Adı / Lab Adı" value="Dr. Anonim">
+        <button id="btn-save-score" class="btn" style="width: 100%;">KABUL DUVARINA KAYDET</button>
+      </div>
+
+      <div style="display: flex; gap: 10px;">
+        <button id="btn-restart" class="btn">REVİZYON YAP & TEKRAR GÖNDER</button>
+        <button id="btn-show-hall" class="btn btn-secondary">KABUL DUVARI</button>
+      </div>
+    </div>
+
+    <!-- MAKALENİZ KABUL EDİLDİ (ZAFER) EKRANI -->
+    <div id="victory-screen" class="screen-overlay hidden">
+      <h1 class="academic-title" style="background: linear-gradient(135deg, #2ecc71, #00d2ff); -webkit-background-clip: text;">
+        ACCEPTED! 🎉
+      </h1>
+      <p class="academic-subtitle">"Congratulations! Your paper has been accepted for publication!"</p>
+
+      <div class="paper-card" style="border-color: var(--accent-accept);">
+        <p style="font-size: 14px; margin-bottom: 12px; color: #bdf7d4;">
+          Tebrikler! Reviewer 2 dize getirildi ve makaleniz <strong>Q1 En Yüksek Etki Faktörlü Dergi</strong>de yayımlandı!
+        </p>
+        <div style="margin: 15px 0;">
+          <span class="metric-title">NİHAİ ETKİ SKORU</span>
+          <div id="victory-score" class="metric-value" style="font-size: 32px; color: var(--accent-accept);">0</div>
+        </div>
+        <input type="text" id="victory-author-input" class="input-author" maxlength="20" placeholder="Yazar Adı" value="Prof. Şampiyon">
+        <button id="btn-save-victory" class="btn" style="width: 100%; background: linear-gradient(135deg, #2ecc71, #27ae60);">
+          ŞAMPİYONLUK KÜRSÜSÜNE YAZ
+        </button>
+      </div>
+
+      <button id="btn-restart-victory" class="btn btn-secondary">YENİ BİR MAKALE YAZ</button>
+    </div>
+
+    <!-- DURAKLATMA EKRANI -->
+    <div id="pause-screen" class="screen-overlay hidden">
+      <h2 class="academic-title" style="font-size: 26px;">KAHVE MOLASI</h2>
+      <p class="academic-subtitle">Makale hakem masasında bekletiliyor...</p>
+      <button id="btn-resume" class="btn">EVALUASYONA DEVAM ET</button>
+    </div>
+
+    <!-- KABUL EDİLENLER DUVARI (LEADERBOARD) -->
+    <div id="hall-modal" class="screen-overlay hidden">
+      <h2 class="academic-title" style="font-size: 26px; color: var(--accent-coffee);">KABUL DUVARI</h2>
+      <p class="academic-subtitle">Reviewer 2'ye Rağmen Yayımlanan Eserler</p>
+
+      <div class="paper-card" style="max-height: 380px; overflow-y: auto;">
+        <table class="table-hall">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>YAZAR / ESER</th>
+              <th>ATIF</th>
+              <th>STATÜ</th>
+              <th>TARİH</th>
+            </tr>
+          </thead>
+          <tbody id="hall-rows">
+            <!-- Dinamik doldurulur -->
+          </tbody>
+        </table>
+      </div>
+
+      <div style="display: flex; gap: 10px;">
+        <button id="btn-close-hall" class="btn">KAPAT</button>
+        <button id="btn-clear-hall" class="btn btn-secondary" style="color: var(--accent-red);">TEMİZLE</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    /* ==========================================================================
+       1. WEB AUDIO API SES SENTEZLEYİCİSİ (Akademik & Retro Sesler)
+       ========================================================================== */
+    class AcademicAudio {
+      constructor() {
+        this.ctx = null;
+        this.muted = false;
+        this.ready = false;
+      }
+
+      init() {
+        if (!this.ready) {
+          const AudioContext = window.AudioContext || window.webkitAudioContext;
+          this.ctx = new AudioContext();
+          this.ready = true;
+        }
+        if (this.ctx && this.ctx.state === 'suspended') {
+          this.ctx.resume();
+        }
+      }
+
+      // Rebuttal fırlatma sesi (hafif kağıt vuruşu)
+      playRebuttal() {
+        if (this.muted || !this.ready) return;
+        const now = this.ctx.currentTime;
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(600, now);
+        osc.frequency.exponentialRampToValueAtTime(150, now + 0.1);
+
+        gain.gain.setValueAtTime(0.12, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.1);
+
+        osc.connect(gain);
+        gain.connect(this.ctx.destination);
+        osc.start(now);
+        osc.stop(now + 0.1);
+      }
+
+      // Hakem darbesi / Red damgası (Tok ve dramatik mühür sesi)
+      playRejectHit() {
+        if (this.muted || !this.ready) return;
+        const now = this.ctx.currentTime;
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+
+        osc.type = 'sawtooth';
+        osc.frequency.setValueAtTime(110, now);
+        osc.frequency.exponentialRampToValueAtTime(35, now + 0.18);
+
+        gain.gain.setValueAtTime(0.25, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.18);
+
+        osc.connect(gain);
+        gain.connect(this.ctx.destination);
+        osc.start(now);
+        osc.stop(now + 0.18);
+      }
+
+      // Kahve içme & Atıf toplama (Neşeli yükselen arpej)
+      playCoffeeChime() {
+        if (this.muted || !this.ready) return;
+        const now = this.ctx.currentTime;
+        [523.25, 659.25, 783.99, 1046.5].forEach((freq, idx) => {
+          const osc = this.ctx.createOscillator();
+          const gain = this.ctx.createGain();
+          const time = now + (idx * 0.05);
+
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(freq, time);
+
+          gain.gain.setValueAtTime(0.1, time);
+          gain.gain.exponentialRampToValueAtTime(0.001, time + 0.12);
+
+          osc.connect(gain);
+          gain.connect(this.ctx.destination);
+          osc.start(time);
+          osc.stop(time + 0.12);
+        });
+      }
+
+      // Point-by-Point Bomba (Gürültü patlaması)
+      playBomb() {
+        if (this.muted || !this.ready) return;
+        const now = this.ctx.currentTime;
+        const bufferSize = this.ctx.sampleRate * 0.4;
+        const buffer = this.ctx.createBuffer(1, bufferSize, this.ctx.sampleRate);
+        const data = buffer.getChannelData(0);
+        for (let i = 0; i < bufferSize; i++) {
+          data[i] = Math.random() * 2 - 1;
+        }
+
+        const noise = this.ctx.createBufferSource();
+        noise.buffer = buffer;
+
+        const filter = this.ctx.createBiquadFilter();
+        filter.type = 'lowpass';
+        filter.frequency.setValueAtTime(600, now);
+        filter.frequency.exponentialRampToValueAtTime(50, now + 0.4);
+
+        const gain = this.ctx.createGain();
+        gain.gain.setValueAtTime(0.3, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.4);
+
+        noise.connect(filter);
+        filter.connect(gain);
+        gain.connect(this.ctx.destination);
+        noise.start(now);
+      }
+
+      // Tebrikler / Kabul Fanfarı
+      playAcceptFanfare() {
+        if (this.muted || !this.ready) return;
+        const now = this.ctx.currentTime;
+        const chord = [523.25, 659.25, 783.99, 1046.50, 1318.51];
+        chord.forEach((freq, i) => {
+          const osc = this.ctx.createOscillator();
+          const gain = this.ctx.createGain();
+          const t = now + (i * 0.09);
+
+          osc.type = 'triangle';
+          osc.frequency.setValueAtTime(freq, t);
+
+          gain.gain.setValueAtTime(0.15, t);
+          gain.gain.exponentialRampToValueAtTime(0.001, t + 0.5);
+
+          osc.connect(gain);
+          gain.connect(this.ctx.destination);
+          osc.start(t);
+          osc.stop(t + 0.5);
+        });
+      }
+    }
+
+    const sound = new AcademicAudio();
+
+    /* ==========================================================================
+       2. MİZAHİ HAKEM ALINTILARI VE LİDERLİK TABLOSU
+       ========================================================================== */
+    const REVIEWER_QUOTES = [
+      "Hakem 2: 'Yazar 2014 yılında yayımladığım ve bu konuyu çözen çığır açıcı makaleme atıf vermemiş.'",
+      "Hakem 2: 'Metodoloji ya aşırı basit ve gereksiz, ya da tamamen hatalı.'",
+      "Hakem 2: 'İngilizce anlatım bir ana dili İngilizce olan kişi tarafından baştan yazılmalıdır.'",
+      "Hakem 2: 'Çalışma ilginç, fakat bu derginin kapsamına kesinlikle uymuyor.'",
+      "Hakem 2: 'Dün akşam yayımlanan yöntemle neden karşılaştırma yapılmadı?'",
+      "Hakem 1 'Kabul', Hakem 3 'Mükemmel' dedi; fakat ben (Hakem 2) sıfır yenilik görüyorum.",
+      "Hakem 2: 'Grafiklerde LaTeX stili yerine varsayılan Excel renkleri kullanılmış, kabul edilemez.'",
+      "Hakem 2: 'Sonuçlar rastlantısal görünüyor. Daha fazla deney yapın (Örn: 5 yıl daha).'"
+    ];
+
+    const STORAGE_KEY = "academic_reviewer_escape_scores_v1";
+
+    function getHallOfFame() {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (raw) return JSON.parse(raw);
+      } catch (e) {
+        console.error(e);
+      }
+      return [
+        { author: "Turing & Shannon", score: 2800, tier: "Nature / Science", date: "12.11.2026" },
+        { author: "Dr. Ada Lovelace", score: 2100, tier: "IEEE Trans. PAMI", date: "10.11.2026" },
+        { author: "Prof. Von Neumann", score: 1600, tier: "NeurIPS Oral", date: "08.11.2026" },
+        { author: "Tez Öğrencisi Garip", score: 950, tier: "Q2 Journal", date: "05.11.2026" },
+        { author: "Anonim Araştırmacı", score: 450, tier: "arXiv Preprint", date: "01.11.2026" }
+      ];
+    }
+
+    function saveHallScore(author, score, tier) {
+      const list = getHallOfFame();
+      const now = new Date();
+      const dateStr = `${String(now.getDate()).padStart(2, '0')}.${String(now.getMonth()+1).padStart(2, '0')}.${now.getFullYear()}`;
+      list.push({ author: author || "Dr. Anonim", score, tier, date: dateStr });
+      list.sort((a, b) => b.score - a.score);
+      const topScores = list.slice(0, 10);
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(topScores));
+      } catch (e) {
+        console.error(e);
+      }
+      return topScores;
+    }
+
+    function renderHallTable() {
+      const tbody = document.getElementById("hall-rows");
+      tbody.innerHTML = "";
+      const scores = getHallOfFame();
+      scores.forEach((entry, idx) => {
+        const row = document.createElement("tr");
+        row.innerHTML = `
+          <td>${idx + 1}</td>
+          <td><strong>${escapeHtml(entry.author)}</strong></td>
+          <td style="color: var(--accent-latex); font-weight: bold;">${entry.score}</td>
+          <td style="color: var(--accent-coffee); font-size: 11px;">${escapeHtml(entry.tier)}</td>
+          <td style="color: var(--text-muted); font-size: 11px;">${entry.date}</td>
+        `;
+        tbody.appendChild(row);
+      });
+    }
+
+    function escapeHtml(str) {
+      return String(str).replace(/[&<>"']/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[m]);
+    }
+
+    /* ==========================================================================
+       3. OYUN NESNELERİ VE MOTOR
+       ========================================================================== */
+    const canvas = document.getElementById("gameCanvas");
+    const ctx = canvas.getContext("2d");
+
+    let animationId = null;
+    let lastTime = 0;
+    let gameState = "START"; // "START", "PLAYING", "PAUSED", "GAMEOVER", "VICTORY"
+
+    let score = 0;
+    let acceptanceRate = 15;
+    let stamina = 100;
+    let bombsCount = 1;
+    let currentTierIndex = 0;
+
+    const TIERS = [
+      { name: "arXiv Preprint", threshold: 0 },
+      { name: "Ulusal Konferans", threshold: 250 },
+      { name: "Scopus / Q3 Dergi", threshold: 600 },
+      { name: "IEEE / ACM Q1", threshold: 1100 },
+      { name: "Nature / Science", threshold: 1800 }
+    ];
+
+    function resizeCanvas() {
+      const rect = canvas.parentElement.getBoundingClientRect();
+      canvas.width = rect.width;
+      canvas.height = rect.height;
+    }
+    window.addEventListener("resize", resizeCanvas);
+    resizeCanvas();
+
+    // LaTeX Arka Plan Parçacıkları (Uçuşan formüller: ∑, ∫, ∂, λ, π, e^x)
+    const latexSymbols = ["∑", "∫", "∂", "λ", "π", "e^x", "O(n)", "∇", "α", "β", "H_0", "p<0.05"];
+    const backgroundFormulas = [];
+    for (let i = 0; i < 25; i++) {
+      backgroundFormulas.push({
+        text: latexSymbols[Math.floor(Math.random() * latexSymbols.length)],
+        x: Math.random() * 800,
+        y: Math.random() * 800,
+        speed: Math.random() * 30 + 15,
+        size: Math.random() * 12 + 10,
+        alpha: Math.random() * 0.15 + 0.05
+      });
+    }
+
+    // Tuş & Fare Dinleyicileri
+    const keys = {};
+    const mousePos = { x: 0, y: 0, active: false };
+    let isMouseDown = false;
+
+    window.addEventListener("keydown", (e) => {
+      keys[e.code] = true;
+      if (e.code === "KeyP" || e.code === "Escape") togglePause();
+      if (e.code === "KeyB") useBomb();
+    });
+
+    window.addEventListener("keyup", (e) => {
+      keys[e.code] = false;
+    });
+
+    canvas.addEventListener("mousemove", (e) => {
+      const rect = canvas.getBoundingClientRect();
+      mousePos.x = e.clientX - rect.left;
+      mousePos.y = e.clientY - rect.top;
+      mousePos.active = true;
+    });
+
+    canvas.addEventListener("mousedown", (e) => {
+      if (e.button === 0) isMouseDown = true;
+    });
+
+    window.addEventListener("mouseup", () => {
+      isMouseDown = false;
+    });
+
+    // Mobil Dokunmatik
+    canvas.addEventListener("touchmove", (e) => {
+      e.preventDefault();
+      const rect = canvas.getBoundingClientRect();
+      const t = e.touches[0];
+      mousePos.x = t.clientX - rect.left;
+      mousePos.y = t.clientY - rect.top;
+      mousePos.active = true;
+    }, { passive: false });
+
+    canvas.addEventListener("touchstart", (e) => {
+      const rect = canvas.getBoundingClientRect();
+      const t = e.touches[0];
+      mousePos.x = t.clientX - rect.left;
+      mousePos.y = t.clientY - rect.top;
+      mousePos.active = true;
+    }, { passive: false });
+
+    /* --- OYUNCU MAKALEMİZ (PLAYER DRAFT.PDF) --- */
+    const player = {
+      x: canvas.width / 2,
+      y: canvas.height - 90,
+      width: 38,
+      height: 48,
+      speed: 380,
+      shieldTime: 0,
+      tripleRebuttalTime: 0,
+      fireCooldown: 0,
+      fireRate: 0.18,
+      invulnerableTime: 0,
+
+      reset() {
+        this.x = canvas.width / 2;
+        this.y = canvas.height - 90;
+        this.shieldTime = 0;
+        this.tripleRebuttalTime = 0;
+        this.fireCooldown = 0;
+        this.invulnerableTime = 1.5;
+      },
+
+      update(dt) {
+        let mx = 0;
+        let my = 0;
+
+        if (keys["KeyA"] || keys["ArrowLeft"]) mx -= 1;
+        if (keys["KeyD"] || keys["ArrowRight"]) mx += 1;
+        if (keys["KeyW"] || keys["ArrowUp"]) my -= 1;
+        if (keys["KeyS"] || keys["ArrowDown"]) my += 1;
+
+        if (mx !== 0 || my !== 0) {
+          mousePos.active = false;
+          const mag = Math.hypot(mx, my);
+          this.x += (mx / mag) * this.speed * dt;
+          this.y += (my / mag) * this.speed * dt;
+        } else if (mousePos.active) {
+          const dx = mousePos.x - this.x;
+          const dy = mousePos.y - this.y;
+          this.x += dx * 9 * dt;
+          this.y += dy * 9 * dt;
+        }
+
+        const hw = this.width / 2;
+        const hh = this.height / 2;
+        this.x = Math.max(hw, Math.min(canvas.width - hw, this.x));
+        this.y = Math.max(hh + 60, Math.min(canvas.height - hh - 10, this.y));
+
+        if (this.invulnerableTime > 0) this.invulnerableTime -= dt;
+        if (this.shieldTime > 0) this.shieldTime -= dt;
+        if (this.tripleRebuttalTime > 0) this.tripleRebuttalTime -= dt;
+        if (this.fireCooldown > 0) this.fireCooldown -= dt;
+
+        // Ateş etme
+        if ((keys["Space"] || isMouseDown) && this.fireCooldown <= 0) {
+          this.shoot();
+          this.fireCooldown = this.fireRate;
+        }
+
+        // Kağıt arkası kıvılcımları
+        if (Math.random() < 0.6) {
+          createSparks(this.x, this.y + hh, '#00d2ff', 1);
+        }
+      },
+
+      shoot() {
+        sound.playRebuttal();
+        const topY = this.y - this.height / 2;
+
+        if (this.tripleRebuttalTime > 0) {
+          rebuttals.push(new Rebuttal(this.x, topY, 0, -600));
+          rebuttals.push(new Rebuttal(this.x - 12, topY, -120, -570));
+          rebuttals.push(new Rebuttal(this.x + 12, topY, 120, -570));
+        } else {
+          rebuttals.push(new Rebuttal(this.x, topY, 0, -600));
+        }
+      },
+
+      takeDamage(amount) {
+        if (this.invulnerableTime > 0) return;
+
+        if (this.shieldTime > 0) {
+          addFloatingText("OVERLEAF PRO KALKANI!", this.x, this.y - 30, '#00d2ff');
+          createSparks(this.x, this.y, '#00d2ff', 10);
+          return;
+        }
+
+        stamina = Math.max(0, stamina - amount);
+        acceptanceRate = Math.max(5, acceptanceRate - Math.floor(amount * 0.4));
+        sound.playRejectHit();
+        screenShake = 0.3;
+        createSparks(this.x, this.y, '#ff3366', 15);
+
+        if (stamina <= 0) {
+          gameOver();
+        }
+        updateHUD();
+      },
+
+      draw() {
+        ctx.save();
+        ctx.translate(this.x, this.y);
+
+        // Yanıp sönme (hasar koruması)
+        if (this.invulnerableTime > 0 && Math.floor(Date.now() / 90) % 2 === 0) {
+          ctx.globalAlpha = 0.4;
+        }
+
+        // Overleaf Pro Kalkanı
+        if (this.shieldTime > 0) {
+          ctx.beginPath();
+          ctx.arc(0, 0, this.height * 0.75, 0, Math.PI * 2);
+          ctx.strokeStyle = '#00d2ff';
+          ctx.lineWidth = 2.5;
+          ctx.shadowColor = '#00d2ff';
+          ctx.shadowBlur = 12;
+          ctx.stroke();
+        }
+
+        // PDF Kağıt Formu (A4 Görünümü, sağ üst köşesi kıvrık)
+        const w = this.width;
+        const h = this.height;
+        ctx.fillStyle = '#ffffff';
+        ctx.shadowColor = '#00d2ff';
+        ctx.shadowBlur = 10;
+        ctx.strokeStyle = '#00d2ff';
+        ctx.lineWidth = 2;
+
+        ctx.beginPath();
+        ctx.moveTo(-w / 2, -h / 2);
+        ctx.lineTo(w / 2 - 10, -h / 2);
+        ctx.lineTo(w / 2, -h / 2 + 10); // Kıvrık köşe
+        ctx.lineTo(w / 2, h / 2);
+        ctx.lineTo(-w / 2, h / 2);
+        ctx.closePath();
+        ctx.fill();
+        ctx.stroke();
+
+        // Kıvrık köşe üçgeni
+        ctx.beginPath();
+        ctx.moveTo(w / 2 - 10, -h / 2);
+        ctx.lineTo(w / 2 - 10, -h / 2 + 10);
+        ctx.lineTo(w / 2, -h / 2 + 10);
+        ctx.fillStyle = '#dcdde1';
+        ctx.fill();
+
+        // Kağıt üzerindeki metin çizgileri
+        ctx.fillStyle = '#2f3640';
+        ctx.fillRect(-w / 2 + 6, -h / 2 + 16, w - 12, 3);
+        ctx.fillRect(-w / 2 + 6, -h / 2 + 23, w - 16, 2.5);
+        ctx.fillRect(-w / 2 + 6, -h / 2 + 29, w - 14, 2.5);
+        ctx.fillRect(-w / 2 + 6, -h / 2 + 35, w - 20, 2.5);
+
+        // Kırmızı PDF Etiketi
+        ctx.fillStyle = '#ff3366';
+        ctx.fillRect(-w / 2 + 5, -h / 2 + 4, 16, 8);
+        ctx.fillStyle = '#fff';
+        ctx.font = 'bold 6px sans-serif';
+        ctx.fillText("PDF", -w / 2 + 6, -h / 2 + 10);
+
+        ctx.restore();
+      }
+    };
+
+    /* --- REBUTTAL MERMİLERİ (CEVAP MEKTUPLARI) --- */
+    const rebuttals = [];
+    class Rebuttal {
+      constructor(x, y, vx, vy) {
+        this.x = x;
+        this.y = y;
+        this.vx = vx;
+        this.vy = vy;
+        this.radius = 6;
+      }
+
+      update(dt) {
+        this.x += this.vx * dt;
+        this.y += this.vy * dt;
+      }
+
+      draw() {
+        ctx.save();
+        ctx.translate(this.x, this.y);
+        ctx.font = '14px Arial';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.shadowColor = '#00d2ff';
+        ctx.shadowBlur = 8;
+        ctx.fillText("✉️", 0, 0);
+        ctx.restore();
+      }
+    }
+
+    /* --- HAKEM ELEŞTİRİLERİ & REVIEWER 2 (ENEMIES) --- */
+    const criticisms = [];
+    class Criticism {
+      constructor(type = "comment") {
+        this.type = type; // "comment", "stamp", "reviewer2_boss"
+        this.x = Math.random() * (canvas.width - 120) + 60;
+        this.y = -40;
+
+        if (type === "comment") {
+          const labels = [
+            "Major Revision",
+            "Out of Scope",
+            "Lack of Novelty",
+            "Missing Baseline",
+            "Flawed Methodology",
+            "Formatting Error",
+            "Cite Me!",
+            "English Editing Needed"
+          ];
+          this.text = labels[Math.floor(Math.random() * labels.length)];
+          this.width = Math.min(130, this.text.length * 8 + 14);
+          this.height = 24;
+          this.vy = 85 + Math.random() * 50 + currentTierIndex * 15;
+          this.vx = (Math.random() - 0.5) * 40;
+          this.hp = 2 + Math.floor(currentTierIndex * 0.7);
+          this.color = '#ff3366';
+        } else if (type === "stamp") {
+          this.text = "DESK REJECT";
+          this.width = 110;
+          this.height = 30;
+          this.vy = 140 + currentTierIndex * 20;
+          this.vx = 0;
+          this.hp = 4 + currentTierIndex;
+          this.color = '#ff0033';
+        } else if (type === "reviewer2_boss") {
+          this.text = "🔴 REVIEWER 2";
+          this.width = 170;
+          this.height = 54;
+          this.x = canvas.width / 2;
+          this.y = -70;
+          this.targetY = 110;
+          this.vx = 110;
+          this.vy = 60;
+          this.hp = 45 + currentTierIndex * 20;
+          this.maxHp = this.hp;
+          this.shootTimer = 1.2;
+          this.color = '#ff0033';
+          addFloatingText("DİKKAT: HAKEM 2 İNCELEMESİ!", canvas.width / 2, 200, '#ff3366', 22);
+        }
+      }
+
+      update(dt) {
+        if (this.type === "reviewer2_boss") {
+          if (this.y < this.targetY) {
+            this.y += this.vy * dt;
+          } else {
+            this.x += this.vx * dt;
+            if (this.x < this.width / 2 + 15 || this.x > canvas.width - this.width / 2 - 15) {
+              this.vx *= -1;
+            }
+          }
+
+          // Boss Red Mermileri Fırlatır
+          this.shootTimer -= dt;
+          if (this.shootTimer <= 0) {
+            this.shootTimer = 1.3 - Math.min(0.5, currentTierIndex * 0.1);
+            sound.playRebuttal();
+            for (let a = -0.3; a <= 0.3; a += 0.3) {
+              const spd = 220;
+              enemyBullets.push(new EnemyBullet(
+                this.x,
+                this.y + this.height / 2,
+                Math.sin(a) * spd,
+                Math.cos(a) * spd
+              ));
+            }
+          }
+          return;
+        }
+
+        this.x += this.vx * dt;
+        this.y += this.vy * dt;
+      }
+
+      draw() {
+        ctx.save();
+        ctx.translate(this.x, this.y);
+
+        if (this.type === "reviewer2_boss") {
+          // Boss Kartı
+          ctx.shadowColor = '#ff0033';
+          ctx.shadowBlur = 15;
+          ctx.fillStyle = 'rgba(40, 10, 20, 0.95)';
+          ctx.strokeStyle = '#ff0033';
+          ctx.lineWidth = 2.5;
+
+          ctx.strokeRect(-this.width / 2, -this.height / 2, this.width, this.height);
+          ctx.fillRect(-this.width / 2, -this.height / 2, this.width, this.height);
+
+          ctx.fillStyle = '#ffffff';
+          ctx.font = 'bold 16px sans-serif';
+          ctx.textAlign = 'center';
+          ctx.textBaseline = 'middle';
+          ctx.fillText("🔴 HAKEM 2 (Öfkeli)", 0, -4);
+
+          // Can Çubuğu
+          const hpRatio = Math.max(0, this.hp / this.maxHp);
+          ctx.fillStyle = 'rgba(255, 255, 255, 0.15)';
+          ctx.fillRect(-this.width / 2 + 10, this.height / 2 - 10, this.width - 20, 5);
+          ctx.fillStyle = '#ff3366';
+          ctx.fillRect(-this.width / 2 + 10, this.height / 2 - 10, (this.width - 20) * hpRatio, 5);
+          ctx.restore();
+          return;
+        }
+
+        // Standart Eleştiri Damgası
+        ctx.shadowColor = this.color;
+        ctx.shadowBlur = 8;
+        ctx.fillStyle = 'rgba(30, 15, 25, 0.9)';
+        ctx.strokeStyle = this.color;
+        ctx.lineWidth = 1.5;
+
+        ctx.fillRect(-this.width / 2, -this.height / 2, this.width, this.height);
+        ctx.strokeRect(-this.width / 2, -this.height / 2, this.width, this.height);
+
+        ctx.fillStyle = '#ffffff';
+        ctx.font = 'bold 11px sans-serif';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(this.text, 0, 0);
+
+        ctx.restore();
+      }
+    }
+
+    /* --- DÜŞMAN MERMİLERİ (RED İĞNELERİ) --- */
+    const enemyBullets = [];
+    class EnemyBullet {
+      constructor(x, y, vx, vy) {
+        this.x = x;
+        this.y = y;
+        this.vx = vx;
+        this.vy = vy;
+        this.radius = 4;
+      }
+      update(dt) {
+        this.x += this.vx * dt;
+        this.y += this.vy * dt;
+      }
+      draw() {
+        ctx.save();
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+        ctx.fillStyle = '#ff3366';
+        ctx.shadowColor = '#ff3366';
+        ctx.shadowBlur = 8;
+        ctx.fill();
+        ctx.restore();
+      }
+    }
+
+    /* --- GÜÇLENDİRİCİLER (COFFEE, CITATION, OVERLEAF) --- */
+    const academicPowerups = [];
+    class AcademicPowerup {
+      constructor(x, y) {
+        this.x = x;
+        this.y = y;
+        this.vy = 75;
+        this.radius = 15;
+        const types = ["coffee", "citation", "overleaf", "bomb"];
+        this.type = types[Math.floor(Math.random() * types.length)];
+      }
+
+      update(dt) {
+        this.y += this.vy * dt;
+      }
+
+      draw() {
+        ctx.save();
+        ctx.translate(this.x, this.y);
+
+        let icon = "☕";
+        let glow = "#f39c12";
+        if (this.type === "coffee") { icon = "☕"; glow = "#f39c12"; }
+        if (this.type === "citation") { icon = "📚"; glow = "#2ecc71"; }
+        if (this.type === "overleaf") { icon = "🛡️"; glow = "#00d2ff"; }
+        if (this.type === "bomb") { icon = "💡"; glow = "#9b59b6"; }
+
+        ctx.shadowColor = glow;
+        ctx.shadowBlur = 10;
+        ctx.beginPath();
+        ctx.arc(0, 0, this.radius, 0, Math.PI * 2);
+        ctx.fillStyle = 'rgba(15, 20, 35, 0.9)';
+        ctx.strokeStyle = glow;
+        ctx.lineWidth = 2;
+        ctx.fill();
+        ctx.stroke();
+
+        ctx.font = '14px sans-serif';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(icon, 0, 1);
+
+        ctx.restore();
+      }
+    }
+
+    /* --- METİNLER & PARÇACIKLAR --- */
+    const particles = [];
+    function createSparks(x, y, color = '#00d2ff', count = 10) {
+      for (let i = 0; i < count; i++) {
+        const ang = Math.random() * Math.PI * 2;
+        const spd = Math.random() * 180 + 40;
+        particles.push({
+          x, y,
+          vx: Math.cos(ang) * spd,
+          vy: Math.sin(ang) * spd,
+          color,
+          radius: Math.random() * 2.5 + 1,
+          alpha: 1,
+          decay: Math.random() * 2 + 1.2
+        });
+      }
+    }
+
+    const floatingTexts = [];
+    function addFloatingText(text, x, y, color = '#2ecc71', size = 15) {
+      floatingTexts.push({
+        text, x, y, color, size,
+        alpha: 1,
+        vy: -35
+      });
+    }
+
+    let screenShake = 0;
+
+    /* ==========================================================================
+       4. OYUN MEKANİĞİ & AKIŞ
+       ========================================================================== */
+    function useBomb() {
+      if (gameState !== "PLAYING" || bombsCount <= 0) return;
+      bombsCount--;
+      sound.playBomb();
+      screenShake = 0.4;
+      addFloatingText("POINT-BY-POINT CEVAP!", canvas.width / 2, canvas.height / 2, '#9b59b6', 22);
+
+      criticisms.forEach(c => {
+        if (c.type === "reviewer2_boss") {
+          c.hp -= 30;
+        } else {
+          score += 40;
+          c.hp = 0;
+          createSparks(c.x, c.y, '#9b59b6', 12);
+        }
+      });
+      enemyBullets.length = 0;
+      updateHUD();
+    }
+
+    document.getElementById("btn-touch-bomb").addEventListener("click", useBomb);
+    document.getElementById("btn-touch-fire").addEventListener("touchstart", () => {
+      if (gameState === "PLAYING" && player.fireCooldown <= 0) {
+        player.shoot();
+        player.fireCooldown = player.fireRate;
+      }
+    });
+
+    let spawnTimer = 0;
+    let bossActive = false;
+
+    function spawnCriticisms(dt) {
+      spawnTimer += dt;
+
+      // Her 200 skorda bir Kabul Olasılığı artışı
+      const targetTier = TIERS.slice().reverse().find(t => score >= t.threshold);
+      if (targetTier) {
+        currentTierIndex = TIERS.indexOf(targetTier);
+        document.getElementById("hud-tier").textContent = targetTier.name;
+      }
+
+      // 100% Kabul Olasılığı Kontrolü -> ZAFER!
+      if (acceptanceRate >= 100) {
+        victory();
+        return;
+      }
+
+      // Boss Çağırma (Her 500 skorda bir veya Tier 3'te)
+      if (score >= 400 && !bossActive && Math.random() < 0.003) {
+        const hasBoss = criticisms.some(c => c.type === "reviewer2_boss");
+        if (!hasBoss) {
+          criticisms.push(new Criticism("reviewer2_boss"));
+          bossActive = true;
+        }
+      }
+
+      // Normal eleştiriler
+      const spawnInterval = Math.max(0.6, 1.4 - (currentTierIndex * 0.15));
+      if (spawnTimer >= spawnInterval && criticisms.length < 8 + currentTierIndex) {
+        spawnTimer = 0;
+        const roll = Math.random();
+        if (roll < 0.75) {
+          criticisms.push(new Criticism("comment"));
+        } else {
+          criticisms.push(new Criticism("stamp"));
+        }
+      }
+    }
+
+    function update(dt) {
+      if (screenShake > 0) screenShake -= dt;
+
+      // Arka plan LaTeX simgeleri
+      backgroundFormulas.forEach(f => {
+        f.y += f.speed * dt;
+        if (f.y > canvas.height + 20) {
+          f.y = -20;
+          f.x = Math.random() * canvas.width;
+        }
+      });
+
+      player.update(dt);
+      spawnCriticisms(dt);
+
+      // Rebuttal Mermileri
+      for (let i = rebuttals.length - 1; i >= 0; i--) {
+        const r = rebuttals[i];
+        r.update(dt);
+        if (r.y < -20) rebuttals.splice(i, 1);
+      }
+
+      // Düşman Mermileri
+      for (let i = enemyBullets.length - 1; i >= 0; i--) {
+        const b = enemyBullets[i];
+        b.update(dt);
+        if (b.y > canvas.height + 20) {
+          enemyBullets.splice(i, 1);
+          continue;
+        }
+
+        const dist = Math.hypot(b.x - player.x, b.y - player.y);
+        if (dist < player.width / 2.2 + b.radius) {
+          player.takeDamage(12);
+          enemyBullets.splice(i, 1);
+        }
+      }
+
+      // Eleştiriler
+      for (let i = criticisms.length - 1; i >= 0; i--) {
+        const c = criticisms[i];
+        c.update(dt);
+
+        if (c.y > canvas.height + 40 && c.type !== "reviewer2_boss") {
+          criticisms.splice(i, 1);
+          continue;
+        }
+
+        // Oyuncuyla Çarpışma
+        const dist = Math.hypot(c.x - player.x, c.y - player.y);
+        if (dist < c.width / 2.2 + player.width / 2.5) {
+          player.takeDamage(c.type === "reviewer2_boss" ? 35 : 18);
+          if (c.type !== "reviewer2_boss") {
+            criticisms.splice(i, 1);
+            continue;
+          }
+        }
+
+        // Rebuttal ile Eleştiriyi Çürütme
+        for (let j = rebuttals.length - 1; j >= 0; j--) {
+          const r = rebuttals[j];
+          if (Math.abs(r.x - c.x) < c.width / 2 + 8 && Math.abs(r.y - c.y) < c.height / 2 + 8) {
+            c.hp--;
+            rebuttals.splice(j, 1);
+            createSparks(r.x, r.y, '#00d2ff', 4);
+
+            if (c.hp <= 0) {
+              sound.playRejectHit();
+              createSparks(c.x, c.y, c.color, c.type === "reviewer2_boss" ? 35 : 12);
+              score += c.type === "reviewer2_boss" ? 300 : 50;
+              acceptanceRate = Math.min(100, acceptanceRate + (c.type === "reviewer2_boss" ? 15 : 2));
+              addFloatingText(`+${c.type === "reviewer2_boss" ? 300 : 50} ATIF`, c.x, c.y, '#00d2ff');
+
+              if (c.type === "reviewer2_boss") bossActive = false;
+
+              // Güçlendirme düşme ihtimali
+              if (Math.random() < 0.28 || c.type === "reviewer2_boss") {
+                academicPowerups.push(new AcademicPowerup(c.x, c.y));
+              }
+
+              criticisms.splice(i, 1);
+              updateHUD();
+              break;
+            }
+          }
+        }
+      }
+
+      // Güçlendiriciler
+      for (let i = academicPowerups.length - 1; i >= 0; i--) {
+        const p = academicPowerups[i];
+        p.update(dt);
+        if (p.y > canvas.height + 30) {
+          academicPowerups.splice(i, 1);
+          continue;
+        }
+
+        const d = Math.hypot(p.x - player.x, p.y - player.y);
+        if (d < p.radius + player.width / 2) {
+          sound.playCoffeeChime();
+          if (p.type === "coffee") {
+            stamina = Math.min(100, stamina + 35);
+            addFloatingText("KAHVE İÇİLDİ! (+35)", player.x, player.y - 20, '#f39c12');
+          } else if (p.type === "citation") {
+            score += 100;
+            acceptanceRate = Math.min(100, acceptanceRate + 5);
+            addFloatingText("ATIF ALINDI! (+100)", player.x, player.y - 20, '#2ecc71');
+          } else if (p.type === "overleaf") {
+            player.shieldTime = 8;
+            addFloatingText("OVERLEAF PRO (8s)!", player.x, player.y - 20, '#00d2ff');
+          } else if (p.type === "bomb") {
+            bombsCount++;
+            addFloatingText("+1 MADDE CEVAP!", player.x, player.y - 20, '#9b59b6');
+          }
+          academicPowerups.splice(i, 1);
+          updateHUD();
+        }
+      }
+
+      // Parçacıklar
+      for (let i = particles.length - 1; i >= 0; i--) {
+        const pt = particles[i];
+        pt.x += pt.vx * dt;
+        pt.y += pt.vy * dt;
+        pt.alpha -= pt.decay * dt;
+        if (pt.alpha <= 0) particles.splice(i, 1);
+      }
+
+      // Uçan Metinler
+      for (let i = floatingTexts.length - 1; i >= 0; i--) {
+        const ft = floatingTexts[i];
+        ft.y += ft.vy * dt;
+        ft.alpha -= 0.85 * dt;
+        if (ft.alpha <= 0) floatingTexts.splice(i, 1);
+      }
+    }
+
+    function draw() {
+      ctx.save();
+      if (screenShake > 0) {
+        ctx.translate((Math.random() - 0.5) * 10, (Math.random() - 0.5) * 10);
+      }
+
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      // LaTeX Formül Arka Planı
+      backgroundFormulas.forEach(f => {
+        ctx.fillStyle = `rgba(0, 210, 255, ${f.alpha})`;
+        ctx.font = `italic ${f.size}px 'Times New Roman', serif`;
+        ctx.fillText(f.text, f.x, f.y);
+      });
+
+      // Öğeler
+      academicPowerups.forEach(p => p.draw());
+      rebuttals.forEach(r => r.draw());
+      enemyBullets.forEach(b => b.draw());
+      criticisms.forEach(c => c.draw());
+      player.draw();
+
+      // Parçacıklar
+      particles.forEach(pt => {
+        ctx.save();
+        ctx.globalAlpha = Math.max(0, pt.alpha);
+        ctx.fillStyle = pt.color;
+        ctx.beginPath();
+        ctx.arc(pt.x, pt.y, pt.radius, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+      });
+
+      // Uçan Metinler
+      floatingTexts.forEach(ft => {
+        ctx.save();
+        ctx.globalAlpha = Math.max(0, ft.alpha);
+        ctx.font = `bold ${ft.size}px 'Segoe UI', sans-serif`;
+        ctx.fillStyle = ft.color;
+        ctx.shadowColor = ft.color;
+        ctx.shadowBlur = 8;
+        ctx.textAlign = 'center';
+        ctx.fillText(ft.text, ft.x, ft.y);
+        ctx.restore();
+      });
+
+      ctx.restore();
+    }
+
+    function gameLoop(timestamp) {
+      if (!lastTime) lastTime = timestamp;
+      const dt = Math.min((timestamp - lastTime) / 1000, 0.1);
+      lastTime = timestamp;
+
+      if (gameState === "PLAYING") {
+        update(dt);
+        draw();
+      }
+      animationId = requestAnimationFrame(gameLoop);
+    }
+
+    /* ==========================================================================
+       5. ARAYÜZ VE MENÜ KONTROLLERİ
+       ========================================================================== */
+    function updateHUD() {
+      document.getElementById("hud-score").textContent = score;
+
+      const staminaBar = document.getElementById("hud-stamina-bar");
+      const staminaVal = document.getElementById("hud-stamina-val");
+      staminaVal.textContent = `${Math.round(stamina)}%`;
+      staminaBar.style.width = `${Math.round(stamina)}%`;
+
+      const acceptBar = document.getElementById("hud-accept-bar");
+      const acceptVal = document.getElementById("hud-accept-val");
+      acceptVal.textContent = `${Math.min(100, Math.round(acceptanceRate))}%`;
+      acceptBar.style.width = `${Math.min(100, Math.round(acceptanceRate))}%`;
+    }
+
+    function startGame() {
+      sound.init();
+      score = 0;
+      stamina = 100;
+      acceptanceRate = 15;
+      bombsCount = 1;
+      currentTierIndex = 0;
+      bossActive = false;
+
+      criticisms.length = 0;
+      rebuttals.length = 0;
+      enemyBullets.length = 0;
+      academicPowerups.length = 0;
+      particles.length = 0;
+      floatingTexts.length = 0;
+
+      player.reset();
+      updateHUD();
+
+      document.getElementById("start-screen").classList.add("hidden");
+      document.getElementById("game-over-screen").classList.add("hidden");
+      document.getElementById("victory-screen").classList.add("hidden");
+      document.getElementById("pause-screen").classList.add("hidden");
+      document.getElementById("hall-modal").classList.add("hidden");
+
+      gameState = "PLAYING";
+      lastTime = 0;
+      if (!animationId) animationId = requestAnimationFrame(gameLoop);
+    }
+
+    function togglePause() {
+      if (gameState === "PLAYING") {
+        gameState = "PAUSED";
+        document.getElementById("pause-screen").classList.remove("hidden");
+      } else if (gameState === "PAUSED") {
+        gameState = "PLAYING";
+        document.getElementById("pause-screen").classList.add("hidden");
+        lastTime = performance.now();
+      }
+    }
+
+    function gameOver() {
+      gameState = "GAMEOVER";
+      sound.playRejectHit();
+
+      // Rastgele komik hakem yorumu seç
+      const randomQuote = REVIEWER_QUOTES[Math.floor(Math.random() * REVIEWER_QUOTES.length)];
+      document.getElementById("reviewer-random-quote").textContent = randomQuote;
+      document.getElementById("final-score").textContent = score;
+      document.getElementById("final-accept-rate").textContent = `${acceptanceRate}%`;
+
+      document.getElementById("game-over-screen").classList.remove("hidden");
+    }
+
+    function victory() {
+      gameState = "VICTORY";
+      sound.playAcceptFanfare();
+      document.getElementById("victory-score").textContent = score;
+      document.getElementById("victory-screen").classList.remove("hidden");
+    }
+
+    // Buton Dinleyicileri
+    document.getElementById("btn-start").addEventListener("click", startGame);
+    document.getElementById("btn-restart").addEventListener("click", startGame);
+    document.getElementById("btn-restart-victory").addEventListener("click", startGame);
+    document.getElementById("btn-pause").addEventListener("click", togglePause);
+    document.getElementById("btn-resume").addEventListener("click", togglePause);
+
+    // Ses Aç/Kapa
+    const btnSound = document.getElementById("btn-sound");
+    btnSound.addEventListener("click", () => {
+      sound.init();
+      sound.muted = !sound.muted;
+      btnSound.textContent = sound.muted ? "🔇" : "🔊";
+    });
+
+    // Skor Kaydetme
+    document.getElementById("btn-save-score").addEventListener("click", () => {
+      const name = document.getElementById("author-name-input").value.trim() || "Dr. Anonim";
+      const currentTier = TIERS[currentTierIndex].name;
+      saveHallScore(name, score, currentTier);
+      renderHallTable();
+      document.getElementById("game-over-screen").classList.add("hidden");
+      document.getElementById("hall-modal").classList.remove("hidden");
+    });
+
+    document.getElementById("btn-save-victory").addEventListener("click", () => {
+      const name = document.getElementById("victory-author-input").value.trim() || "Prof. Şampiyon";
+      saveHallScore(name, score, "Nature / Science (KABUL)");
+      renderHallTable();
+      document.getElementById("victory-screen").classList.add("hidden");
+      document.getElementById("hall-modal").classList.remove("hidden");
+    });
+
+    // Liderlik Tablosu
+    function openHall() {
+      renderHallTable();
+      document.getElementById("hall-modal").classList.remove("hidden");
+    }
+    document.getElementById("btn-hall-open").addEventListener("click", openHall);
+    document.getElementById("btn-show-hall").addEventListener("click", openHall);
+
+    document.getElementById("btn-close-hall").addEventListener("click", () => {
+      document.getElementById("hall-modal").classList.add("hidden");
+      if (gameState === "GAMEOVER") document.getElementById("game-over-screen").classList.remove("hidden");
+      if (gameState === "VICTORY") document.getElementById("victory-screen").classList.remove("hidden");
+    });
+
+    document.getElementById("btn-clear-hall").addEventListener("click", () => {
+      if (confirm("Kabul Duvarındaki tüm kayıtları temizlemek istediğinize emin misiniz?")) {
+        localStorage.removeItem(STORAGE_KEY);
+        renderHallTable();
+      }
+    });
+
+    // Web Sitesine Gömme Kodunu Kopyalama (iframe)
+    document.getElementById("btn-embed-code").addEventListener("click", () => {
+      const iframeCode = `<iframe src="reviewer-escape.html" width="100%" height="700px" style="border:none; border-radius:12px; box-shadow:0 8px 30px rgba(0,0,0,0.5);" loading="lazy"></iframe>`;
+      navigator.clipboard.writeText(iframeCode).then(() => {
+        alert("Gömme kodu (iframe) panoya kopyalandı! Web sayfanızın HTML koduna yapıştırabilirsiniz.");
+      }).catch(() => {
+        prompt("Gömme kodunu kopyalayın:", iframeCode);
+      });
+    });
+
+    // İlk çizim
+    draw();
+  </script>
+</body>
+</html>
