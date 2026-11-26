@@ -1,0 +1,748 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Bilgisayar Ağları Simülatörleri</title>
+<style>
+:root{
+  --bg:#f4f6fb;--card:#fff;--ink:#1c2333;--muted:#5d6678;--line:#dde2ec;--soft:#eef2f8;
+  --accent:#2563eb;--net:#2563eb;--host:#ea580c;
+  --app:#7c3aed;--tr:#0891b2;--nw:#16a34a;--dl:#d97706;--ph:#64748b;
+}
+*{box-sizing:border-box}
+body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;background:var(--bg);color:var(--ink);line-height:1.5}
+.wrap{max-width:1180px;margin:0 auto;padding:20px 16px 40px}
+h1{font-size:1.5rem;margin:0 0 4px}
+.sub{color:var(--muted);margin:0 0 16px}
+.tabs{display:flex;gap:6px;flex-wrap:wrap;border-bottom:2px solid var(--line);margin-bottom:18px}
+.tab{border:0;background:none;padding:10px 16px;font:inherit;font-weight:600;color:var(--muted);cursor:pointer;border-bottom:3px solid transparent;margin-bottom:-2px}
+.tab.on{color:var(--accent);border-bottom-color:var(--accent)}
+.pane{display:none}.pane.on{display:block}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px;margin-bottom:16px}
+.card h3{margin:0 0 10px;font-size:1.02rem}
+.row{display:flex;gap:12px;flex-wrap:wrap;align-items:flex-end}
+label{font-size:.85rem;color:var(--muted);display:block;margin-bottom:4px}
+input[type=text],select{font:inherit;padding:8px 10px;border:1px solid var(--line);border-radius:8px;background:#fff;min-width:0}
+input[type=range]{accent-color:var(--accent)}
+.btn{font:inherit;font-weight:600;border:1px solid var(--line);background:#fff;padding:8px 14px;border-radius:8px;cursor:pointer}
+.btn:hover:not(:disabled){background:var(--soft)}
+.btn.pri{background:var(--accent);color:#fff;border-color:var(--accent)}
+.btn.pri:hover:not(:disabled){filter:brightness(1.08);background:var(--accent)}
+.btn:disabled{opacity:.45;cursor:default}
+.err{color:#dc2626;font-weight:600;min-height:1.4em;margin-top:6px}
+table{border-collapse:collapse;width:100%}
+td,th{padding:7px 10px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
+th{font-size:.82rem;color:var(--muted);font-weight:600}
+td.k{color:var(--muted);width:42%}
+td.v{font-family:ui-monospace,Consolas,monospace;font-weight:600}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+@media(max-width:820px){.grid2{grid-template-columns:1fr}}
+.mono{font-family:ui-monospace,Consolas,monospace}
+.small{font-size:.85rem;color:var(--muted)}
+
+/* ---- Subnet ---- */
+.bits{font-family:ui-monospace,Consolas,monospace;font-size:.95rem;letter-spacing:.5px;white-space:nowrap}
+.nb{color:var(--net);font-weight:700}.hb{color:var(--host);font-weight:700}
+.bitrow td{padding:6px 10px}
+.legend span{display:inline-block;margin-right:14px}
+.sw{display:inline-block;width:12px;height:12px;border-radius:3px;vertical-align:-1px;margin-right:4px}
+.tag{display:inline-block;padding:1px 8px;border-radius:99px;background:var(--soft);font-size:.8rem;font-weight:600;margin-left:6px}
+.scroll{overflow-x:auto}
+
+/* ---- Kapsülleme ---- */
+.enc{display:grid;grid-template-columns:230px 1fr 230px;gap:16px;align-items:start}
+@media(max-width:900px){.enc{grid-template-columns:1fr}}
+.stack .ttl{font-weight:700;text-align:center;margin-bottom:6px}
+.stack .dir{text-align:center;font-size:.8rem;color:var(--muted);margin-top:6px}
+.ly{border:2px solid transparent;border-radius:8px;padding:6px 10px;margin-bottom:6px;color:#fff;transition:.3s;opacity:.55}
+.ly b{display:block;font-size:.95rem}
+.ly small{display:block;font-size:.72rem;opacity:.95}
+.ly.act{opacity:1;transform:scale(1.04);box-shadow:0 4px 14px rgba(0,0,0,.18);border-color:#111}
+.pdu{min-height:86px;display:flex;align-items:stretch;justify-content:center;flex-wrap:nowrap;gap:0;margin:10px 0 4px;overflow:hidden}
+.blk{color:#fff;padding:10px 10px;font-size:.82rem;font-weight:700;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;border-right:2px solid #fff;min-width:70px}
+.blk:first-child{border-radius:8px 0 0 8px}.blk:last-child{border-radius:0 8px 8px 0;border-right:0}
+.blk:only-child{border-radius:8px}
+.blk small{font-weight:500;font-size:.72rem;opacity:.9}
+.blk.data{flex:1 1 auto;max-width:340px;word-break:break-word}
+.blk.in{animation:drop .55s ease-out}
+.blk.out{animation:lift .5s ease-in forwards}
+@keyframes drop{from{transform:translateY(-36px);opacity:0}}
+@keyframes lift{to{transform:translateY(-36px);opacity:0}}
+.pduname{text-align:center;font-weight:700}
+.stepT{font-weight:700;font-size:1.05rem;margin:0 0 4px}
+.dots{display:flex;gap:6px;justify-content:center;margin:12px 0}
+.dots i{width:10px;height:10px;border-radius:50%;background:var(--line);display:block;cursor:pointer}
+.dots i.on{background:var(--accent)}
+.bitbox{font-family:ui-monospace,Consolas,monospace;font-size:.8rem;word-break:break-all;background:#0f172a;color:#7dd3fc;padding:10px;border-radius:8px;line-height:1.35}
+.wire{position:relative;height:34px;margin:12px 0;background:linear-gradient(#94a3b8,#94a3b8) center/100% 4px no-repeat;overflow:hidden}
+.wire span{position:absolute;top:5px;font-family:ui-monospace,monospace;font-weight:700;color:#0f172a;background:#fde68a;border-radius:4px;padding:0 4px;animation:run 2.4s linear infinite}
+@keyframes run{from{left:-20px}to{left:100%}}
+
+/* ---- Paket yolculuğu ---- */
+.topo{width:100%;height:auto;display:block;background:#fbfcfe;border:1px solid var(--line);border-radius:10px}
+.log{max-height:320px;overflow:auto;padding-left:0;margin:0;list-style:none;position:relative}
+.log li{padding:7px 10px;border-left:3px solid transparent;border-bottom:1px solid var(--soft);font-size:.9rem;color:var(--muted)}
+.log li.done{color:var(--ink)}
+.log li.cur{border-left-color:var(--accent);background:#eff6ff;color:var(--ink);font-weight:600}
+.tbls{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:12px}
+.tb{border:1px solid var(--line);border-radius:8px;overflow:hidden}
+.tb h4{margin:0;padding:6px 10px;background:var(--soft);font-size:.86rem}
+.tb td{font-size:.8rem;padding:4px 10px;font-family:ui-monospace,Consolas,monospace}
+.tb .empty{color:var(--muted);font-style:italic;font-family:inherit}
+.tb tr.new td{background:#fef9c3}
+.chip{display:inline-block;width:12px;height:12px;border-radius:3px;vertical-align:-1px;margin-right:4px}
+.ftype{font-weight:700}
+
+/* ---- IP sınıfları ---- */
+.cbar{display:flex;height:46px;border-radius:8px;overflow:hidden;position:relative;margin:8px 0 2px}
+.cbar div{display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:.9rem;cursor:pointer;transition:filter .2s}
+.cbar div:hover{filter:brightness(1.1)}
+.cbar .mk{position:absolute;top:-6px;bottom:-6px;width:3px;background:#111;border-radius:2px;pointer-events:none;transition:left .15s}
+.cscale{font-size:.75rem;color:var(--muted);font-family:ui-monospace,monospace}
+.ccA{background:#2563eb}.ccB{background:#16a34a}.ccC{background:#d97706}.ccD{background:#7c3aed}.ccE{background:#64748b}
+.octs{display:flex;gap:4px;margin:4px 0}
+.octs span{flex:1;text-align:center;padding:4px 0;border-radius:5px;color:#fff;font-weight:700;font-size:.8rem}
+.oN{background:var(--net)}.oH{background:var(--host)}.oX{background:#cbd5e1;color:#334155!important}
+.lead{background:#fde68a;border-radius:3px;padding:0 1px}
+tr.cl{cursor:pointer}tr.cl:hover td{background:#f8fafc}
+tr.def td{background:#eff6ff}
+.steps{margin:8px 0 0;padding-left:20px}.steps li{margin-bottom:6px}
+.qbox{font-size:1.08rem;font-weight:600;margin:6px 0 12px}
+.ok{color:#16a34a;font-weight:700}.no{color:#dc2626;font-weight:700}
+.score{float:right;font-size:.9rem;color:var(--muted)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Bilgisayar Ağları Simülatörleri</h1>
+  <p class="sub">Alt ağ hesaplama, katmanlı kapsülleme ve bir paketin ağdaki yolculuğu, etkileşimli olarak.</p>
+
+  <div class="tabs" role="tablist">
+    <button class="tab on" data-t="p1">1 · Alt Ağ Hesaplayıcı</button>
+    <button class="tab" data-t="p2">2 · Kapsülleme (OSI / TCP-IP)</button>
+    <button class="tab" data-t="p3">3 · Paket Yolculuğu</button>
+    <button class="tab" data-t="p4">4 · IP Sınıfları ve Alt Ağlama</button>
+  </div>
+
+  <!-- ================= 1. ALT AĞ ================= -->
+  <section class="pane on" id="p1">
+    <div class="card">
+      <div class="row">
+        <div><label for="sIp">IP adresi (istersen /önek ile: 192.168.1.10/24)</label>
+          <input type="text" id="sIp" value="192.168.10.77" size="22" class="mono"></div>
+        <div style="flex:1;min-width:220px"><label for="sPre">Önek uzunluğu (CIDR): <b id="sPreV">/26</b></label>
+          <input type="range" id="sPre" min="0" max="32" value="26" style="width:100%"></div>
+      </div>
+      <div class="err" id="sErr"></div>
+    </div>
+
+    <div class="grid2">
+      <div class="card"><h3>Sonuçlar</h3><table id="sRes"></table></div>
+      <div class="card">
+        <h3>İkili (binary) gösterim</h3>
+        <p class="small legend"><span><i class="sw" style="background:var(--net)"></i>Ağ bitleri</span><span><i class="sw" style="background:var(--host)"></i>Host bitleri</span></p>
+        <div class="scroll"><table id="sBin"></table></div>
+        <p class="small">Ağ adresi = IP <b>VE</b> maske (host bitleri 0). Yayın adresi = host bitlerinin tümü 1.</p>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>Bu ağı alt ağlara böl</h3>
+      <div class="row">
+        <div><label for="sDiv">Alt ağ sayısı</label>
+          <select id="sDiv"><option>2</option><option selected>4</option><option>8</option><option>16</option><option>32</option><option>64</option></select></div>
+        <div class="small" id="sDivInfo" style="padding-bottom:8px"></div>
+      </div>
+      <div class="scroll" style="margin-top:10px"><table id="sDivT"></table></div>
+    </div>
+  </section>
+
+  <!-- ================= 2. KAPSÜLLEME ================= -->
+  <section class="pane" id="p2">
+    <div class="card">
+      <div class="row">
+        <div style="flex:1;min-width:200px"><label for="eMsg">Gönderilecek veri</label>
+          <input type="text" id="eMsg" value="GET /index.html" maxlength="40" style="width:100%"></div>
+        <div><label for="eProto">Taşıma protokolü</label>
+          <select id="eProto"><option>TCP</option><option>UDP</option></select></div>
+        <div class="row" style="gap:6px">
+          <button class="btn" id="eFirst" title="Başa dön">⏮</button>
+          <button class="btn" id="ePrev">◀ Geri</button>
+          <button class="btn pri" id="eNext">İleri ▶</button>
+          <button class="btn" id="eAuto">▶ Otomatik</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="enc">
+      <div class="card stack"><div class="ttl">💻 Gönderici</div><div id="stTx"></div><div class="dir">↓ Kapsülleme (encapsulation)</div></div>
+      <div class="card">
+        <p class="stepT" id="eTitle"></p>
+        <p id="eText" style="margin:0"></p>
+        <div class="pdu" id="ePdu"></div>
+        <div class="pduname" id="ePduName"></div>
+        <div id="eBits"></div>
+        <div class="dots" id="eDots"></div>
+        <div id="eFields"></div>
+      </div>
+      <div class="card stack"><div class="ttl">🖥️ Alıcı</div><div id="stRx"></div><div class="dir">↑ Kapsülü açma (decapsulation)</div></div>
+    </div>
+  </section>
+
+  <!-- ================= 3. PAKET YOLCULUĞU ================= -->
+  <section class="pane" id="p3">
+    <div class="card">
+      <div class="row">
+        <div><label for="pSrc">Kaynak</label><select id="pSrc"></select></div>
+        <div><label for="pDst">Hedef</label><select id="pDst"></select></div>
+        <button class="btn pri" id="pGo">📨 Ping gönder</button>
+        <button class="btn" id="pPlay" disabled>⏸ Duraklat</button>
+        <button class="btn" id="pStep" disabled>⏭ Sonraki adım</button>
+        <div><label><input type="checkbox" id="pManual"> Adım adım mod</label></div>
+        <div><label for="pSpeed">Hız</label><input type="range" id="pSpeed" min="0.4" max="2.5" step="0.1" value="1"></div>
+        <button class="btn" id="pReset" title="ARP önbelleklerini ve MAC tablolarını boşaltır">🧹 Tabloları temizle</button>
+      </div>
+      <p class="small" style="margin:8px 0 0">İpucu: Aynı pingi iki kez gönderin. İkincisinde ARP adımı olmaz, çünkü adresler artık önbellekte. Farklı alt ağlar arasında <b>MAC adreslerinin her atlamada değiştiğine, IP adreslerinin ise aynı kaldığına</b> dikkat edin.</p>
+    </div>
+
+    <div class="card" style="padding:10px">
+      <svg id="topo" class="topo" viewBox="0 0 900 400"></svg>
+      <p class="small" style="margin:6px 4px 0">
+        <span><i class="chip" style="background:#eab308"></i>ARP isteği</span> &nbsp;
+        <span><i class="chip" style="background:#f97316"></i>ARP yanıtı</span> &nbsp;
+        <span><i class="chip" style="background:#2563eb"></i>ICMP Echo isteği</span> &nbsp;
+        <span><i class="chip" style="background:#16a34a"></i>ICMP Echo yanıtı</span> &nbsp;
+        <span style="color:#dc2626;font-weight:700">✕</span> çerçeve düşürüldü / yok sayıldı
+      </p>
+    </div>
+
+    <div class="grid2">
+      <div class="card"><h3>Olay günlüğü</h3><ol class="log" id="pLog"><li>Bir kaynak ve hedef seçip “Ping gönder”e basın.</li></ol></div>
+      <div class="card"><h3>Hattaki çerçeve</h3><table id="pFrame"></table>
+        <h3 style="margin-top:16px">R1 yönlendirme tablosu</h3>
+        <table><tr><th>Hedef ağ</th><th>Çıkış arayüzü</th><th>Tür</th></tr>
+          <tr><td class="mono">192.168.1.0/24</td><td class="mono">G0/0</td><td>Doğrudan bağlı</td></tr>
+          <tr><td class="mono">192.168.2.0/24</td><td class="mono">G0/1</td><td>Doğrudan bağlı</td></tr></table>
+      </div>
+    </div>
+    <div class="card"><h3>ARP önbellekleri ve anahtar MAC tabloları</h3><div class="tbls" id="pTables"></div></div>
+  </section>
+
+  <!-- ================= 4. IP SINIFLARI VE ALT AĞLAMA ================= -->
+  <section class="pane" id="p4">
+    <div class="card">
+      <h3>IPv4 adres sınıfları</h3>
+      <p class="small" style="margin-top:0">Sınıflı adreslemede (1981, RFC 791) sınıf, adresin <b>ilk oktetinin baştaki bitlerine</b> bakılarak bulunur. Bugün internette sınıfsız adresleme (CIDR) kullanılıyor, ancak sınıflar temel kavram olarak hâlâ önemli.</p>
+      <div class="cbar" id="cBar">
+        <div class="ccA" style="flex:128" data-v="10">A</div><div class="ccB" style="flex:64" data-v="150">B</div>
+        <div class="ccC" style="flex:32" data-v="200">C</div><div class="ccD" style="flex:16" data-v="230">D</div>
+        <div class="ccE" style="flex:16" data-v="245">E</div><i class="mk" id="cMk"></i>
+      </div>
+      <div class="cscale" style="position:relative;height:16px"><span style="position:absolute;left:0.00%;transform:translateX(0)">0</span><span style="position:absolute;left:50.00%;transform:translateX(-50%)">128</span><span style="position:absolute;left:75.00%;transform:translateX(-50%)">192</span><span style="position:absolute;left:87.50%;transform:translateX(-50%)">224</span><span style="position:absolute;left:93.75%;transform:translateX(-50%)">240</span><span style="position:absolute;left:99.61%;transform:translateX(-100%)">255</span></div>
+      <div class="row" style="margin-top:14px">
+        <div style="flex:1;min-width:220px"><label for="cOct">İlk oktet: <b id="cOctV"></b></label><input type="range" id="cOct" min="0" max="255" value="10" style="width:100%"></div>
+      </div>
+      <div class="grid2" style="margin-top:10px">
+        <div id="cInfo"></div>
+        <div id="cOcts"></div>
+      </div>
+      <div class="scroll" style="margin-top:14px"><table id="cTbl"></table></div>
+    </div>
+
+    <div class="card">
+      <h3>Özel ve özel amaçlı adres blokları</h3>
+      <div class="scroll"><table>
+        <tr><th>Blok</th><th>Aralık</th><th>Kullanım</th></tr>
+        <tr><td class="mono">10.0.0.0/8</td><td class="mono">10.0.0.0 – 10.255.255.255</td><td>Özel ağ (RFC 1918), A sınıfı</td></tr>
+        <tr><td class="mono">172.16.0.0/12</td><td class="mono">172.16.0.0 – 172.31.255.255</td><td>Özel ağ (RFC 1918), B sınıfı</td></tr>
+        <tr><td class="mono">192.168.0.0/16</td><td class="mono">192.168.0.0 – 192.168.255.255</td><td>Özel ağ (RFC 1918), C sınıfı</td></tr>
+        <tr><td class="mono">127.0.0.0/8</td><td class="mono">127.0.0.0 – 127.255.255.255</td><td>Geri döngü (loopback), ör. 127.0.0.1 = “bu bilgisayar”</td></tr>
+        <tr><td class="mono">169.254.0.0/16</td><td class="mono">169.254.0.0 – 169.254.255.255</td><td>Link-local (APIPA): DHCP’den adres alınamazsa</td></tr>
+        <tr><td class="mono">100.64.0.0/10</td><td class="mono">100.64.0.0 – 100.127.255.255</td><td>Taşıyıcı sınıfı NAT (CGNAT, RFC 6598)</td></tr>
+        <tr><td class="mono">0.0.0.0/8</td><td class="mono">0.0.0.0 – 0.255.255.255</td><td>“Bu ağ”; 0.0.0.0 = adres yok / varsayılan rota</td></tr>
+        <tr><td class="mono">255.255.255.255/32</td><td class="mono">255.255.255.255</td><td>Sınırlı yayın (yönlendiriciden geçmez)</td></tr>
+        <tr><td class="mono">224.0.0.0/4</td><td class="mono">224.0.0.0 – 239.255.255.255</td><td>Çok noktaya yayın (multicast), D sınıfı</td></tr>
+        <tr><td class="mono">192.0.2.0/24 vb.</td><td class="mono">192.0.2.x, 198.51.100.x, 203.0.113.x</td><td>Dokümantasyon ve örnekler için (RFC 5737)</td></tr>
+      </table></div>
+    </div>
+
+    <div class="card">
+      <h3>CIDR önek ve maske tablosu</h3>
+      <p class="small" style="margin-top:0">Mavi satırlar sınıfların varsayılan maskeleridir. <b>Blok boyu</b>, ağ adreslerinin hangi oktette kaçar kaçar arttığını gösterir. Bir satıra tıklarsanız 1. sekmedeki hesaplayıcı o önekle açılır.</p>
+      <div class="scroll"><table id="cidrT"></table></div>
+    </div>
+
+    <div class="card">
+      <h3>Adım adım alt ağ çözümü (“blok boyu” yöntemi)</h3>
+      <div class="row">
+        <div><label for="wIp">IP/önek</label><input type="text" id="wIp" value="172.16.45.200/20" class="mono" size="20"></div>
+      </div>
+      <div id="wOut"></div>
+    </div>
+
+    <div class="card">
+      <h3>Alıştırma <span class="score" id="qScore">Doğru: 0 / 0</span></h3>
+      <div class="row" style="margin-bottom:8px">
+        <div><label for="qType">Soru türü</label>
+          <select id="qType"><option value="mix">Karışık</option><option value="cls">Adres sınıfı</option><option value="net">Ağ adresi</option><option value="bc">Yayın adresi</option><option value="first">İlk host</option><option value="last">Son host</option><option value="hosts">Kullanılabilir host sayısı</option><option value="mask">Önek → maske</option><option value="pre">Maske → önek</option></select></div>
+        <button class="btn" id="qNew">🔄 Yeni soru</button>
+      </div>
+      <div class="qbox" id="qText"></div>
+      <div class="row">
+        <input type="text" id="qAns" class="mono" placeholder="Cevabınız" size="22">
+        <button class="btn pri" id="qChk">Kontrol et</button>
+        <button class="btn" id="qSol">Çözümü göster</button>
+      </div>
+      <div id="qRes" style="margin-top:10px"></div>
+    </div>
+  </section>
+</div>
+
+<script>
+/* ================= Sekmeler ================= */
+document.querySelectorAll('.tab').forEach(b=>b.onclick=()=>{
+  document.querySelectorAll('.tab').forEach(x=>x.classList.toggle('on',x===b));
+  document.querySelectorAll('.pane').forEach(p=>p.classList.toggle('on',p.id===b.dataset.t));
+});
+const $=id=>document.getElementById(id);
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+
+/* ================= 1. ALT AĞ HESAPLAYICI ================= */
+function parseIP(s){const p=s.trim().split('.');if(p.length!==4)return null;let n=0;
+  for(const x of p){if(!/^\d{1,3}$/.test(x))return null;const v=+x;if(v>255)return null;n=n*256+v}return n>>>0}
+const ipStr=n=>[n>>>24,(n>>>16)&255,(n>>>8)&255,n&255].join('.');
+const maskOf=p=>p===0?0:(0xFFFFFFFF<<(32-p))>>>0;
+function bitsHTML(n,p){let s='';for(let i=31;i>=0;i--){const idx=31-i;s+=`<span class="${idx<p?'nb':'hb'}">${(n>>>i)&1}</span>`;if(i%8===0&&i)s+='.';}return s}
+function ipClass(n){const a=n>>>24;if(a<128)return'A';if(a<192)return'B';if(a<224)return'C';if(a<240)return'D (çok noktaya yayın)';return'E (deneysel)'}
+function ipType(n){const a=n>>>24,b=(n>>>16)&255;
+  if(a===10||(a===172&&b>=16&&b<=31)||(a===192&&b===168))return'Özel (private, RFC 1918)';
+  if(a===127)return'Geri döngü (loopback)';if(a===169&&b===254)return'Link-local (APIPA)';
+  if(a>=224&&a<240)return'Çok noktaya yayın (multicast)';if(a===0)return'Özel amaçlı (0.0.0.0/8)';
+  if(a===100&&b>=64&&b<=127)return'Paylaşımlı (CGNAT, 100.64.0.0/10)';return'Genel (public)'}
+const fmt=n=>n.toLocaleString('tr-TR');
+
+function subnetCalc(){
+  let raw=$('sIp').value.trim();
+  if(raw.includes('/')){const [a,b]=raw.split('/');const p=parseInt(b,10);
+    if(!isNaN(p)&&p>=0&&p<=32){$('sPre').value=p}raw=a}
+  const p=+$('sPre').value;$('sPreV').textContent='/'+p;
+  const ip=parseIP(raw);
+  if(ip===null){$('sErr').textContent='Geçersiz IPv4 adresi. Örnek: 192.168.1.10';return}
+  $('sErr').textContent='';
+  const m=maskOf(p),net=(ip&m)>>>0,bc=(net|(~m>>>0))>>>0,total=2**(32-p);
+  let first,last,usable;
+  if(p===32){first=last=ip;usable=1}else if(p===31){first=net;last=bc;usable=2}
+  else{first=net+1;last=bc-1;usable=total-2}
+  const rows=[
+    ['IP adresi',ipStr(ip)],
+    ['Alt ağ maskesi',ipStr(m)+' <span class="tag">/'+p+'</span>'],
+    ['Joker maske (wildcard)',ipStr((~m)>>>0)],
+    ['Ağ adresi',ipStr(net)],
+    ['Yayın (broadcast) adresi',p>=31?'— (yok)':ipStr(bc)],
+    ['İlk kullanılabilir host',ipStr(first)],
+    ['Son kullanılabilir host',ipStr(last)],
+    ['Toplam adres sayısı',fmt(total)+' <span class="small">(2<sup>'+(32-p)+'</sup>)</span>'],
+    ['Kullanılabilir host sayısı',fmt(usable)+(p<=30?' <span class="small">(2<sup>'+(32-p)+'</sup> − 2)</span>':p===31?' <span class="small">(noktadan noktaya, RFC 3021)</span>':' <span class="small">(tek host)</span>')],
+    ['Adres sınıfı (tarihsel)',ipClass(ip)],
+    ['Adres türü',ipType(ip)]];
+  $('sRes').innerHTML=rows.map(r=>`<tr><td class="k">${r[0]}</td><td class="v">${r[1]}</td></tr>`).join('');
+  $('sBin').innerHTML=[['IP',ip],['Maske',m],['Ağ',net],['Yayın',bc]]
+    .map(r=>`<tr class="bitrow"><td class="k" style="width:70px">${r[0]}</td><td class="bits">${bitsHTML(r[1],p)}</td><td class="mono small">${ipStr(r[1])}</td></tr>`).join('');
+  // bölme
+  const k=+$('sDiv').value,bitsNeed=Math.log2(k),np=p+bitsNeed;
+  if(np>32){$('sDivInfo').innerHTML=`/${p} ağı ${k} alt ağa bölünemez: ${bitsNeed} bit gerekir ama yalnızca ${32-p} host biti var.`;$('sDivT').innerHTML='';return}
+  const size=2**(32-np);
+  $('sDivInfo').innerHTML=`Host kısmından <b>${bitsNeed}</b> bit ödünç alınır → yeni önek <b>/${np}</b> (maske ${ipStr(maskOf(np))}), her alt ağda ${fmt(size)} adres, ${fmt(np<=30?size-2:np===31?2:1)} kullanılabilir host.`;
+  let h='<tr><th>#</th><th>Ağ adresi</th><th>Kullanılabilir host aralığı</th><th>Yayın adresi</th></tr>';
+  for(let i=0;i<k;i++){const n=(net+i*size)>>>0,b=(n+size-1)>>>0;
+    const range=np>=31?`${ipStr(n)} – ${ipStr(b)}`:`${ipStr(n+1)} – ${ipStr(b-1)}`;
+    const mine=ip>=n&&ip<=b;
+    h+=`<tr${mine?' style="background:#eff6ff"':''}><td>${i+1}</td><td class="mono">${ipStr(n)}/${np}</td><td class="mono">${range}</td><td class="mono">${np>=31?'—':ipStr(b)}</td></tr>`}
+  $('sDivT').innerHTML=h;
+}
+['sIp','sPre','sDiv'].forEach(id=>$(id).addEventListener('input',subnetCalc));
+subnetCalc();
+
+/* ================= 2. KAPSÜLLEME ================= */
+const LAY=[
+  {ad:'Uygulama',osi:'OSI 7·6·5 (Uygulama, Sunum, Oturum)',pdu:'Veri',ex:'HTTP, DNS, SMTP',c:'var(--app)'},
+  {ad:'Taşıma',osi:'OSI 4',pdu:'Segment / Datagram',ex:'TCP, UDP',c:'var(--tr)'},
+  {ad:'Ağ',osi:'OSI 3',pdu:'Paket',ex:'IP, ICMP',c:'var(--nw)'},
+  {ad:'Veri Bağlantı',osi:'OSI 2',pdu:'Çerçeve',ex:'Ethernet, Wi-Fi',c:'var(--dl)'},
+  {ad:'Fiziksel',osi:'OSI 1',pdu:'Bit',ex:'Kablo, fiber, radyo',c:'var(--ph)'}];
+function drawStack(el){el.innerHTML=LAY.map((l,i)=>`<div class="ly" data-i="${i}" style="background:${l.c}"><b>${l.ad}</b><small>${l.osi}</small><small>PDU: ${l.pdu} · ${l.ex}</small></div>`).join('')}
+drawStack($('stTx'));drawStack($('stRx'));
+
+let eStep=0,eTimer=null,eSteps=[];
+const utf8len=s=>new TextEncoder().encode(s).length;
+function encBuild(){
+  const msg=$('eMsg').value||'Merhaba',P=$('eProto').value,tcp=P==='TCP',dl=utf8len(msg),l4len=tcp?20:8;
+  const F={
+    l4:tcp?[['Kaynak port','49152 (rastgele, istemci)'],['Hedef port','80 (HTTP)'],['Sıra numarası','1001'],['Onay numarası','5001'],['Bayraklar','PSH, ACK'],['Pencere boyutu','64240'],['Sağlama toplamı','0x1C46']]
+          :[['Kaynak port','51515 (rastgele, istemci)'],['Hedef port','53 (DNS)'],['Uzunluk',(8+dl)+' bayt'],['Sağlama toplamı','0x3A7F']],
+    ip:[['Sürüm','4 (IPv4)'],['Başlık uzunluğu','20 bayt'],['Toplam uzunluk',(20+l4len+dl)+' bayt'],['TTL','64'],['Protokol',tcp?'6 (TCP)':'17 (UDP)'],['Kaynak IP','192.168.1.10'],['Hedef IP','203.0.113.25']],
+    eth:[['Hedef MAC','00:1A:2B:3C:4D:5E (ağ geçidi)'],['Kaynak MAC','AA:BB:CC:00:00:10'],['EtherType','0x0800 (IPv4)'],['FCS (çerçeve sonu)','CRC-32, 4 bayt']]};
+  const B={
+    data:{t:`Veri<small>"${esc(msg)}"<br>${dl} B</small>`,c:LAY[0].c,cls:'data'},
+    l4:{t:`${P} başlığı<small>${l4len} B</small>`,c:LAY[1].c},
+    ip:{t:`IP başlığı<small>20 B</small>`,c:LAY[2].c},
+    eth:{t:`Ethernet başlığı<small>14 B</small>`,c:LAY[3].c},
+    fcs:{t:`FCS<small>4 B</small>`,c:LAY[3].c}};
+  const all=['eth','ip','l4','data','fcs'];
+  eSteps=[
+    {s:'tx',L:0,b:['data'],add:['data'],pdu:'Veri',T:'1. Uygulama katmanı veriyi oluşturur',x:`Uygulama (ör. web tarayıcısı) göndereceği veriyi hazırlar: <b>"${esc(msg)}"</b>. Bu aşamadaki PDU’nun adı <b>Veri</b>dir.`},
+    {s:'tx',L:1,b:['l4','data'],add:['l4'],pdu:tcp?'Segment':'Datagram',f:'l4',T:`2. Taşıma katmanı ${P} başlığı ekler`,x:tcp?'TCP başlığı port numaralarını, sıra/onay numaralarını ve güvenilir iletim için gereken bilgileri taşır. PDU artık bir <b>segment</b>.':'UDP başlığı yalnızca port numaralarını, uzunluğu ve sağlama toplamını içerir. Bağlantısızdır, hızlıdır. PDU artık bir <b>datagram</b>.'},
+    {s:'tx',L:2,b:['ip','l4','data'],add:['ip'],pdu:'Paket',f:'ip',T:'3. Ağ katmanı IP başlığı ekler',x:'IP başlığı kaynak ve hedef <b>IP adreslerini</b> taşır. Yönlendiriciler paketi bu adreslere bakarak iletir. PDU: <b>Paket</b>.'},
+    {s:'tx',L:3,b:all,add:['eth','fcs'],pdu:'Çerçeve',f:'eth',T:'4. Veri bağlantı katmanı Ethernet başlığı ve FCS ekler',x:'Ethernet başlığı, aynı yerel ağdaki <b>bir sonraki cihazın MAC adresini</b> içerir. Çerçevenin sonuna hata denetimi için <b>FCS</b> (CRC-32) eklenir. PDU: <b>Çerçeve</b>.'},
+    {s:'tx',L:4,bits:true,wire:true,pdu:'Bit',T:'5. Fiziksel katman çerçeveyi bitlere çevirir',x:`Toplam ${14+20+l4len+dl+4} baytlık çerçeve 0 ve 1’lere dönüştürülür ve elektrik sinyali, ışık ya da radyo dalgası olarak iletim ortamına verilir.`},
+    {s:'rx',L:4,b:all,add:all,pdu:'Bit → Çerçeve',wire:true,T:'6. Alıcı bitleri alır, çerçeveyi yeniden oluşturur',x:'Alıcının ağ kartı gelen sinyali bitlere, bitleri de çerçeveye çevirir. Şimdi kapsül katman katman açılacak.'},
+    {s:'rx',L:3,b:['ip','l4','data'],rem:['eth','fcs'],pdu:'Paket',f:'eth',T:'7. Veri bağlantı katmanı: MAC ve FCS kontrolü',x:'Hedef MAC alıcınınkiyle eşleşiyor ve FCS doğru. Ethernet başlığı ile FCS çıkarılır. EtherType = 0x0800 olduğu için içerik IPv4 katmanına verilir.'},
+    {s:'rx',L:2,b:['l4','data'],rem:['ip'],pdu:tcp?'Segment':'Datagram',f:'ip',T:'8. Ağ katmanı: IP kontrolü',x:`Hedef IP alıcıya ait, bu yüzden IP başlığı çıkarılır. Protokol alanı (${tcp?'6 = TCP':'17 = UDP'}) içeriğin hangi taşıma protokolüne verileceğini belirtir.`},
+    {s:'rx',L:1,b:['data'],rem:['l4'],pdu:'Veri',f:'l4',T:'9. Taşıma katmanı: port kontrolü',x:`Hedef port <b>${tcp?'80 (HTTP)':'53 (DNS)'}</b>. Veri bu portu dinleyen uygulamaya verilir.${tcp?' TCP ayrıca sıra numarasını kontrol eder ve göndericiye ACK yollar.':' UDP onay göndermez.'}`},
+    {s:'rx',L:0,b:['data'],pdu:'Veri',T:'10. Veri uygulamaya ulaştı ✓',x:`Alıcı uygulama veriyi okur: <b>"${esc(msg)}"</b>. Gönderici tarafta eklenen her başlık, alıcı tarafta aynı katmanda okunup çıkarıldı.`}];
+  eSteps.F=F;eSteps.B=B;eSteps.msg=msg;eSteps.tcp=tcp;
+  $('eDots').innerHTML=eSteps.map((_,i)=>`<i data-i="${i}" title="Adım ${i+1}"></i>`).join('');
+  $('eDots').querySelectorAll('i').forEach(d=>d.onclick=()=>{encStop();encGo(+d.dataset.i,false)});
+}
+function blocksHTML(keys,mark,cls){const B=eSteps.B;return keys.map(k=>`<div class="blk ${B[k].cls||''} ${mark.includes(k)?cls:''}" style="background:${B[k].c}">${B[k].t}</div>`).join('')}
+function bitString(){const bytes=[0x00,0x1A,0x2B,0x3C,0x4D,0x5E,0xAA,0xBB,0xCC,0,0,0x10,0x08,0x00,0x45,0x00,...new TextEncoder().encode(eSteps.msg)];
+  return bytes.slice(0,24).map(b=>b.toString(2).padStart(8,'0')).join(' ')+' …'}
+function encGo(i,forward){
+  const prev=eStep;eStep=Math.max(0,Math.min(eSteps.length-1,i));const st=eSteps[eStep];
+  $('eTitle').textContent=st.T;$('eText').innerHTML=st.x;
+  $('ePduName').textContent='PDU: '+st.pdu;
+  ['stTx','stRx'].forEach(id=>$(id).querySelectorAll('.ly').forEach(l=>l.classList.toggle('act',(id==='stTx'?'tx':'rx')===st.s&&+l.dataset.i===st.L)));
+  const pdu=$('ePdu');clearTimeout(pdu._t);
+  if(st.bits){pdu.innerHTML='';}
+  else if(forward&&st.rem&&eSteps[prev]&&eSteps[prev].b){pdu.innerHTML=blocksHTML(eSteps[prev].b,st.rem,'out');pdu._t=setTimeout(()=>pdu.innerHTML=blocksHTML(st.b,[],''),520)}
+  else pdu.innerHTML=blocksHTML(st.b,forward?(st.add||[]):[],'in');
+  let bh='';
+  if(st.bits)bh+=`<div class="bitbox">${bitString()}</div>`;
+  if(st.wire){const bits='1011001110100101';bh+='<div class="wire">'+[...bits].map((b,j)=>`<span style="animation-delay:${(j*0.15).toFixed(2)}s">${b}</span>`).join('')+'</div>';}
+  $('eBits').innerHTML=bh;
+  const f=st.f?eSteps.F[st.f]:null;
+  const fn={l4:(eSteps.tcp?'TCP':'UDP')+' başlığı alanları',ip:'IP başlığı alanları',eth:'Ethernet çerçevesi alanları'};
+  $('eFields').innerHTML=f?`<h3 style="font-size:.95rem;margin:6px 0">${fn[st.f]}${st.s==='rx'?' (alıcı tarafından okunur)':''}</h3><table>${f.map(r=>`<tr><td class="k">${r[0]}</td><td class="v">${r[1]}</td></tr>`).join('')}</table>`:'';
+  $('eDots').querySelectorAll('i').forEach((d,j)=>d.classList.toggle('on',j<=eStep));
+  $('ePrev').disabled=eStep===0;$('eNext').disabled=eStep===eSteps.length-1;
+}
+function encStop(){clearInterval(eTimer);eTimer=null;$('eAuto').textContent='▶ Otomatik'}
+$('eNext').onclick=()=>{encStop();encGo(eStep+1,true)};
+$('ePrev').onclick=()=>{encStop();encGo(eStep-1,false)};
+$('eFirst').onclick=()=>{encStop();encGo(0,true)};
+$('eAuto').onclick=()=>{
+  if(eTimer){encStop();return}
+  if(eStep===eSteps.length-1)encGo(0,true);
+  $('eAuto').textContent='⏸ Durdur';
+  eTimer=setInterval(()=>{if(eStep>=eSteps.length-1){encStop();return}encGo(eStep+1,true)},3200);
+};
+['eMsg','eProto'].forEach(id=>$(id).addEventListener('input',()=>{const s=eStep;encBuild();encGo(s,false)}));
+encBuild();encGo(0,true);
+
+/* ================= 3. PAKET YOLCULUĞU ================= */
+const NS='http://www.w3.org/2000/svg';
+const POS={PC1:[95,85],PC2:[95,315],SW1:[275,200],R1:[450,200],SW2:[625,200],PC3:[805,85],PC4:[805,315]};
+const LINKS=[['PC1','SW1'],['PC2','SW1'],['SW1','R1'],['R1','SW2'],['SW2','PC3'],['SW2','PC4']];
+const EP={
+  PC1:{node:'PC1',ip:'192.168.1.10',mac:'AA:00:00:00:00:01',gw:'192.168.1.1',seg:'SW1'},
+  PC2:{node:'PC2',ip:'192.168.1.11',mac:'AA:00:00:00:00:02',gw:'192.168.1.1',seg:'SW1'},
+  R1a:{node:'R1',ifn:'G0/0',ip:'192.168.1.1',mac:'00:1A:2B:00:01:01',seg:'SW1'},
+  R1b:{node:'R1',ifn:'G0/1',ip:'192.168.2.1',mac:'00:1A:2B:00:02:01',seg:'SW2'},
+  PC3:{node:'PC3',ip:'192.168.2.10',mac:'AA:00:00:00:00:03',gw:'192.168.2.1',seg:'SW2'},
+  PC4:{node:'PC4',ip:'192.168.2.11',mac:'AA:00:00:00:00:04',gw:'192.168.2.1',seg:'SW2'}};
+const SEG={SW1:['PC1','PC2','R1a'],SW2:['R1b','PC3','PC4']};
+const PORT={SW1:{PC1:'Fa0/1',PC2:'Fa0/2',R1:'Gi0/1'},SW2:{R1:'Gi0/1',PC3:'Fa0/1',PC4:'Fa0/2'}};
+const BC='FF:FF:FF:FF:FF:FF';
+const COL={'ARP İsteği':'#eab308','ARP Yanıtı':'#f97316','ICMP Echo İsteği':'#2563eb','ICMP Echo Yanıtı':'#16a34a'};
+const net24=ip=>ip.split('.').slice(0,3).join('.');
+const clone=o=>JSON.parse(JSON.stringify(o));
+const newState=()=>({arp:{PC1:{},PC2:{},PC3:{},PC4:{},R1:{}},mac:{SW1:{},SW2:{}}});
+let ST=newState();
+
+function drawTopo(){
+  const svg=$('topo');let h='';
+  h+=`<rect x="20" y="25" width="355" height="350" rx="16" fill="#eff6ff" stroke="#bfdbfe" stroke-dasharray="6 5"/><text x="34" y="48" font-size="13" fill="#1d4ed8" font-weight="700">LAN 1 · 192.168.1.0/24</text>`;
+  h+=`<rect x="525" y="25" width="355" height="350" rx="16" fill="#f0fdf4" stroke="#bbf7d0" stroke-dasharray="6 5"/><text x="866" y="48" font-size="13" fill="#15803d" font-weight="700" text-anchor="end">LAN 2 · 192.168.2.0/24</text>`;
+  LINKS.forEach(([a,b])=>h+=`<line x1="${POS[a][0]}" y1="${POS[a][1]}" x2="${POS[b][0]}" y2="${POS[b][1]}" stroke="#94a3b8" stroke-width="3"/>`);
+  // port etiketleri
+  const pl=(sw,n)=>{const [x1,y1]=POS[sw],[x2,y2]=POS[n];const x=x1+(x2-x1)*.3,y=y1+(y2-y1)*.3;return `<text x="${x}" y="${y-6}" font-size="10" fill="#64748b" text-anchor="middle">${PORT[sw][n]}</text>`};
+  ['PC1','PC2','R1'].forEach(n=>h+=pl('SW1',n));['PC3','PC4','R1'].forEach(n=>h+=pl('SW2',n));
+  h+='<g id="nodes">';
+  for(const id of ['PC1','PC2','PC3','PC4']){const [x,y]=POS[id],e=EP[id];
+    h+=`<g data-n="${id}"><rect x="${x-26}" y="${y-22}" width="52" height="34" rx="4" fill="#1e293b"/><rect x="${x-21}" y="${y-18}" width="42" height="25" rx="2" fill="#7dd3fc"/><rect x="${x-5}" y="${y+12}" width="10" height="7" fill="#475569"/><rect x="${x-16}" y="${y+19}" width="32" height="4" rx="2" fill="#475569"/>
+      <text x="${x}" y="${y+40}" text-anchor="middle" font-weight="700" font-size="14">${id}</text>
+      <text x="${x}" y="${y+55}" text-anchor="middle" font-size="11" fill="#334155" font-family="monospace">${e.ip}</text>
+      <text x="${x}" y="${y+68}" text-anchor="middle" font-size="10" fill="#64748b" font-family="monospace">${e.mac}</text></g>`}
+  for(const id of ['SW1','SW2']){const [x,y]=POS[id];
+    h+=`<g data-n="${id}"><rect x="${x-38}" y="${y-17}" width="76" height="34" rx="6" fill="#0e7490"/><text x="${x}" y="${y+6}" text-anchor="middle" fill="#fff" font-size="18">⇄</text>
+      <text x="${x}" y="${y+36}" text-anchor="middle" font-weight="700" font-size="14">${id}</text><text x="${x}" y="${y+50}" text-anchor="middle" font-size="10" fill="#64748b">Anahtar (switch)</text></g>`}
+  {const [x,y]=POS.R1;
+    h+=`<g data-n="R1"><circle cx="${x}" cy="${y}" r="27" fill="#7c3aed"/><text x="${x}" y="${y+7}" text-anchor="middle" fill="#fff" font-size="20">✣</text>
+      <text x="${x}" y="${y-38}" text-anchor="middle" font-weight="700" font-size="14">R1 (yönlendirici)</text>
+      <text x="${x-8}" y="${y+48}" text-anchor="end" font-size="10" fill="#334155" font-family="monospace">G0/0 192.168.1.1</text>
+      <text x="${x-8}" y="${y+61}" text-anchor="end" font-size="9" fill="#64748b" font-family="monospace">00:1A:2B:00:01:01</text>
+      <text x="${x+8}" y="${y+48}" font-size="10" fill="#334155" font-family="monospace">G0/1 192.168.2.1</text>
+      <text x="${x+8}" y="${y+61}" font-size="9" fill="#64748b" font-family="monospace">00:1A:2B:00:02:01</text></g>`}
+  h+='</g><g id="pkts"></g>';
+  svg.innerHTML=h;
+}
+drawTopo();
+
+function buildPing(srcId,dstId){
+  const steps=[],st=ST;
+  const push=s=>{s.snap=clone(st);steps.push(s)};
+  const nm=e=>e.node==='R1'?`R1 (${e.ifn})`:e.node;
+
+  function l2send(src,f,desc){
+    const sw=src.seg;
+    push({moves:[{from:src.node,to:sw,f}],f,at:src.node,text:desc});
+    const known=st.mac[sw][f.srcMAC]===src.node;st.mac[sw][f.srcMAC]=src.node;
+    let txt=`${sw}: kaynak MAC ${f.srcMAC} ${known?'zaten tabloda':'öğrenildi'} (port ${PORT[sw][src.node]}). `;
+    const others=SEG[sw].map(id=>EP[id]).filter(e=>e.node!==src.node);
+    let targets;
+    if(f.dstMAC===BC){targets=others;txt+='Hedef MAC yayın adresi → çerçeve diğer tüm portlara gönderilir.'}
+    else if(st.mac[sw][f.dstMAC]){const n=st.mac[sw][f.dstMAC];targets=others.filter(e=>e.node===n);txt+=`Hedef MAC tabloda var → yalnızca ${PORT[sw][n]} portuna iletilir.`}
+    else{targets=others;txt+='Hedef MAC tabloda yok → çerçeve diğer tüm portlara taşırılır (flooding).'}
+    const ok=e=>f.dstMAC===BC?f.tip===e.ip:f.dstMAC===e.mac;
+    const drops=targets.filter(e=>!ok(e));
+    if(drops.length)txt+=' '+drops.map(e=>e.node).join(', ')+(f.dstMAC===BC?': sorulan IP kendisinin değil, isteği yok sayar.':': hedef MAC kendisinin değil, çerçeveyi düşürür.');
+    push({moves:targets.map(e=>({from:sw,to:e.node,f,drop:!ok(e)})),f,at:sw,text:txt});
+    return targets.find(ok)||null;
+  }
+  function ensureArp(ep,ip){
+    const c=st.arp[ep.node];
+    if(c[ip]){push({moves:[],f:null,at:ep.node,text:`${nm(ep)}: ${ip} adresinin MAC’i ARP önbelleğinde var (${c[ip]}), ARP gerekmez.`});return}
+    const req={type:'ARP İsteği',srcMAC:ep.mac,dstMAC:BC,srcIP:ep.ip,dstIP:ip,tip:ip,ttl:'–'};
+    const r=l2send(ep,req,`${nm(ep)}: ${ip} adresinin MAC’ini bilmiyor. ARP isteği yayınlar: “${ip} kimde? ${ep.ip} adresine bildirin.”`);
+    st.arp[r.node][ep.ip]=ep.mac;
+    const rep={type:'ARP Yanıtı',srcMAC:r.mac,dstMAC:ep.mac,srcIP:r.ip,dstIP:ep.ip,ttl:'–'};
+    l2send(r,rep,`${nm(r)}: “${ip} bende, MAC adresim ${r.mac}” diye tek hedefli ARP yanıtı gönderir. Bu arada ${ep.ip} → ${ep.mac} kaydını kendi önbelleğine ekledi.`);
+    st.arp[ep.node][ip]=r.mac;
+    push({moves:[],f:rep,at:ep.node,text:`${nm(ep)}: ARP yanıtını aldı ve önbelleğe ekledi: ${ip} → ${r.mac}.`});
+  }
+  function hostSend(src,dstIP,type){
+    const same=net24(src.ip)===net24(dstIP),nh=same?dstIP:src.gw;
+    push({moves:[],f:null,at:src.node,text:same?`${src.node}: hedef ${dstIP} aynı alt ağda (${net24(dstIP)}.0/24), doğrudan gönderilecek.`
+      :`${src.node}: hedef ${dstIP} farklı bir alt ağda, paket varsayılan ağ geçidine (${src.gw}) gönderilecek.`});
+    ensureArp(src,nh);
+    let f={type,srcMAC:src.mac,dstMAC:st.arp[src.node][nh],srcIP:src.ip,dstIP,ttl:64};
+    let r=l2send(src,f,`${src.node}: ${type} paketini Ethernet çerçevesine koyup gönderir. Hedef MAC = ${same?'hedef bilgisayarın':'yönlendiricinin (R1)'} MAC’i.`);
+    if(r&&r.node==='R1'){
+      const out=net24(dstIP)===net24(EP.R1a.ip)?EP.R1a:EP.R1b,ttl=f.ttl-1;
+      push({moves:[],f:{...f,ttl},at:'R1',text:`R1: çerçeveyi aldı, Ethernet başlığını çıkardı. Hedef IP ${dstIP} için yönlendirme tablosuna baktı: ${net24(dstIP)}.0/24 → ${out.ifn}. TTL 64 → ${ttl}.`});
+      ensureArp(out,dstIP);
+      f={...f,srcMAC:out.mac,dstMAC:st.arp.R1[dstIP],ttl};
+      r=l2send(out,f,`R1: paketi yeni bir Ethernet çerçevesine koyar. Kaynak MAC = ${out.ifn} arayüzünün MAC’i, hedef MAC = ${dstIP} adresinin MAC’i. IP adresleri değişmez!`);
+    }
+    return r;
+  }
+  const s=EP[srcId],d=EP[dstId];
+  push({moves:[],f:null,at:s.node,text:`${s.node} (${s.ip}) → ${d.node} (${d.ip}): ping (ICMP Echo) başlatıldı.`});
+  hostSend(s,d.ip,'ICMP Echo İsteği');
+  push({moves:[],f:null,at:d.node,text:`${d.node}: Echo isteğini aldı ve ICMP Echo yanıtı hazırlıyor.`});
+  hostSend(d,s.ip,'ICMP Echo Yanıtı');
+  push({moves:[],f:null,at:s.node,text:`${s.node}: Echo yanıtını aldı. Ping başarılı ✓`});
+  return steps;
+}
+
+/* --- arayüz --- */
+const pcs=['PC1','PC2','PC3','PC4'];
+$('pSrc').innerHTML=pcs.map(p=>`<option value="${p}">${p} (${EP[p].ip})</option>`).join('');
+$('pDst').innerHTML=pcs.map(p=>`<option value="${p}">${p} (${EP[p].ip})</option>`).join('');
+$('pDst').value='PC3';
+
+let steps=[],idx=0,playing=false,busy=false,lastFrame=null;
+const speed=()=>+$('pSpeed').value;
+const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+
+function renderTables(snap,prev){
+  const row=(a,b,isNew)=>`<tr${isNew?' class="new"':''}><td>${a}</td><td>${b}</td></tr>`;
+  let h='';
+  for(const n of ['PC1','PC2','R1','PC3','PC4']){const t=snap.arp[n],p=prev?prev.arp[n]:{};const ks=Object.keys(t);
+    h+=`<div class="tb"><h4>ARP önbelleği: ${n}</h4><table>${ks.length?ks.map(k=>row(k,t[k],!(k in p))).join(''):'<tr><td class="empty" colspan="2">(boş)</td></tr>'}</table></div>`}
+  for(const sw of ['SW1','SW2']){const t=snap.mac[sw],p=prev?prev.mac[sw]:{};const ks=Object.keys(t);
+    h+=`<div class="tb"><h4>MAC tablosu: ${sw}</h4><table>${ks.length?ks.map(k=>row(k,`${PORT[sw][t[k]]} (${t[k]})`,!(k in p))).join(''):'<tr><td class="empty" colspan="2">(boş)</td></tr>'}</table></div>`}
+  $('pTables').innerHTML=h;
+}
+function renderFrame(f){
+  if(!f){$('pFrame').innerHTML='<tr><td class="small">Hatta çerçeve yok.</td></tr>';return}
+  const p=lastFrame;const c=(k)=>p&&p.type===f.type&&p[k]!==f[k]?' style="background:#fef9c3"':'';
+  $('pFrame').innerHTML=`<tr><td class="k">Tür</td><td class="v ftype" style="color:${COL[f.type]}">${f.type}</td></tr>
+   <tr><th colspan="2">Ethernet başlığı (Katman 2)</th></tr>
+   <tr><td class="k">Kaynak MAC</td><td class="v"${c('srcMAC')}>${f.srcMAC}</td></tr>
+   <tr><td class="k">Hedef MAC</td><td class="v"${c('dstMAC')}>${f.dstMAC}${f.dstMAC===BC?' (yayın)':''}</td></tr>
+   <tr><th colspan="2">${f.type.startsWith('ARP')?'ARP içeriği':'IP başlığı (Katman 3)'}</th></tr>
+   <tr><td class="k">${f.type.startsWith('ARP')?'Gönderen IP':'Kaynak IP'}</td><td class="v">${f.srcIP}</td></tr>
+   <tr><td class="k">${f.type.startsWith('ARP')?'Hedef (sorulan) IP':'Hedef IP'}</td><td class="v">${f.dstIP}</td></tr>
+   <tr><td class="k">TTL</td><td class="v"${c('ttl')}>${f.ttl}</td></tr>`;
+  lastFrame=f;
+}
+function highlight(n){document.querySelectorAll('#nodes > g').forEach(g=>g.style.filter=g.dataset.n===n?'drop-shadow(0 0 8px #f59e0b)':'')}
+
+function animate(moves,dur){
+  return new Promise(res=>{
+    if(!moves.length){setTimeout(res,dur*0.55);return}
+    const layer=$('pkts');
+    const els=moves.map(m=>{const g=document.createElementNS(NS,'g');
+      g.innerHTML=`<rect x="-22" y="-12" width="44" height="24" rx="6" fill="${COL[m.f.type]}" stroke="#fff" stroke-width="2"/><text y="4" text-anchor="middle" font-size="11" fill="#fff" font-weight="700">${m.f.type.startsWith('ARP')?'ARP':'ICMP'}</text>`;
+      layer.appendChild(g);return g});
+    const t0=performance.now();
+    function fr(t){const k=Math.min(1,(t-t0)/dur),e=k<.5?2*k*k:1-Math.pow(-2*k+2,2)/2;
+      moves.forEach((m,i)=>{const [x1,y1]=POS[m.from],[x2,y2]=POS[m.to];els[i].setAttribute('transform',`translate(${x1+(x2-x1)*e},${y1+(y2-y1)*e})`)});
+      if(k<1){requestAnimationFrame(fr);return}
+      moves.forEach(m=>{if(!m.drop)return;const [x,y]=POS[m.to];const x2=document.createElementNS(NS,'text');
+        x2.setAttribute('x',x+30);x2.setAttribute('y',y-18);x2.setAttribute('fill','#dc2626');x2.setAttribute('font-size','26');x2.setAttribute('font-weight','700');x2.textContent='✕';
+        layer.appendChild(x2);setTimeout(()=>x2.remove(),900/speed())});
+      setTimeout(()=>{els.forEach(e=>e.remove());res()},220);
+    }
+    requestAnimationFrame(fr);
+  });
+}
+function showLog(){
+  $('pLog').innerHTML=steps.map((s,i)=>`<li class="${i<idx?'done':''}${i===idx?' cur':''}">${i+1}. ${esc(s.text)}</li>`).join('');
+}
+async function stepOnce(){
+  if(busy||idx>=steps.length)return;busy=true;updBtns();
+  const s=steps[idx];
+  const lis=$('pLog').children;[...lis].forEach((li,i)=>{li.classList.toggle('cur',i===idx);li.classList.toggle('done',i<=idx)});
+  const cur=lis[idx];if(cur){const L=$('pLog');L.scrollTop=cur.offsetTop-L.clientHeight/2}
+  if(s.f)renderFrame(s.f);
+  highlight(s.at);
+  await animate(s.moves,1100/speed());
+  renderTables(s.snap,idx>0?steps[idx-1].snap:steps.base);
+  idx++;busy=false;updBtns();
+}
+async function play(){
+  playing=true;updBtns();
+  while(playing&&idx<steps.length){await stepOnce();if(playing)await sleep(260/speed())}
+  playing=false;updBtns();
+}
+function updBtns(){
+  const left=idx<steps.length;
+  $('pPlay').disabled=!left;$('pPlay').textContent=playing?'⏸ Duraklat':'▶ Devam';
+  $('pStep').disabled=!left||playing||busy;
+  $('pGo').disabled=busy||playing;$('pReset').disabled=busy||playing;
+}
+$('pGo').onclick=()=>{
+  const a=$('pSrc').value,b=$('pDst').value;
+  if(a===b){alertLog('Kaynak ve hedef aynı olamaz.');return}
+  const base=clone(ST);
+  steps=buildPing(a,b);steps.base=base;idx=0;lastFrame=null;
+  showLog();renderFrame(null);
+  if(!$('pManual').checked)play();else updBtns();
+};
+function alertLog(t){$('pLog').innerHTML=`<li class="cur">${t}</li>`}
+$('pPlay').onclick=()=>{if(playing){playing=false;updBtns()}else play()};
+$('pStep').onclick=()=>stepOnce();
+$('pReset').onclick=()=>{ST=newState();steps=[];idx=0;lastFrame=null;renderTables(ST,null);renderFrame(null);highlight(null);
+  $('pLog').innerHTML='<li>Tablolar temizlendi. Yeni bir ping gönderin.</li>';updBtns()};
+renderTables(ST,null);renderFrame(null);
+
+/* ================= 4. IP SINIFLARI VE ALT AĞLAMA ================= */
+const CLS=[
+  {k:'A',lo:0,hi:127,bits:'0',pre:8,m:'255.0.0.0',o:'NHHH',nets:'126 (2⁷ − 2)',hosts:'16.777.214 (2²⁴ − 2)',use:'Çok büyük ağlar',note:'0 ve 127 ayrılmıştır (127 = loopback), kullanılabilir aralık 1–126.'},
+  {k:'B',lo:128,hi:191,bits:'10',pre:16,m:'255.255.0.0',o:'NNHH',nets:'16.384 (2¹⁴)',hosts:'65.534 (2¹⁶ − 2)',use:'Orta büyüklükte ağlar',note:''},
+  {k:'C',lo:192,hi:223,bits:'110',pre:24,m:'255.255.255.0',o:'NNNH',nets:'2.097.152 (2²¹)',hosts:'254 (2⁸ − 2)',use:'Küçük ağlar',note:''},
+  {k:'D',lo:224,hi:239,bits:'1110',pre:null,m:'—',o:'XXXX',nets:'—',hosts:'—',use:'Çok noktaya yayın (multicast)',note:'Bir gruba üye tüm cihazlara gönderim içindir. Ağ/host ayrımı yoktur.'},
+  {k:'E',lo:240,hi:255,bits:'1111',pre:null,m:'—',o:'XXXX',nets:'—',hosts:'—',use:'Deneysel / ayrılmış',note:'Genel kullanıma açık değildir.'}];
+$('cTbl').innerHTML='<tr><th>Sınıf</th><th>Baştaki bitler</th><th>İlk oktet</th><th>Varsayılan maske</th><th>Ağ sayısı</th><th>Ağ başına host</th><th>Kullanım</th></tr>'+
+  CLS.map(c=>`<tr><td><b>${c.k}</b></td><td class="mono">${c.bits}…</td><td class="mono">${c.lo} – ${c.hi}</td><td class="mono">${c.m}${c.pre?' (/'+c.pre+')':''}</td><td>${c.nets}</td><td>${c.hosts}</td><td>${c.use}</td></tr>`).join('');
+function clsUpd(){
+  const v=+$('cOct').value,c=CLS.find(x=>v>=x.lo&&v<=x.hi),b=v.toString(2).padStart(8,'0');
+  $('cOctV').textContent=v;$('cMk').style.left=`calc(${(v+0.5)/256*100}% - 1px)`;
+  const L=c.bits.length;
+  $('cInfo').innerHTML=`<div style="font-size:1.6rem;font-weight:800">${c.k} sınıfı</div>
+    <div>İkili: <span class="mono" style="font-size:1.1rem"><span class="lead">${b.slice(0,L)}</span>${b.slice(L)}</span>, baştaki <b>${c.bits}</b> bitleri sınıfı belirler.</div>
+    <div class="small">${c.use}. ${c.note}${v===127?' <b>Bu oktet loopback içindir.</b>':''}${v===10||v===172||v===192?' Bu oktetle başlayan özel (RFC 1918) bir blok var.':''}</div>`;
+  const nm={N:'Ağ',H:'Host',X:'—'};
+  $('cOcts').innerHTML=c.pre?`<div class="small">Oktet dağılımı (varsayılan maske /${c.pre}):</div>
+    <div class="octs">${[...c.o].map((x,i)=>`<span class="o${x}">${i===0?v:x==='N'?'ağ':'host'}<br><small>${nm[x]}</small></span>`).join('')}</div>
+    <div class="small">Örnek: <span class="mono">${v}.${c.o[1]==='N'?'20':'x'}.${c.o[2]==='N'?'30':'x'}.x</span>, ağ kısmı ${c.pre/8} oktet, host kısmı ${4-c.pre/8} oktet.</div>`
+    :`<div class="small">Bu sınıfta ağ/host ayrımı ve varsayılan maske yoktur.</div>`;
+}
+$('cOct').addEventListener('input',clsUpd);
+$('cBar').querySelectorAll('div').forEach(d=>d.onclick=()=>{$('cOct').value=d.dataset.v;clsUpd()});
+clsUpd();
+
+// CIDR tablosu
+(function(){
+  let h='<tr><th>Önek</th><th>Alt ağ maskesi</th><th>Joker maske</th><th>Blok boyu</th><th>Toplam adres</th><th>Kullanılabilir host</th></tr>';
+  for(let p=8;p<=32;p++){const m=maskOf(p),o=Math.floor((p-1)/8),v=(m>>>(24-8*o))&255,tot=2**(32-p);
+    const def=p===8?'A':p===16?'B':p===24?'C':'';
+    h+=`<tr class="cl${def?' def':''}" data-p="${p}"><td class="mono"><b>/${p}</b>${def?' <span class="tag">'+def+' varsayılan</span>':''}</td><td class="mono">${ipStr(m)}</td><td class="mono">${ipStr((~m)>>>0)}</td><td>${256-v} <span class="small">(${o+1}. oktet)</span></td><td>${fmt(tot)}</td><td>${fmt(p<=30?tot-2:p===31?2:1)}</td></tr>`}
+  $('cidrT').innerHTML=h;
+  $('cidrT').querySelectorAll('tr.cl').forEach(r=>r.onclick=()=>{$('sPre').value=r.dataset.p;
+    $('sIp').value=$('sIp').value.split('/')[0];subnetCalc();document.querySelector('[data-t=p1]').click();window.scrollTo(0,0)});
+})();
+
+// Adım adım çözüm
+const OCT=['1.','2.','3.','4.'];
+function solveHTML(ip,p){
+  const m=maskOf(p),net=(ip&m)>>>0,bc=(net|(~m>>>0))>>>0;
+  const o=Math.floor((p-1)/8),v=(m>>>(24-8*o))&255,b=256-v,x=(ip>>>(24-8*o))&255,st=Math.floor(x/b)*b;
+  const ipo=ipStr(ip).split('.');
+  const hostN=p<=30?fmt(2**(32-p)-2):p===31?'2':'1';
+  return `<ol class="steps">
+    <li><b>Maske:</b> /${p} → ${p} tane 1 biti → <span class="mono">${ipStr(m)}</span></li>
+    <li><b>İlgili oktet:</b> maskenin 255 olmayan ilk okteti <b>${OCT[o]} oktet</b> (değeri ${v}). <b>Blok boyu</b> = 256 − ${v} = <b>${b}</b>. Ağ adresleri bu oktette ${b} adım arayla ilerler: 0, ${b}, ${2*b<256?2*b:''}${3*b<256?', '+3*b:''}…</li>
+    <li>IP’nin ${OCT[o]} okteti <b>${x}</b>. ${x}, <b>${st} – ${st+b-1}</b> bloğuna düşer (${st} = ${b} × ${st/b}).</li>
+    <li><b>Ağ adresi:</b> önceki oktetler aynı kalır, ilgili oktet ${st}, sonrakiler 0 → <span class="mono"><b>${ipStr(net)}</b></span></li>
+    <li><b>Yayın adresi:</b> ilgili oktet ${st+b-1}, sonrakiler 255 → <span class="mono"><b>${ipStr(bc)}</b></span></li>
+    <li><b>Host aralığı:</b> <span class="mono">${p<=30?ipStr(net+1)+' – '+ipStr(bc-1):ipStr(net)+' – '+ipStr(bc)}</span>, kullanılabilir host sayısı 2<sup>${32-p}</sup>${p<=30?' − 2':''} = <b>${hostN}</b></li>
+  </ol><p class="small">Kontrol: ${ipo.join('.')} VE ${ipStr(m)} = ${ipStr(net)}</p>`;
+}
+function wUpd(){const [a,b]=$('wIp').value.split('/');const ip=parseIP(a||''),p=parseInt(b,10);
+  $('wOut').innerHTML=(ip===null||isNaN(p)||p<1||p>32)?'<p class="err">Örnek biçim: 172.16.45.200/20</p>':solveHTML(ip,p)}
+$('wIp').addEventListener('input',wUpd);wUpd();
+
+// Alıştırma
+let Q=null,qOk=0,qAll=0;
+const rnd=(a,b)=>a+Math.floor(Math.random()*(b-a+1));
+function randIP(){const t=rnd(0,3);
+  if(t===0)return parseIP(`10.${rnd(0,255)}.${rnd(0,255)}.${rnd(1,254)}`);
+  if(t===1)return parseIP(`172.${rnd(16,31)}.${rnd(0,255)}.${rnd(1,254)}`);
+  if(t===2)return parseIP(`192.168.${rnd(0,255)}.${rnd(1,254)}`);
+  return parseIP(`${rnd(1,223)}.${rnd(0,255)}.${rnd(0,255)}.${rnd(1,254)}`)}
+function newQ(){
+  const types=['cls','net','bc','first','last','hosts','mask','pre'];
+  let t=$('qType').value;if(t==='mix')t=types[rnd(0,types.length-1)];
+  const p=t==='cls'?null:rnd(t==='mask'||t==='pre'?8:16,30);
+  let ip=t==='cls'?parseIP(`${rnd(1,254)}.${rnd(0,255)}.${rnd(0,255)}.${rnd(1,254)}`):randIP();
+  if(t==='cls'&&(ip>>>24)===127)ip=(ip+0x01000000)>>>0;
+  const m=p?maskOf(p):0,net=(ip&m)>>>0,bc=(net|(~m>>>0))>>>0,s=ipStr(ip)+'/'+p;
+  const Qs={
+    cls:[`<span class="mono">${ipStr(ip)}</span> adresi hangi sınıftadır? (A, B, C, D veya E)`,ipClass(ip)[0]],
+    net:[`<span class="mono">${s}</span> adresinin <b>ağ adresi</b> nedir?`,ipStr(net)],
+    bc:[`<span class="mono">${s}</span> adresinin <b>yayın adresi</b> nedir?`,ipStr(bc)],
+    first:[`<span class="mono">${s}</span> ağındaki <b>ilk kullanılabilir host</b> adresi nedir?`,ipStr(net+1)],
+    last:[`<span class="mono">${s}</span> ağındaki <b>son kullanılabilir host</b> adresi nedir?`,ipStr(bc-1)],
+    hosts:[`/${p} önekli bir ağda kaç <b>kullanılabilir host</b> adresi vardır?`,String(2**(32-p)-2)],
+    mask:[`/${p} önekinin <b>alt ağ maskesi</b> nedir? (noktalı ondalık)`,ipStr(m)],
+    pre:[`<span class="mono">${ipStr(m)}</span> maskesinin <b>önek uzunluğu</b> nedir? (ör. /24)`,'/'+p]};
+  Q={t,ip,p,q:Qs[t][0],a:Qs[t][1],done:false};
+  $('qText').innerHTML=Q.q;$('qAns').value='';$('qRes').innerHTML='';$('qAns').focus({preventScroll:true});
+}
+function norm(s){s=s.trim().toUpperCase().replace(/\s+/g,'').replace(/^\//,'');return Q&&Q.t==='hosts'?s.replace(/[.,]/g,''):s}
+function explain(){
+  if(Q.t==='cls'){const c=CLS.find(x=>(Q.ip>>>24)>=x.lo&&(Q.ip>>>24)<=x.hi),v=Q.ip>>>24;
+    return `<p>İlk oktet <b>${v}</b> = <span class="mono">${v.toString(2).padStart(8,'0')}</span>. Baştaki bitler <b>${c.bits}</b> olduğundan aralık ${c.lo}–${c.hi} → <b>${c.k} sınıfı</b>.</p>`}
+  if(Q.t==='hosts')return `<p>Host biti = 32 − ${Q.p} = ${32-Q.p}. Kullanılabilir host = 2<sup>${32-Q.p}</sup> − 2 = <b>${fmt(2**(32-Q.p)-2)}</b> (ağ ve yayın adresleri çıkarılır).</p>`;
+  if(Q.t==='mask'||Q.t==='pre'){const m=maskOf(Q.p);
+    return `<p>/${Q.p} = ${Q.p} tane 1 biti: <span class="bits">${bitsHTML(m,Q.p)}</span> → <span class="mono"><b>${ipStr(m)}</b></span></p>`}
+  return solveHTML(Q.ip,Q.p);
+}
+$('qNew').onclick=newQ;$('qType').onchange=newQ;
+$('qChk').onclick=()=>{if(!Q)return;
+  const right=norm($('qAns').value)===norm(Q.a);
+  if(!Q.done){qAll++;if(right)qOk++;Q.done=true}
+  $('qScore').textContent=`Doğru: ${qOk} / ${qAll}`;
+  $('qRes').innerHTML=(right?'<p class="ok">✓ Doğru!</p>':`<p class="no">✗ Yanlış. Doğru cevap: <span class="mono">${Q.a}</span></p>`)+(right?'':explain());
+};
+$('qSol').onclick=()=>{if(!Q)return;if(!Q.done){qAll++;Q.done=true;$('qScore').textContent=`Doğru: ${qOk} / ${qAll}`}
+  $('qRes').innerHTML=`<p>Cevap: <span class="mono"><b>${Q.a}</b></span></p>`+explain()};
+$('qAns').addEventListener('keydown',e=>{if(e.key==='Enter')$('qChk').click()});
+newQ();
+</script>
+</body>
+</html>
